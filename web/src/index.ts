@@ -41,15 +41,15 @@ interface Settings {
   temperature: number;
   maxTokens: number;
   drafts: number;
+  usageMode: "light" | "medium" | "super" | "intense";
 }
 
-// v4: Coda writes multi-language files with BPE tokens, so lengths are in tokens (not bytes)
-// and several drafts are compared. Older saved settings get the new generation defaults.
-const SETTINGS_VERSION = 4;
-const DEFAULT_SETTINGS: Settings = { v: SETTINGS_VERSION, theme: "system", temperature: 0.6, maxTokens: 900, drafts: 4 };
+const SETTINGS_VERSION = 5;
+const MODE_TOKENS = { light: 256, medium: 450, super: 650, intense: 900 } as const;
+const DEFAULT_SETTINGS: Settings = { v: SETTINGS_VERSION, theme: "dark", temperature: 0.3, maxTokens: 450, drafts: 1, usageMode: "medium" };
 const LANGUAGES = ["auto", "html", "css", "javascript", "python"] as const;
 type Language = (typeof LANGUAGES)[number];
-const MAX_MESSAGE_CHARS = 1000;
+const MAX_MESSAGE_CHARS = 6000;
 const MAX_AVATAR_BYTES = 300 * 1024;
 
 interface Ctx {
@@ -71,7 +71,11 @@ function parseSettings(raw: string): Settings {
   try {
     const saved = JSON.parse(raw) as Partial<Settings>;
     if (saved.v !== SETTINGS_VERSION) {
-      return { ...DEFAULT_SETTINGS, theme: saved.theme ?? DEFAULT_SETTINGS.theme };
+      const oldLength = Number(saved.maxTokens ?? DEFAULT_SETTINGS.maxTokens);
+      const usageMode = oldLength <= 320 ? "light" : oldLength <= 550 ? "medium" : oldLength <= 750 ? "super" : "intense";
+      return { ...DEFAULT_SETTINGS, theme: saved.theme ?? DEFAULT_SETTINGS.theme,
+        temperature: saved.temperature ?? DEFAULT_SETTINGS.temperature,
+        usageMode, maxTokens: MODE_TOKENS[usageMode] };
     }
     return { ...DEFAULT_SETTINGS, ...saved };
   } catch {
@@ -159,8 +163,9 @@ const getStatus: Handler = async ({ env, ctx }) => {
   try {
     const res = await modelFetch(env, "/health", { signal: AbortSignal.timeout(3000) });
     if (res.ok) {
-      const data = (await res.json()) as { step?: number; parameters?: number };
-      status = { online: true, step: data.step ?? null, parameters: data.parameters ?? null };
+      const data = (await res.json()) as { step?: number; parameters?: number; model?: string; backend?: string; context_tokens?: number };
+      status = { online: true, step: data.step ?? null, parameters: data.parameters ?? null,
+        model: data.model ?? null, backend: data.backend ?? null, contextTokens: data.context_tokens ?? null };
     }
   } catch {
     // offline: PC asleep, server.py stopped, or tunnel down
@@ -257,7 +262,7 @@ const updateMe: Handler = async (c) => {
   const current = parseSettings(s.user.settings);
   const next: Settings = { ...current };
   if (body.settings) {
-    const { theme, temperature, maxTokens, drafts } = body.settings;
+    const { theme, temperature, maxTokens, drafts, usageMode } = body.settings;
     if (theme !== undefined) {
       if (!["system", "light", "dark"].includes(theme)) throw new HttpError(400, "invalid_setting", "Unknown theme.");
       next.theme = theme;
@@ -276,6 +281,12 @@ const updateMe: Handler = async (c) => {
       const d = Math.round(Number(drafts));
       if (!(d >= 1 && d <= 6)) throw new HttpError(400, "invalid_setting", "Drafts must be between 1 and 6.");
       next.drafts = d;
+    }
+    if (usageMode !== undefined) {
+      if (typeof usageMode !== "string" || !Object.hasOwn(MODE_TOKENS, usageMode)) throw new HttpError(400, "invalid_setting", "Unknown usage mode.");
+      next.usageMode = usageMode;
+      next.maxTokens = MODE_TOKENS[usageMode];
+      next.drafts = 1;
     }
   }
   const displayName = body.displayName !== undefined
@@ -439,6 +450,9 @@ interface ModelReply {
   tokens?: number;
   ms?: number;
   step?: number;
+  model?: string;
+  prompt_tokens?: number;
+  context_tokens?: number;
   finished?: boolean;
   syntax_ok?: boolean;
   checks?: { ok: boolean; checks: ModelCheck[]; stats?: Record<string, unknown> };
@@ -485,6 +499,9 @@ function replyMeta(reply: ModelReply) {
     detail: String(c.detail ?? "").slice(0, 160),
   }));
   return {
+    model: reply.model ?? null,
+    promptTokens: reply.prompt_tokens ?? null,
+    contextTokens: reply.context_tokens ?? null,
     lang: LANGUAGES.includes(reply.lang as Language) ? reply.lang : reply.lang === "text" ? "text" : "python",
     tokens: reply.tokens ?? null,
     ms: reply.ms ?? null,

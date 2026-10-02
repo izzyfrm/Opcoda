@@ -2,6 +2,7 @@
 try {
   const theme = localStorage.getItem("opcoda-theme");
   if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+  else document.documentElement.dataset.theme = "dark";
 } catch {
-  // storage unavailable: follow the system theme
+  document.documentElement.dataset.theme = "dark";
 }

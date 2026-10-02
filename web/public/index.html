@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Opcoda — Coda</title>
-  <meta name="description" content="Coda writes HTML, CSS, JavaScript and Python. A small coding model trained from scratch." />
+  <meta name="description" content="Coda 1.0 helps you build HTML, CSS, JavaScript and Python projects." />
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)" />
@@ -31,17 +31,20 @@
       <symbol id="i-external" viewBox="0 0 20 20"><path d="M11 4h5v5M16 4l-7 7M14 11v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
       <symbol id="i-copy" viewBox="0 0 20 20"><rect x="7" y="7" width="9" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13 4.5V4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
       <symbol id="i-panel" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 4v12" stroke="currentColor" stroke-width="1.6"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 20 20"><path d="M6.5 8l3.5 3.5L13.5 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-paperclip" viewBox="0 0 20 20"><path d="M7 10.5l4.8-4.8a2.5 2.5 0 013.5 3.5l-6.6 6.6a4 4 0 01-5.7-5.7l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-sliders" viewBox="0 0 20 20"><path d="M4 6h4m4 0h4M4 14h7m4 0h1M8 4v4m3 4v4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="13" cy="14" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
     </defs>
   </svg>
 
-  <div id="boot" class="boot" aria-live="polite">Loading Opcoda…</div>
+  <div id="boot" class="boot" role="status" aria-live="polite"><div class="boot-content"><span class="boot-spinner" aria-hidden="true"></span><h1>Welcome to Opcoda</h1><p>Preparing your workspace…</p></div></div>
 
   <!-- Sign in / create account -->
   <main id="auth" class="auth" hidden>
     <div class="auth-panel">
       <span class="wordmark"><img src="/favicon.png" alt="" width="24" height="24" />opcoda</span>
       <h1 id="auth-title">Sign in</h1>
-      <p class="auth-lede">Coda writes HTML, CSS, JavaScript and Python. It's a small model trained from scratch.</p>
+      <p class="auth-lede">Build HTML, CSS, JavaScript and Python projects with Coda 1.0.</p>
 
       <div class="segmented" role="tablist" aria-label="Account">
         <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="auth-form" data-mode="login">Sign in</button>
@@ -109,24 +112,31 @@
     <main class="chat">
       <header class="chat-header">
         <button type="button" class="icon-btn only-mobile" id="open-sidebar" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false"><svg aria-hidden="true"><use href="#i-menu"/></svg></button>
+        <div class="model-picker">
+          <button type="button" class="model-trigger" id="model-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="model-menu"><span>Coda 1.0</span><svg aria-hidden="true"><use href="#i-chevron"/></svg></button>
+          <div class="model-menu" id="model-menu" role="menu" hidden>
+            <div class="model-option" aria-current="true"><span class="model-check"><svg aria-hidden="true"><use href="#i-check"/></svg></span><span><strong>Coda 1.0</strong><small>Local coding model</small></span></div>
+            <div class="model-menu-section"><span class="model-menu-label">Response effort</span><div class="compact-modes" role="radiogroup" aria-label="Response effort"><label><input type="radio" name="header-usage-mode" value="light" />Light</label><label><input type="radio" name="header-usage-mode" value="medium" />Medium</label><label><input type="radio" name="header-usage-mode" value="super" />Super</label><label><input type="radio" name="header-usage-mode" value="intense" />Intense</label></div></div>
+          </div>
+        </div>
         <div class="model-id">
-          <span class="model-name">Coda</span>
           <span class="status" id="status" data-state="checking"><span class="dot" aria-hidden="true"></span><span id="status-text">Checking…</span></span>
         </div>
+        <button type="button" class="btn btn-ghost btn-sm context-trigger" id="open-context" aria-haspopup="dialog">Usage</button>
         <span class="usage" id="usage"></span>
         <button type="button" class="icon-btn" id="toggle-workspace" aria-label="Show code panel" aria-controls="workspace" aria-expanded="false" hidden><svg aria-hidden="true"><use href="#i-panel"/></svg></button>
       </header>
 
       <section class="thread" id="thread" aria-label="Conversation">
         <div class="empty" id="empty-state">
-          <h1>What should Coda build?</h1>
-          <p>Coda writes complete HTML pages, CSS, JavaScript and Python programs, then checks every draft before showing you the best one. It's small and trained from scratch, so it does best on everyday tasks like these.</p>
+          <div class="empty-mark" aria-hidden="true"><svg><use href="#i-mark"/></svg></div>
+          <h1>Build something useful.</h1>
+          <p>Describe the result you want. Coda will write the code, check it, and open the result in your workspace.</p>
           <div class="examples" id="examples">
-            <button type="button" class="example" data-lang="html"><span class="lang-tag" data-lang="html">HTML</span>Landing page for a coffee shop called Bean &amp; Brew with a menu and a contact form</button>
-            <button type="button" class="example" data-lang="html"><span class="lang-tag" data-lang="html">HTML</span>To-do list app that saves tasks in localStorage</button>
-            <button type="button" class="example" data-lang="css"><span class="lang-tag" data-lang="css">CSS</span>Buttons with hover, focus and disabled states</button>
-            <button type="button" class="example" data-lang="python"><span class="lang-tag" data-lang="python">Python</span>Bank account class with deposit, withdraw and a transaction history</button>
-            <button type="button" class="example" data-lang="javascript"><span class="lang-tag" data-lang="javascript">JS</span>Function that splits an array into chunks of a given size</button>
+            <button type="button" class="example" data-lang="html"><span>Build a polished product landing page</span><span class="lang-tag" data-lang="html">HTML</span></button>
+            <button type="button" class="example" data-lang="html"><span>Create a to-do app with saved tasks</span><span class="lang-tag" data-lang="html">HTML</span></button>
+            <button type="button" class="example" data-lang="python"><span>Write a transaction history class</span><span class="lang-tag" data-lang="python">Python</span></button>
+            <button type="button" class="example" data-lang="javascript"><span>Split an array into fixed-size chunks</span><span class="lang-tag" data-lang="javascript">JS</span></button>
           </div>
         </div>
         <ol class="messages" id="messages" aria-live="polite"></ol>
@@ -134,16 +144,21 @@
 
       <form class="composer" id="composer">
         <div class="composer-box">
-          <div class="lang-picker" role="radiogroup" aria-label="Language" id="lang-picker">
-            <label><input type="radio" name="lang" value="auto" checked />Auto</label>
-            <label><input type="radio" name="lang" value="html" />HTML</label>
-            <label><input type="radio" name="lang" value="css" />CSS</label>
-            <label><input type="radio" name="lang" value="javascript" />JavaScript</label>
-            <label><input type="radio" name="lang" value="python" />Python</label>
-          </div>
+          <div class="attachment-chip" id="attachment-chip" hidden><svg aria-hidden="true"><use href="#i-paperclip"/></svg><span id="attachment-name"></span><button type="button" id="remove-attachment" aria-label="Remove attachment"><svg aria-hidden="true"><use href="#i-close"/></svg></button></div>
           <div class="composer-row">
             <label for="prompt" class="sr-only">Describe what Coda should build</label>
             <textarea id="prompt" rows="1" placeholder="Describe a page, component, function or program…" autocomplete="off" spellcheck="true"></textarea>
+          </div>
+          <div class="composer-toolbar">
+            <div class="composer-actions">
+              <button type="button" class="composer-tool" id="attach-file" aria-label="Attach a code or text file" title="Attach file"><svg aria-hidden="true"><use href="#i-paperclip"/></svg></button>
+              <input type="file" id="file-input" class="sr-only" accept=".txt,.md,.html,.css,.js,.jsx,.ts,.tsx,.py,.json,.xml,.yaml,.yml" />
+              <div class="tool-picker">
+                <button type="button" class="composer-tool tool-trigger" id="tool-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="tool-menu"><svg aria-hidden="true"><use href="#i-sliders"/></svg><span id="tool-label">Auto</span><svg class="chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+                <div class="tool-menu" id="tool-menu" role="menu" hidden><span class="tool-menu-label">Output language</span><div class="lang-picker" role="radiogroup" aria-label="Language" id="lang-picker"><label><input type="radio" name="lang" value="auto" checked />Auto detect</label><label><input type="radio" name="lang" value="html" />HTML</label><label><input type="radio" name="lang" value="css" />CSS</label><label><input type="radio" name="lang" value="javascript" />JavaScript</label><label><input type="radio" name="lang" value="python" />Python</label></div></div>
+              </div>
+            </div>
+            <span class="composer-count" id="composer-count" aria-live="polite"></span>
             <button type="submit" class="send" id="send" aria-label="Send message" disabled><svg aria-hidden="true"><use href="#i-send"/></svg></button>
           </div>
         </div>
@@ -194,6 +209,26 @@
     </aside>
   </div>
 
+  <dialog id="context" class="dialog context-dialog" aria-labelledby="context-title">
+    <header class="dialog-header"><h2 id="context-title">Context</h2><button type="button" class="icon-btn" data-close aria-label="Close context"><svg aria-hidden="true"><use href="#i-close"/></svg></button></header>
+    <div class="dialog-body">
+      <div class="context-grid">
+        <div><span>Chat</span><strong id="context-chat">New chat</strong></div>
+        <div><span>Model</span><strong>Coda 1.0</strong></div>
+        <div><span>Engine</span><strong id="context-engine">Checking…</strong></div>
+        <div><span>Model status</span><strong id="context-status">Checking…</strong></div>
+        <div><span>Usage mode</span><strong id="context-mode">Medium</strong></div>
+        <div><span>Response limit</span><strong id="context-response">450 tokens</strong></div>
+        <div><span>Context window</span><strong id="context-window">—</strong></div>
+        <div><span>Messages in chat</span><strong id="context-messages">0</strong></div>
+        <div><span>Last input</span><strong id="context-input">—</strong></div>
+        <div><span>Last output</span><strong id="context-output">—</strong></div>
+      </div>
+      <div class="context-usage"><div><span>Daily messages</span><strong id="context-daily">—</strong></div><progress id="context-progress" max="25" value="0"></progress><p class="hint" id="context-reset"></p></div>
+      <p class="hint">Each request is a new coding task. Earlier chat messages are saved here but are not sent to the model.</p>
+    </div>
+  </dialog>
+
   <!-- Settings -->
   <dialog id="settings" class="dialog" aria-labelledby="settings-title">
     <header class="dialog-header">
@@ -238,25 +273,23 @@
 
       <section class="settings-section" aria-labelledby="s-coda">
         <h3 id="s-coda">Coda</h3>
-        <div class="field">
-          <label for="s-drafts">Drafts to compare <output id="drafts-out" for="s-drafts"></output></label>
-          <input type="range" id="s-drafts" min="1" max="6" step="1" />
-          <p class="hint">Coda writes this many versions and keeps the one that passes the most checks. More drafts take a little longer.</p>
+        <p>Choose how much time and output Coda spends on a request.</p>
+        <div class="segmented modes" role="radiogroup" aria-label="Usage mode">
+          <label><input type="radio" name="usage-mode" value="light" />Light</label>
+          <label><input type="radio" name="usage-mode" value="medium" />Medium</label>
+          <label><input type="radio" name="usage-mode" value="super" />Super</label>
+          <label><input type="radio" name="usage-mode" value="intense" />Intense</label>
         </div>
+        <p class="hint">Light is faster and shorter. Intense allows longer responses; it may take more time.</p>
         <div class="field">
           <label for="s-temperature">Creativity <output id="temperature-out" for="s-temperature"></output></label>
           <input type="range" id="s-temperature" min="0.1" max="1" step="0.05" />
-          <p class="hint">Lower is more predictable. Around 0.6 gives varied drafts that still work.</p>
-        </div>
-        <div class="field">
-          <label for="s-length">Max response length <output id="length-out" for="s-length"></output></label>
-          <input type="range" id="s-length" min="128" max="1000" step="8" />
-          <p class="hint">In tokens (about 3 characters each). Full web pages need 700 or more.</p>
+          <p class="hint">Lower is more consistent. Higher allows more variation.</p>
         </div>
       </section>
 
       <section class="settings-section" aria-labelledby="s-security">
-        <h3 id="s-security">Password</h3>
+        <h3 id="s-security">Security</h3>
         <form id="password-form" novalidate>
           <div class="field">
             <label for="s-current">Current password</label>

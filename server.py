@@ -37,6 +37,7 @@ from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
 from opcoda.verify import _HTMLChecker, check_css, check_html, check_js_many, check_python, normalize_lang
+from opcoda.ui_skill import ui_guidance
 
 CANDIDATES = ["checkpoints/coda-v4-best.pt", "checkpoints/coda-coda-v4-best.pt", "checkpoints/coda-phase3-best.pt",
               "checkpoints/coda-smoke-step-500.pt"]
@@ -47,7 +48,7 @@ TOKEN_FILE = Path(".coda-model-token")
 MODEL_TOKEN = os.environ.get("CODA_MODEL_TOKEN") or (TOKEN_FILE.read_text().strip() if TOKEN_FILE.exists() else "")
 if not MODEL_TOKEN:
     print("warning: no model token set; /api/generate is open to anyone who can reach this server")
-MAX_PROMPT_CHARS = 1000
+MAX_PROMPT_CHARS = 6000
 LANGUAGES = ("html", "css", "javascript", "python")
 CODE_START = re.compile(r"^\s*(def |class |import |from |@)")
 LANG_TAG = re.compile(r'^<code lang="([a-z]+)">\n')
@@ -178,6 +179,10 @@ def ollama_language(text: str, requested: str) -> str:
 
 def generate_ollama(req: GenerateRequest) -> dict:
     lang = ollama_language(req.prompt, req.language)
+    guidance = ui_guidance(req.prompt, lang)
+    system_prompt = f"You are a careful {lang} coding assistant. Return only complete {lang} code, without Markdown fences or explanation. Use the user's exact requested names and behavior. Keep the solution concise."
+    if guidance:
+        system_prompt += "\nUse these local design recommendations where relevant; explicit user requirements take priority:\n" + guidance
     prompt = ("Complete this code and return the whole completed file:\n" if CODE_START.match(req.prompt)
               else "Write code for this request:\n") + req.prompt
     body = {
@@ -185,7 +190,7 @@ def generate_ollama(req: GenerateRequest) -> dict:
         "stream": False,
         "keep_alive": "5m",
         "messages": [
-            {"role": "system", "content": f"You are a careful {lang} coding assistant. Return only complete {lang} code, without Markdown fences or explanation. Use the user's exact requested names and behavior. Keep the solution concise."},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
         "options": {"temperature": min(max(req.temperature, 0.0), 1.0),
@@ -208,7 +213,8 @@ def generate_ollama(req: GenerateRequest) -> dict:
     return {"text": code, "lang": lang, "finished": data.get("done_reason") != "length",
             "syntax_ok": report.ok, "checks": report.to_dict(),
             "drafts": {"total": 1, "passed": int(report.ok)},
-            "tokens": data.get("eval_count")}
+            "tokens": data.get("eval_count"), "prompt_tokens": data.get("prompt_eval_count"),
+            "context_tokens": 4096, "model": OLLAMA_MODEL}
 
 
 def generate_phase4(req: GenerateRequest) -> dict:
@@ -270,7 +276,7 @@ def health():
         if OLLAMA_MODEL not in available:
             raise HTTPException(status_code=503, detail=f"model {OLLAMA_MODEL} is not installed")
         return {"ok": True, "model": OLLAMA_MODEL, "backend": "ollama", "step": None,
-                "parameters": None, "languages": list(LANGUAGES)}
+                "parameters": None, "languages": list(LANGUAGES), "context_tokens": 4096}
     return {"ok": True, "model": "Coda", "step": payload.get("step"), "parameters": model.parameter_count(),
             "checkpoint": Path(CHECKPOINT).name, "languages": list(LANGUAGES) if PHASE4 else ["python"],
             "context_tokens": config.block_size}

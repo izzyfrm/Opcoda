@@ -15,6 +15,10 @@ export function json(data: unknown, init: ResponseInit = {}): Response {
   const headers = new Headers(init.headers);
   headers.set("content-type", "application/json; charset=utf-8");
   if (!headers.has("cache-control")) headers.set("cache-control", "no-store");
+  headers.set("x-content-type-options", "nosniff");
+  headers.set("referrer-policy", "no-referrer");
+  headers.set("x-frame-options", "DENY");
+  headers.set("cross-origin-resource-policy", "same-origin");
   return new Response(JSON.stringify(data), { ...init, headers });
 }
 
@@ -29,9 +33,25 @@ export async function readJson<T>(request: Request, maxBytes = 16_384): Promise<
   if (Number(request.headers.get("content-length") ?? 0) > maxBytes) {
     throw new HttpError(413, "too_large", "Request body is too large.");
   }
-  const text = await request.text();
-  if (text.length > maxBytes) throw new HttpError(413, "too_large", "Request body is too large.");
+  const reader = request.body?.getReader();
+  if (!reader) throw new HttpError(400, "bad_json", "Request body is not valid JSON.");
+  const chunks: Uint8Array[] = [];
+  let bytes = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    bytes += value.byteLength;
+    if (bytes > maxBytes) {
+      await reader.cancel();
+      throw new HttpError(413, "too_large", "Request body is too large.");
+    }
+    chunks.push(value);
+  }
+  const buffer = new Uint8Array(bytes);
+  let offset = 0;
+  for (const chunk of chunks) { buffer.set(chunk, offset); offset += chunk.byteLength; }
   try {
+    const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(buffer);
     return JSON.parse(text) as T;
   } catch {
     throw new HttpError(400, "bad_json", "Request body is not valid JSON.");
@@ -43,13 +63,13 @@ export function assertSameOrigin(request: Request, url: URL): void {
   if (request.method === "GET" || request.method === "HEAD") return;
   const origin = request.headers.get("origin");
   if (!origin) throw new HttpError(403, "bad_origin", "Missing Origin header.");
-  let host: string;
+  let source: string;
   try {
-    host = new URL(origin).host;
+    source = new URL(origin).origin;
   } catch {
     throw new HttpError(403, "bad_origin", "Invalid Origin header.");
   }
-  if (host !== url.host) throw new HttpError(403, "bad_origin", "Cross-site request blocked.");
+  if (source !== url.origin) throw new HttpError(403, "bad_origin", "Cross-site request blocked.");
 }
 
 export const nowSeconds = (): number => Math.floor(Date.now() / 1000);

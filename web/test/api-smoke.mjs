@@ -60,13 +60,20 @@ check("invalid username rejected", r.status === 400 && r.data?.error?.code === "
 // --- CSRF / origin
 r = await anon("/api/auth/login", { method: "POST", body: { username: aliceName, password: alicePass }, origin: "https://evil.example" });
 check("cross-site POST blocked", r.status === 403);
+const originProbe = client();
+const wrongPortOrigin = new URL(ORIGIN);
+wrongPortOrigin.port = String(Number(wrongPortOrigin.port || 80) + 1);
+r = await originProbe("/api/auth/login", { method: "POST", body: { username: aliceName, password: alicePass }, origin: wrongPortOrigin.origin });
+check("same host with different port blocked", r.status === 403, `${r.status} ${JSON.stringify(r.data)}`);
 r = await anon("/api/auth/login", { method: "POST", body: { username: aliceName, password: alicePass }, origin: null });
 check("POST without Origin blocked", r.status === 403);
+r = await anon("/api/auth/login", { method: "POST", raw: "x".repeat(20_000), headers: { "content-type": "application/json" } });
+check("oversized JSON blocked", r.status === 413);
 
 // --- auth required
 for (const path of ["/api/me", "/api/conversations", "/api/me/avatar"]) {
   r = await anon(path);
-  check(`anonymous GET ${path} -> 401`, r.status === 401);
+  check(`anonymous GET ${path} -> 401`, r.status === 401, `${r.status} ${JSON.stringify(r.data)}`);
 }
 
 // --- login
@@ -80,8 +87,10 @@ check("second account created", r.status === 201);
 // --- settings validation
 r = await alice("/api/me", { method: "PATCH", body: { settings: { temperature: 5 } } });
 check("out-of-range setting rejected", r.status === 400);
-r = await alice("/api/me", { method: "PATCH", body: { displayName: "Alice B", settings: { theme: "dark", maxTokens: 128 } } });
-check("settings saved", r.status === 200 && r.data.user.settings.theme === "dark" && r.data.user.displayName === "Alice B");
+r = await alice("/api/me", { method: "PATCH", body: { displayName: "Alice B", settings: { theme: "dark", usageMode: "super" } } });
+check("settings saved", r.status === 200 && r.data.user.settings.theme === "dark" && r.data.user.settings.usageMode === "super" && r.data.user.settings.maxTokens === 650 && r.data.user.displayName === "Alice B");
+r = await alice("/api/me", { method: "PATCH", body: { settings: { usageMode: "unknown" } } });
+check("unknown usage mode rejected", r.status === 400);
 
 // --- avatar validation
 r = await alice("/api/me/avatar", { method: "PUT", raw: "not an image at all", headers: { "content-type": "image/png" } });
@@ -104,7 +113,7 @@ if (r.status === 200) {
 } else {
   check("chat reports the model as offline (model server not running)", r.status === 503, `${r.status} ${JSON.stringify(r.data)}`);
 }
-r = await alice("/api/chat", { method: "POST", body: { message: "x".repeat(501) } });
+r = await alice("/api/chat", { method: "POST", body: { message: "x".repeat(6001) } });
 check("over-long message rejected", r.status === 400);
 
 // --- password change signs out other sessions
