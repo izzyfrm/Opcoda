@@ -1,0 +1,330 @@
+{
+  "summary": {
+    "model": "qwen2.5-coder:3b",
+    "tasks": 12,
+    "syntax": 12,
+    "functional": 10
+  },
+  "details": [
+    {
+      "task": "is_palindrome",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 5,
+        "total": 5,
+        "results": [
+          {
+            "ok": true,
+            "got": "True"
+          },
+          {
+            "ok": true,
+            "got": "False"
+          },
+          {
+            "ok": true,
+            "got": "True"
+          },
+          {
+            "ok": true,
+            "got": "True"
+          },
+          {
+            "ok": true,
+            "got": "False"
+          }
+        ]
+      },
+      "source": "def is_palindrome(text):\n    return text == text[::-1]\n"
+    },
+    {
+      "task": "average",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 4,
+        "total": 4,
+        "results": [
+          {
+            "ok": true,
+            "got": "2.0"
+          },
+          {
+            "ok": true,
+            "got": "0"
+          },
+          {
+            "ok": true,
+            "got": "5.0"
+          },
+          {
+            "ok": true,
+            "got": "1.5"
+          }
+        ]
+      },
+      "source": "def average(values):\n    if not values:\n        return 0\n    return sum(values) / len(values)\n"
+    },
+    {
+      "task": "count_words",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 3,
+        "total": 3,
+        "results": [
+          {
+            "ok": true,
+            "got": "2"
+          },
+          {
+            "ok": true,
+            "got": "0"
+          },
+          {
+            "ok": true,
+            "got": "3"
+          }
+        ]
+      },
+      "source": "def count_words(text):\n    return len(text.split())\n"
+    },
+    {
+      "task": "merge_dicts",
+      "syntax": true,
+      "functional": {
+        "status": "failed",
+        "passed": 2,
+        "total": 3,
+        "results": [
+          {
+            "ok": true,
+            "got": "{'b': 2, 'a': 1}"
+          },
+          {
+            "ok": false,
+            "got": "{'a': 1}"
+          },
+          {
+            "ok": true,
+            "got": "{}"
+          }
+        ]
+      },
+      "source": "def merge_dicts(left, right):\n    return {**right, **left}\n"
+    },
+    {
+      "task": "rotate_left",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 3,
+        "total": 3,
+        "results": [
+          {
+            "ok": true,
+            "got": "[2, 3, 1]"
+          },
+          {
+            "ok": true,
+            "got": "[]"
+          },
+          {
+            "ok": true,
+            "got": "[7]"
+          }
+        ]
+      },
+      "source": "def rotate_left(values):\n    if values:\n        return values[1:] + values[:1]\n    return []\n"
+    },
+    {
+      "task": "is_prime",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 6,
+        "total": 6,
+        "results": [
+          {
+            "ok": true,
+            "got": "True"
+          },
+          {
+            "ok": true,
+            "got": "False"
+          },
+          {
+            "ok": true,
+            "got": "False"
+          },
+          {
+            "ok": true,
+            "got": "False"
+          },
+          {
+            "ok": true,
+            "got": "True"
+          },
+          {
+            "ok": true,
+            "got": "False"
+          }
+        ]
+      },
+      "source": "def is_prime(number):\n    if number <= 1:\n        return False\n    if number <= 3:\n        return True\n    if number % 2 == 0 or number % 3 == 0:\n        return False\n    i = 5\n    while i * i <= number:\n        if number % i == 0 or number % (i + 2) == 0:\n            return False\n        i += 6\n    return True\n"
+    },
+    {
+      "task": "gcd",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 4,
+        "total": 4,
+        "results": [
+          {
+            "ok": true,
+            "got": "6"
+          },
+          {
+            "ok": true,
+            "got": "1"
+          },
+          {
+            "ok": true,
+            "got": "9"
+          },
+          {
+            "ok": true,
+            "got": "10"
+          }
+        ]
+      },
+      "source": "def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n"
+    },
+    {
+      "task": "flatten_one",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 3,
+        "total": 3,
+        "results": [
+          {
+            "ok": true,
+            "got": "[1, 2, 3]"
+          },
+          {
+            "ok": true,
+            "got": "[]"
+          },
+          {
+            "ok": true,
+            "got": "['a', 'b', 'c']"
+          }
+        ]
+      },
+      "source": "def flatten_one(groups):\n    return [item for sublist in groups for item in sublist]\n"
+    },
+    {
+      "task": "common_items",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 3,
+        "total": 3,
+        "results": [
+          {
+            "ok": true,
+            "got": "[2, 3]"
+          },
+          {
+            "ok": true,
+            "got": "[]"
+          },
+          {
+            "ok": true,
+            "got": "[]"
+          }
+        ]
+      },
+      "source": "def common_items(left, right):\n    return list(set(left) & set(right))\n"
+    },
+    {
+      "task": "to_snake_case",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 3,
+        "total": 3,
+        "results": [
+          {
+            "ok": true,
+            "got": "'hello_world'"
+          },
+          {
+            "ok": true,
+            "got": "'foo_bar_baz'"
+          },
+          {
+            "ok": true,
+            "got": "'x'"
+          }
+        ]
+      },
+      "source": "def to_snake_case(text):\n    return text.replace(' ', '_').replace('-', '_').lower()\n"
+    },
+    {
+      "task": "second_largest",
+      "syntax": true,
+      "functional": {
+        "status": "passed",
+        "passed": 5,
+        "total": 5,
+        "results": [
+          {
+            "ok": true,
+            "got": "2"
+          },
+          {
+            "ok": true,
+            "got": "4"
+          },
+          {
+            "ok": true,
+            "got": "None"
+          },
+          {
+            "ok": true,
+            "got": "None"
+          },
+          {
+            "ok": true,
+            "got": "None"
+          }
+        ]
+      },
+      "source": "def second_largest(values):\n    unique_values = set(values)\n    if len(unique_values) < 2:\n        return None\n    sorted_values = sorted(unique_values, reverse=True)\n    return sorted_values[1]\n"
+    },
+    {
+      "task": "group_by_length",
+      "syntax": true,
+      "functional": {
+        "status": "failed",
+        "passed": 1,
+        "total": 2,
+        "results": [
+          {
+            "ok": false,
+            "got": "{1: ['d'], 2: ['cc']}"
+          },
+          {
+            "ok": true,
+            "got": "{}"
+          }
+        ]
+      },
+      "source": "def group_by_length(words):\n    return {len(word): [word] for word in words}\n"
+    }
+  ]
+}

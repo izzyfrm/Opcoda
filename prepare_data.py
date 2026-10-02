@@ -158,6 +158,8 @@ def main() -> None:
     parser.add_argument("--max-file-kb", type=int, default=256)
     parser.add_argument("--tokenizer", default=None, help="BPE tokenizer JSON (e.g. tokenizer/coda-bpe-4k.json); omit for byte tokens")
     parser.add_argument("--max-tokens", type=int, default=0, help="drop examples longer than this many tokens (0 = keep all)")
+    parser.add_argument("--groups", nargs="*", default=None,
+                        help="include only these curriculum groups, e.g. py-function py-program py-module")
     args = parser.parse_args()
 
     if not 0.0 <= args.val_fraction <= 0.30:
@@ -180,6 +182,8 @@ def main() -> None:
         with curriculum.open(encoding="utf-8") as f:
             for line in f:
                 rec = json.loads(line)
+                if args.groups is not None and rec.get("group") not in args.groups:
+                    continue
                 key = normalize_code(rec["code"])
                 if key in seen:
                     dropped["duplicate"] += 1
@@ -272,6 +276,7 @@ def main() -> None:
         "max_tokens": args.max_tokens,
         "seed": args.seed,
         "curriculum": str(curriculum),
+        "groups": args.groups,
         "roots": list(args.roots),
         "heldout_spec_sha256": guard.spec_sha256,
         "splits": stats,

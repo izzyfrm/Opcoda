@@ -1,6 +1,6 @@
 # Opcoda — Coda 1.0 starter
 
-This is the first from-scratch Coda training skeleton. It does **not** download a pretrained model and it does **not** call an AI API.
+This repository includes the original from-scratch Coda training project. For better coding results on the owner's CPU-only PC, the website can now use a locally installed Ollama coding model. It does not send prompts to a hosted AI API.
 
 The first goal is intentionally small: prove that the entire training → checkpoint → generation loop works on your PC before scaling the model or dataset.
 

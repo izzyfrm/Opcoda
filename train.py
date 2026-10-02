@@ -141,6 +141,7 @@ def main() -> None:
     parser.add_argument("--min-delta", type=float, default=0.002)
     parser.add_argument("--threads", type=int, default=0, help="torch CPU threads (0 = PyTorch default)")
     parser.add_argument("--seed", type=int, default=1337)
+    parser.add_argument("--init-from", default=None, help="initialize model weights from a compatible checkpoint")
     args = parser.parse_args()
 
     if args.threads:
@@ -167,6 +168,12 @@ def main() -> None:
         tokenizer_payload = json.loads(Path(tok_info["path"]).read_text(encoding="utf-8"))
     name = args.name or args.profile
     model = Coda(cfg).to(device)
+    if args.init_from:
+        payload = torch.load(args.init_from, map_location=device, weights_only=False)
+        if payload["config"] != dataclasses.asdict(cfg) or payload.get("tokenizer") != tokenizer_payload:
+            raise SystemExit("--init-from checkpoint does not match this profile and tokenizer")
+        model.load_state_dict(payload["model"])
+        print(f"initialized from {args.init_from} (step {payload.get('step', '?')})")
     optimizer = make_optimizer(model, args)
 
     train = Split(data_dir, "train", cfg.block_size, dtype=dtype)

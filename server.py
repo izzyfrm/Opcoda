@@ -3,7 +3,9 @@
     uvicorn server:app --host 127.0.0.1 --port 8000
 
 Environment:
-    CODA_CHECKPOINT   checkpoint to serve (default: newest of coda-v4-best.pt, coda-phase3-best.pt)
+    CODA_BACKEND      ollama (default) or coda (from-scratch checkpoint)
+    CODA_OLLAMA_MODEL local Ollama model (default: llama3.2:3b)
+    CODA_CHECKPOINT   Coda checkpoint when CODA_BACKEND=coda
     CODA_MODEL_TOKEN  shared secret; when set, /api/generate requires
                       "Authorization: Bearer <token>". Always set it when tunnelled.
                       If unset, the token is read from .coda-model-token (gitignored).
@@ -22,23 +24,24 @@ How a reply is produced (Phase 4 checkpoints):
     4. The best draft wins: finished > passes every check > passes more checks > longer.
 """
 import hmac
+import json
 import os
 import re
 import threading
 import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
-import torch
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from opcoda.config import CodaConfig
-from opcoda.model import Coda
-from opcoda.tokenizer import tokenizer_from_checkpoint
 from opcoda.verify import _HTMLChecker, check_css, check_html, check_js_many, check_python, normalize_lang
 
 CANDIDATES = ["checkpoints/coda-v4-best.pt", "checkpoints/coda-coda-v4-best.pt", "checkpoints/coda-phase3-best.pt",
               "checkpoints/coda-smoke-step-500.pt"]
+BACKEND = os.environ.get("CODA_BACKEND", "ollama").lower()
+OLLAMA_MODEL = os.environ.get("CODA_OLLAMA_MODEL", "llama3.2:3b")
 CHECKPOINT = os.environ.get("CODA_CHECKPOINT") or next((c for c in CANDIDATES if Path(c).exists()), CANDIDATES[-1])
 TOKEN_FILE = Path(".coda-model-token")
 MODEL_TOKEN = os.environ.get("CODA_MODEL_TOKEN") or (TOKEN_FILE.read_text().strip() if TOKEN_FILE.exists() else "")
@@ -50,21 +53,30 @@ CODE_START = re.compile(r"^\s*(def |class |import |from |@)")
 LANG_TAG = re.compile(r'^<code lang="([a-z]+)">\n')
 
 app = FastAPI(title="Coda model API", docs_url=None, redoc_url=None)
-device = "cuda" if torch.cuda.is_available() else "cpu"
+if BACKEND not in ("coda", "ollama"):
+    raise RuntimeError(f"unknown CODA_BACKEND: {BACKEND}")
+if BACKEND == "coda":
+    import torch
+    from opcoda.config import CodaConfig
+    from opcoda.model import Coda
+    from opcoda.tokenizer import tokenizer_from_checkpoint
 
-print(f"Loading Coda from {CHECKPOINT} on {device}...")
-payload = torch.load(CHECKPOINT, map_location=device)
-config = CodaConfig(**payload["config"])
-model = Coda(config).to(device)
-model.load_state_dict(payload["model"])
-model.eval()
-tokenizer = tokenizer_from_checkpoint(payload)
-PHASE4 = payload.get("format") == "coda-phase4"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"Loading Coda from {CHECKPOINT} on {device}...")
+    payload = torch.load(CHECKPOINT, map_location=device, weights_only=False)
+    config = CodaConfig(**payload["config"])
+    model = Coda(config).to(device)
+    model.load_state_dict(payload["model"])
+    model.eval()
+    tokenizer = tokenizer_from_checkpoint(payload)
+    PHASE4 = payload.get("format") == "coda-phase4"
+    print(f"Coda loaded: step {payload.get('step', '?')}, {model.parameter_count():,} parameters, "
+          f"{'BPE, multi-language' if PHASE4 else 'byte-level, Python only'}.")
+else:
+    print(f"Using local Ollama model {OLLAMA_MODEL}.")
 # One generation at a time: drafts are already batched, and parallel requests would
 # just fight over the same CPU cores.
 generation_lock = threading.Lock()
-print(f"Coda loaded: step {payload.get('step', '?')}, {model.parameter_count():,} parameters, "
-      f"{'BPE, multi-language' if PHASE4 else 'byte-level, Python only'}.")
 
 
 class GenerateRequest(BaseModel):
@@ -151,6 +163,54 @@ def verify_drafts(drafts: list[dict]) -> None:
         d["report"] = report
 
 
+def ollama_language(text: str, requested: str) -> str:
+    lang = normalize_lang(requested)
+    if lang in LANGUAGES:
+        return lang
+    if re.search(r"\b(html|web ?page|website|landing page)\b", text, re.I):
+        return "html"
+    if re.search(r"\b(css|stylesheet)\b", text, re.I):
+        return "css"
+    if re.search(r"\b(javascript|typescript|\bjs\b)\b", text, re.I):
+        return "javascript"
+    return "python"
+
+
+def generate_ollama(req: GenerateRequest) -> dict:
+    lang = ollama_language(req.prompt, req.language)
+    prompt = ("Complete this code and return the whole completed file:\n" if CODE_START.match(req.prompt)
+              else "Write code for this request:\n") + req.prompt
+    body = {
+        "model": OLLAMA_MODEL,
+        "stream": False,
+        "keep_alive": "5m",
+        "messages": [
+            {"role": "system", "content": f"You are a careful {lang} coding assistant. Return only complete {lang} code, without Markdown fences or explanation. Use the user's exact requested names and behavior. Keep the solution concise."},
+            {"role": "user", "content": prompt},
+        ],
+        "options": {"temperature": min(max(req.temperature, 0.0), 1.0),
+                    "num_predict": min(max(req.max_tokens, 64), 900), "num_ctx": 4096},
+    }
+    request = urllib.request.Request("http://127.0.0.1:11434/api/chat",
+                                     data=json.dumps(body).encode("utf-8"),
+                                     headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(request, timeout=135) as response:
+            data = json.load(response)
+    except (OSError, ValueError) as exc:
+        raise HTTPException(status_code=503, detail=f"local Ollama unavailable: {exc}") from exc
+    raw = data.get("message", {}).get("content", "").strip()
+    fenced = re.search(r"```(?:[a-zA-Z0-9_+-]+)?\s*\n(.*?)\n```", raw, re.S)
+    code = (fenced.group(1) if fenced else raw).strip() + "\n"
+    draft = {"lang": lang, "code": code}
+    verify_drafts([draft])
+    report = draft["report"]
+    return {"text": code, "lang": lang, "finished": data.get("done_reason") != "length",
+            "syntax_ok": report.ok, "checks": report.to_dict(),
+            "drafts": {"total": 1, "passed": int(report.ok)},
+            "tokens": data.get("eval_count")}
+
+
 def generate_phase4(req: GenerateRequest) -> dict:
     prompt, forced_lang, prefix = build_prompt(req.prompt, req.language)
     ids = tokenizer.encode(prompt)
@@ -164,7 +224,7 @@ def generate_phase4(req: GenerateRequest) -> dict:
         lang, code, finished = split_draft(tokenizer.decode(s["ids"]), forced_lang, prefix)
         drafts.append({"lang": lang, "code": code, "finished": finished or s["finished"], "tokens": len(s["ids"])})
     verify_drafts(drafts)
-    best = max(drafts, key=lambda d: (d["finished"], d["report"].ok, d["report"].passed, min(len(d["code"]), 4000)))
+    best = max(drafts, key=lambda d: (d["report"].ok, d["report"].passed, d["finished"], min(len(d["code"]), 4000)))
     return {
         "text": best["code"],
         "lang": best["lang"] or "text",
@@ -201,6 +261,16 @@ def root():
 
 @app.get("/health")
 def health():
+    if BACKEND == "ollama":
+        try:
+            with urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=2) as response:
+                available = {m["name"] for m in json.load(response).get("models", [])}
+        except (OSError, ValueError) as exc:
+            raise HTTPException(status_code=503, detail="local Ollama unavailable") from exc
+        if OLLAMA_MODEL not in available:
+            raise HTTPException(status_code=503, detail=f"model {OLLAMA_MODEL} is not installed")
+        return {"ok": True, "model": OLLAMA_MODEL, "backend": "ollama", "step": None,
+                "parameters": None, "languages": list(LANGUAGES)}
     return {"ok": True, "model": "Coda", "step": payload.get("step"), "parameters": model.parameter_count(),
             "checkpoint": Path(CHECKPOINT).name, "languages": list(LANGUAGES) if PHASE4 else ["python"],
             "context_tokens": config.block_size}
@@ -213,11 +283,13 @@ def generate(req: GenerateRequest, authorization: str | None = Header(default=No
         raise HTTPException(status_code=503, detail="Coda is busy, try again in a moment")
     try:
         started = time.perf_counter()
-        result = generate_phase4(req) if PHASE4 else generate_phase3(req)
+        result = (generate_ollama(req) if BACKEND == "ollama" else
+                  generate_phase4(req) if PHASE4 else generate_phase3(req))
         result["ms"] = round((time.perf_counter() - started) * 1000)
     finally:
         generation_lock.release()
-    result.update({"model": "Coda", "step": payload.get("step")})
+    result.update({"model": OLLAMA_MODEL if BACKEND == "ollama" else "Coda",
+                   "step": None if BACKEND == "ollama" else payload.get("step")})
     return result
 
 

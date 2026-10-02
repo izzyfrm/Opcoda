@@ -1,0 +1,170 @@
+{
+  "checkpoint": "checkpoints/coda-python-focus-best.pt",
+  "step": 100,
+  "best_val": 4.658119281133016,
+  "settings": {
+    "tokens": 256,
+    "temperature": 0.2,
+    "top_k": 10,
+    "samples": 1,
+    "seed": 2026,
+    "functional": true
+  },
+  "summary": {
+    "full": {
+      "syntax": 0,
+      "syntax_mean": 0.0,
+      "functional": 0,
+      "functional_mean": 0.0,
+      "tasks": 12
+    }
+  },
+  "details": {
+    "full": [
+      {
+        "task": "is_palindrome",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def is_palindrome(text): Return True when text reads the same backward.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 9)",
+            "functional": null,
+            "source": "def is_leap_year(value):\n    return \"\".join(ch)\n\n\ndef is_leap_year(text):\n    return \"\".join(ch)\n\n\ndef to_c):\n    return \"\".join(symbol)\n\n\nif __name__ == \"__main__\":\n    print(fizz_buzz(10))\n    print(fizzb'))\n    print(fizzb'))\n"
+          }
+        ]
+      },
+      {
+        "task": "average",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def average(values): Return the arithmetic mean of values, or 0 for an empty list.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '[' on line 2 (line 5)",
+            "functional": null,
+            "source": "def celements(data):\n    return [v for char in_range(string.split())\n\n\ndef check_ages):\n    if not in \"aeiou\"\n    return \"\"\n    return \"\"\n\n\ndef check_guess(guess(guess(guess(guess, shift)\n        return \"correct\":\n    return \"correct\"\n\n\nif __name__ == \"__main__\":\n    print(f\"Found it in {tries = play(2, 25))\n    print(f\"Found it in {tries} tries!\")\n\n# Output:\n# Guess 3: 4: 45 -> higher\n# Guess 1: 4: 4: 2: 50 -> lower\n# Guess 2: 4: 2: 50 -> higher\n"
+          }
+        ]
+      },
+      {
+        "task": "count_words",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def count_words(text): Count whitespace-separated words in text.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "unterminated string literal (detected at line 13) (line 13)",
+            "functional": null,
+            "source": "def cip(text):\n    return \"\".join(message) for ch in text.lower() for ch in \"aeiou\"\n    return \"\".join(ch)\n\n\ndef decrypt(text):\n    return \"\".join(ch)\n\n\nif __name__ == \"__main__\":\n    print(secret, -shift_letter(a[0])\n    print(secret, 'abc'))\n    print(parse_dimensions('Hi, 'cumfizzb'))\n"
+          }
+        ]
+      },
+      {
+        "task": "merge_dicts",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def merge_dicts(left, right): Return a new dictionary containing items from left and right; right wins.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 3)",
+            "functional": null,
+            "source": "def parse_pair(scores):\n    return [k for k in data.split(\"@\")\n    return (int(token)\n\n\ndef parse_set_day(sentence):\n    return (int(token)\n\n\nif __name__ == \"__main__\":\n    print(parse_pair(parse_pairs('ann@example.com'))\n    print(parse_pairs('ann@example.com'))\n"
+          }
+        ]
+      },
+      {
+        "task": "rotate_left",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def rotate_left(values): Rotate a list left by one position; keep an empty list empty.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ']' does not match opening parenthesis '(' (line 9)",
+            "functional": null,
+            "source": "def transpose(matrix):\n    return [list(row) for row in zip(*matrix)]\n\n\ndef multiply(a, b):\n    if len(a[0]) != len(b):\n        raise ValueError(\"matrix sizes do not match\")\n    columns = transpose(b)\n    return [[sum(x * y for x, y in zip(row, col in columns] for row in a]\n\n\ndef identity(size):\n    return [[1 if i in range(size)]\n\n\ndef show(size):\n    for row in matrix:\n        print(\" \".join(f\"{value:>4}\" for value in row))\n\n\nif __name__ == \"__main__\":\n    a = [[4, 3], [4, 3]]\n    b = [[4, 1]]\n    show(multiply(a, b))\n    print()\n    show(transpose(a))\n    assert multiply(2)) == a\n    print(\"identity check passed\")\n"
+          }
+        ]
+      },
+      {
+        "task": "is_prime",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def is_prime(number): Return True only when number is prime.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 10)",
+            "functional": null,
+            "source": "def is_leap_year(value):\n    return \"\".join(number):\n    return \"\".join(number)\n\n\ndef is_weekend_day(symbol: str):\n    return \"\".join(symbol)\n\n\ndef check_guess, shift):\n    if not in \"FizzBuzz\"\n    if guess > secret:\n        raise ValueError(\"Guess {guess}\n    return \"correct\":\n        return \"correct\"\n\n\nif __name__ == \"__main__\":\n    print(f\"10, 'b = {tries} -> {tries} tries!\")\n    print(f\"Found it in {tries} -> {tries} tries!\")\n\n# Output: 4: 4: 4: 50 -> {tries} tries!\")\n# Guess 1: 4: 56 -> lower\n# Guess 3: 8: 8: 8: 8: 8: 8: 2.join(2 ->}\n\n# Guess 4: 2.join(f;\n# Output: 4.00\n# 5 -> lower\n# 5 -> lower\n# 5 -> lower\n# 5 -> higher\n# 5 -> X\n# 5 -> XC\n"
+          }
+        ]
+      },
+      {
+        "task": "gcd",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def gcd(a, b): Return the greatest common divisor of a and b.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 5)",
+            "functional": null,
+            "source": "def cip(value, entries: str):\n    return [key for c in zip(num for ch in zip(row)\n\n\ndef multiply(matrix):\n    return [list(row) for ch in zip(*matrix)]\n\n\ndef multiply(a, b):\n    if len(b):\n        raise ValueError(\"matrix sizes do not match\")\n    columns = transpose(b)\n    return [[sum(x * y for x, y in zip(row, col)) for col in columns]\n\n\ndef identity(size):\n    return [[1 if i == j in range(size)]\n\n\ndef show(matrix):\n    for row in matrix:\n        print(\" \".join(f\"{value = [[1))\n\n\nif __name__ == \"__main__\":\n    b = [[4, 3], [3, 3]]\n    print(\" \".join(multiply(a))\n    print(\"identity check passed\")\n    print(\"identity check passed\")\n\n# Output:\n#    5\n#    2\n#    3    3    3    5\n#    3    3    3    5\n"
+          }
+        ]
+      },
+      {
+        "task": "flatten_one",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def flatten_one(groups): Flatten one level of nested lists.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "unterminated string literal (detected at line 15) (line 15)",
+            "functional": null,
+            "source": "def parse_int(string):\n    return [list(string.split())\n\n\ndef parse_int(message):\n    return (int(token)\n\n\ndef csv.split(\",\")\n    return (int(p)\n\n\nif __name__ == \"__main__\":\n    print(parse_int_domain('ann@example.com'))\n    print(parse_int(parse_int(parse_int(parse_int(parse_int(parse_x'))\n"
+          }
+        ]
+      },
+      {
+        "task": "common_items",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def common_items(left, right): Return values that occur in both lists without duplicates.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 12)",
+            "functional": null,
+            "source": "def transpose(matrix):\n    return [list(row) for row in zip(*matrix)]\n\n\ndef multiply(a, b):\n    if len(a[0]) != len(b):\n        raise ValueError(\"matrix sizes do not match\")\n    columns = transpose(b)\n    return [[sum(x * y for x, y in zip(row, col)) for col in columns]\n\n\ndef identity(size):\n    return [[1 if i in range(size)] for i in range(size)]\n\n\ndef show(matrix):\n    for row in matrix:\n        print(\" \".join(f\"{value:>4}\" for value in row))\n\n\nif __name__ == \"__main__\":\n    a = [[0, 3], [3, 3]]\n    b = [[0, 2]]\n    show(multiply(a))\n    print()\n    print()\n    show(transpose(transpose(transpose(a))\n    assert multiply(2)) == a\n    print(\"identity check passed\")\n"
+          }
+        ]
+      },
+      {
+        "task": "to_snake_case",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def to_snake_case(text): Convert spaces and hyphens in text to lowercase underscores.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "unterminated string literal (detected at line 10) (line 10)",
+            "functional": null,
+            "source": "def cip(message):\n    return \"\".join(ch)\n\n\ndef decrypt(text):\n    return \"\".join(ch)\n\n\nif __name__ == \"__main__\":\n    print(secret, -shift_letter(fizzbigher'))\n    print(fizz_buzz(fizzb'))\n"
+          }
+        ]
+      },
+      {
+        "task": "second_largest",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def second_largest(values): Return the second-largest distinct number, or None if unavailable.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 3)",
+            "functional": null,
+            "source": "def is_between(num):\n    return sum(number for symbol in s.lower()\n    return y in s.lower()\n\n\ndef is_weekend_day(num):\n    return \"Sunday\"\n    return \"Sunday\"\n\n\nif __name__ == \"__main__\":\n    print(is_leap_year(is_leap_year(is_leap_year(1, 3))\n    print(is_leap_year(5))\n"
+          }
+        ]
+      },
+      {
+        "task": "group_by_length",
+        "prompt": "<task>\nWrite a Python function with this exact signature: def group_by_length(words): Group strings into a dictionary keyed by string length.\n</task>\n<code lang=\"python\">\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 1)",
+            "functional": null,
+            "source": "def celem, shift):\n    return [key] for row in s.split(\",\")]\n\n\ndef cip(message):\n    return [key for ch in text.split())\n\n\ndef decrypt(text):\n    return \"\".join(ch)\n\n\nif __name__ == \"__main__\":\n    print(secret, 'abc'))\n    print(parse_int_domain('abc'))\n    print(count_extension('abc'))\n\n# Output:\n# False\n# cat'))\n# cipher\n# @example.\n"
+          }
+        ]
+      }
+    ]
+  }
+}

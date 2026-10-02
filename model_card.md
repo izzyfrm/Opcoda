@@ -4,6 +4,8 @@
 **Model:** Coda 1.0  
 **Status:** experimental / from-scratch training project
 
+The opcoda.cc coding assistant currently uses `llama3.2:3b` locally through Ollama because the from-scratch Coda checkpoints did not pass the held-out coding tests. This card describes the research model, not the current website backend.
+
 ## Goal
 
 Build a compact coding-focused language model without relying on a pretrained language model or external inference provider.

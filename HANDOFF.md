@@ -1,5 +1,9 @@
 # Opcoda / Coda 1.0 — Handoff (end of Phase 3)
 
+## 2026-10-02 update
+
+The owner prioritized better coding over the earlier from-scratch-only rule. The original Coda training pipeline remains in this repository, while `start-coda.ps1` now defaults to local `llama3.2:3b` through Ollama. `-Backend coda` still serves a Coda checkpoint. The 6M Phase 4 checkpoint at step 600 and a Python-focused continuation both scored 0/12 on held-out Python function tests. The local Ollama comparison scored 12/12 for `llama3.2:3b` and 10/12 for `qwen2.5-coder:3b` on the same tasks. The site is served by the 3B Ollama model through the existing private tunnel.
+
 Read this first if you are continuing the project (human or AI).
 
 ## Ground rules (from the project owner, do not break)

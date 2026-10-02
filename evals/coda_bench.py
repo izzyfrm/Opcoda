@@ -37,6 +37,7 @@ TASKS_PATH = HERE / "heldout_tasks.json"
 STOP = {
     "instruct": ["</code>"],
     "comment": ["\n<task>", "\n# Task:", "\ndef ", "\nclass ", "</code>"],
+    "full": ["</code>"],
 }
 CUT_MARKERS = ("</code>", "<task>", "<code>")
 
@@ -47,6 +48,9 @@ def load_tasks() -> list[dict]:
 
 def build_prompt(task: dict, fmt: str, phase4: bool = False) -> str:
     desc = task["description"]
+    if fmt == "full":
+        return (f"<task>\nWrite a Python function with this exact signature: {task['signature']} "
+                f"{desc}\n</task>\n<code lang=\"python\">\n")
     if fmt == "instruct":
         code_tag = '<code lang="python">' if phase4 else '<code>'
         return f"<task>\n{desc}\n</task>\n{code_tag}\n{task['signature']}\n"
@@ -64,6 +68,18 @@ def extract_function(signature: str, completion: str) -> str:
             break
         kept.append(line)
     return "\n".join(kept).rstrip() + "\n"
+
+
+def extract_full_function(name: str, completion: str) -> str:
+    for marker in CUT_MARKERS:
+        if marker in completion:
+            completion = completion[:completion.index(marker)]
+    lines = completion.splitlines()
+    start = next((i for i, line in enumerate(lines) if line.startswith(f"def {name}(")), None)
+    if start is None:
+        return completion.rstrip() + "\n"
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].strip() and not lines[i][0].isspace()), len(lines))
+    return "\n".join(lines[start:end]).rstrip() + "\n"
 
 
 def syntax_check(source: str, name: str) -> tuple[bool, str]:
@@ -93,6 +109,10 @@ def generate(model, tok, prompt: str, fmt: str, args, seed: int, device: str) ->
 
     torch.manual_seed(seed)
     ids = tok.encode(prompt)
+    if getattr(tok, "vocab_size", 256) > 256:
+        sample = model.sample(ids, max_new_tokens=args.tokens, token_bytes=tok.token_bytes,
+                              temperature=args.temperature, top_k=args.top_k, stop=STOP[fmt])[0]
+        return tok.decode(sample["ids"])
     x = torch.tensor([ids], dtype=torch.long, device=device)
     y = model.generate(x, max_new_tokens=args.tokens, temperature=args.temperature, top_k=args.top_k,
                        stop=[tok.encode(s) for s in STOP[fmt]])[0].tolist()
@@ -145,7 +165,7 @@ def self_test() -> int:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("checkpoint", nargs="?", default="checkpoints/coda-phase3-best.pt")
-    parser.add_argument("--formats", nargs="+", choices=list(STOP), default=["instruct", "comment"])
+    parser.add_argument("--formats", nargs="+", choices=list(STOP), default=None)
     parser.add_argument("--tokens", type=int, default=256, help="max new byte-tokens per function")
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--top-k", type=int, default=10)
@@ -166,6 +186,8 @@ def main() -> None:
     model, payload = load_model(args.checkpoint, device)
     tok = tokenizer_from_checkpoint(payload)
     phase4 = payload.get("format") == "coda-phase4"
+    if args.formats is None:
+        args.formats = ["full"] if phase4 else ["instruct", "comment"]
     tasks = load_tasks()
 
     print(f"checkpoint: {args.checkpoint} | step {payload.get('step', '?')} | {model.parameter_count():,} params")
@@ -183,7 +205,8 @@ def main() -> None:
             samples = []
             for s in range(args.samples):
                 completion = generate(model, tok, prompt, fmt, args, args.seed + 1000 * s + ti, device)
-                source = extract_function(task["signature"], completion)
+                source = (extract_full_function(task["name"], completion) if fmt == "full"
+                          else extract_function(task["signature"], completion))
                 r = score(task, source, args.functional)
                 r["source"] = source
                 samples.append(r)

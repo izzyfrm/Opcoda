@@ -37,3 +37,5 @@ data/imported/**
 data/curriculum_v4/
 data/v4/*.bin
 data/v4/*_offsets.npy
+data/v4-python/*.bin
+data/v4-python/*_offsets.npy

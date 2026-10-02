@@ -1,6 +1,6 @@
 # opcoda.cc — website + accounts
 
-The Cloudflare Worker `opcoda` serves the site and the account API. Coda itself still runs on your PC.
+The Cloudflare Worker `opcoda` serves the site and the account API. Code generation runs on your PC. By default, `start-coda.ps1` uses a local Ollama coding model; the from-scratch Coda checkpoints remain available with `-Backend coda`.
 
 ```
 browser ──► opcoda.cc (Worker "opcoda")
@@ -10,6 +10,7 @@ browser ──► opcoda.cc (Worker "opcoda")
               └─ env.CODA_MODEL ──► Workers VPC service "coda-model"
                                     ──► Cloudflare Tunnel "opcoda-model" (private, no public hostname)
                                     ──► server.py on your PC at 127.0.0.1:8000
+                                        └─► Ollama at 127.0.0.1:11434 (default)
                                         Authorization: Bearer MODEL_TOKEN
 ```
 
@@ -64,7 +65,7 @@ node test/api-smoke.mjs                # 33 API checks against the running wrang
 **Already done on 2026-10-02.** Day to day you only need two things:
 
 ```powershell
-.\start-coda.ps1                     # from the repo root: Coda online (model server + private tunnel)
+.\start-coda.ps1                     # from the repo root: local coding model + private tunnel
 cd web; npx wrangler deploy          # after changing the website or Worker
 ```
 
@@ -102,3 +103,5 @@ Don't use `cloudflared tunnel route dns` for this tunnel. The model is deliberat
 | `.dev.vars` → `MODEL_URL` | local dev only: reach `server.py` directly instead of through Workers VPC |
 | `npx wrangler secret put INVITE_CODE` | require an invite code to sign up (`wrangler secret delete INVITE_CODE` to reopen) |
 | `CODA_CHECKPOINT` env / `start-coda.ps1 -Checkpoint` | which checkpoint `server.py` serves |
+| `start-coda.ps1 -Backend coda` | serve the original from-scratch checkpoint instead of Ollama |
+| `start-coda.ps1 -OllamaModel` | local Ollama model name (default `llama3.2:3b`) |
