@@ -689,7 +689,21 @@ async function cleanup(db: D1Database): Promise<void> {
 export default {
   async fetch(request, env, ctx): Promise<Response> {
     const url = new URL(request.url);
-    if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
+    if (!url.pathname.startsWith("/api/")) {
+      if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method not allowed", { status: 405 });
+      if (url.pathname === "/info" || url.pathname === "/info/") {
+        return env.ASSETS.fetch(request);
+      }
+      if (url.pathname === "/" || /^\/c\/[0-9a-f-]{36}$/.test(url.pathname) || /^\/(?:app\.css|app\.js|theme\.js|project\.js|favicon\.png|info\.html|404\.html|sandbox\/run\.html)$/.test(url.pathname)) {
+        return env.ASSETS.fetch(request);
+      }
+      const asset = await env.ASSETS.fetch(new Request(new URL("/404", url), request));
+      const headers = new Headers(asset.headers);
+      headers.set("content-type", "text/html; charset=utf-8");
+      headers.set("cache-control", "no-store");
+      headers.set("x-content-type-options", "nosniff");
+      return new Response(asset.body, { status: 404, headers });
+    }
 
     const secure = url.protocol === "https:";
     try {

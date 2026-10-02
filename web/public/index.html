@@ -37,7 +37,7 @@
     </defs>
   </svg>
 
-  <div id="boot" class="boot" role="status" aria-live="polite"><div class="boot-content"><span class="boot-spinner" aria-hidden="true"></span><h1>Welcome to Opcoda</h1><p>Preparing your workspace…</p></div></div>
+  <div id="boot" class="boot" role="status" aria-live="polite"><div class="boot-content"><img class="boot-mark" src="/favicon.png" alt="" width="48" height="48" /><span class="boot-kicker">CODA 1.0</span><h1>Welcome to Opcoda</h1><p>Preparing your workspace…</p><span class="boot-progress" aria-hidden="true"><span></span></span></div></div>
 
   <!-- Sign in / create account -->
   <main id="auth" class="auth" hidden>
@@ -76,7 +76,7 @@
         <p class="form-error" id="auth-error" role="alert" hidden></p>
         <button class="btn btn-primary btn-block" type="submit" id="auth-submit">Sign in</button>
       </form>
-      <p class="auth-note">Coda runs on a single home PC, so it's sometimes offline.</p>
+      <p class="auth-note">Coda runs on a single home PC, so it's sometimes offline. <a href="/info">About Opcoda</a></p>
     </div>
   </main>
 
@@ -103,6 +103,7 @@
         </button>
         <div class="menu" id="account-menu" role="menu" hidden>
           <button type="button" role="menuitem" id="open-settings">Settings</button>
+          <a role="menuitem" href="/info">About Opcoda</a>
           <button type="button" role="menuitem" id="sign-out">Sign out</button>
         </div>
       </div>

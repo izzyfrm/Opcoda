@@ -4,12 +4,19 @@ from pathlib import Path
 
 SKILLS_DIR = Path(__file__).resolve().parent.parent / "ai-skills"
 MAX_FILE_CHARS = 4000
-MAX_GUIDANCE_CHARS = 5000
+MAX_GUIDANCE_CHARS = 8500
 STOP = {"about", "build", "create", "make", "website", "page", "code", "html", "css", "javascript", "with", "this", "that", "from", "your", "please"}
 
 
 def _words(value: str) -> set[str]:
-    return set(re.findall(r"[a-z]{3,}", value.lower())) - STOP
+    words = set(re.findall(r"[a-z]{3,}", value.lower())) - STOP
+    if words & {"style", "styles", "styling", "stylish"}:
+        words.add("style")
+    if words & {"background", "backgrounds"}:
+        words.add("background")
+    if words & {"animation", "animations", "animate"}:
+        words.add("animation")
+    return words
 
 
 def markdown_guidance(prompt: str, language: str, directory: Path = SKILLS_DIR) -> str:
@@ -30,4 +37,4 @@ def markdown_guidance(prompt: str, language: str, directory: Path = SKILLS_DIR) 
         if score:
             matches.append((score, path.name, content))
     matches.sort(key=lambda item: (-item[0], item[1]))
-    return "\n\n".join(f"Guide: {name}\n{content}" for _, name, content in matches[:2])[:MAX_GUIDANCE_CHARS]
+    return "\n\n".join(f"Guide: {name}\n{content}" for _, name, content in matches[:5])[:MAX_GUIDANCE_CHARS]
