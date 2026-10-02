@@ -1,0 +1,10 @@
+def add(a, b):
+
+def is_even(number):
+
+function multiply(a, b) {
+
+<!doctype html>
+<html>
+<head>
+  <title>Opcoda</title>

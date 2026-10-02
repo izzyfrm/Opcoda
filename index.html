@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Opcoda — Coda 1.0</title>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #111111;
+      --panel-2: #171717;
+      --border: #242424;
+      --text: #f5f5f5;
+      --muted: #8d8d8d;
+      --soft: #bdbdbd;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        ui-sans-serif,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      padding: 20px;
+    }
+
+    .chat {
+      width: min(720px, 100%);
+      height: min(760px, calc(100vh - 40px));
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .model {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .model strong {
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+
+    .model span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .usage {
+      font-size: 12px;
+      color: var(--soft);
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scrollbar-width: thin;
+      scrollbar-color: #2b2b2b transparent;
+    }
+
+    .message {
+      max-width: 82%;
+      padding: 12px 14px;
+      border-radius: 20px;
+      line-height: 1.5;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #eeeeee;
+      color: #111;
+      border-bottom-right-radius: 7px;
+    }
+
+    .message.ai {
+      align-self: flex-start;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 7px;
+    }
+
+    .composer-wrap {
+      padding: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .composer {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 44px;
+      max-height: 140px;
+      resize: none;
+      border: 0;
+      outline: 0;
+      color: var(--text);
+      background: transparent;
+      font: inherit;
+      line-height: 1.4;
+      padding: 11px 8px 8px 10px;
+    }
+
+    textarea::placeholder {
+      color: #666;
+    }
+
+    button {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
+      border: 0;
+      border-radius: 50%;
+      background: #f2f2f2;
+      color: #0a0a0a;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover {
+      transform: scale(1.04);
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .limit {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 0;
+      }
+
+      .chat {
+        width: 100%;
+        height: 100dvh;
+        border-radius: 0;
+        border: 0;
+      }
+
+      .message {
+        max-width: 90%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="chat">
+    <header class="topbar">
+      <div class="model">
+        <strong>Coda 1.0</strong>
+        <span>Opcoda coding model</span>
+      </div>
+
+      <div class="usage" id="usage">25 / 25 messages</div>
+    </header>
+
+    <section class="messages" id="messages">
+      <div class="message ai">What are we building?</div>
+    </section>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <textarea
+          id="prompt"
+          rows="1"
+          placeholder="Message Coda..."
+          autocomplete="off"
+        ></textarea>
+
+        <button id="send" aria-label="Send message">↑</button>
+      </div>
+
+      <div class="limit" id="limitText">Daily usage resets automatically.</div>
+    </div>
+  </main>
+
+  <script>
+    const DAILY_LIMIT = 25;
+    const API_ENDPOINT = "/api/chat";
+
+    const messages = document.getElementById("messages");
+    const prompt = document.getElementById("prompt");
+    const send = document.getElementById("send");
+    const usage = document.getElementById("usage");
+    const limitText = document.getElementById("limitText");
+
+    function todayKey() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function getUsageState() {
+      const saved = JSON.parse(localStorage.getItem("opcoda-usage") || "{}");
+
+      if (saved.date !== todayKey()) {
+        return { date: todayKey(), used: 0 };
+      }
+
+      return {
+        date: saved.date,
+        used: Number(saved.used || 0)
+      };
+    }
+
+    function saveUsageState(state) {
+      localStorage.setItem("opcoda-usage", JSON.stringify(state));
+    }
+
+    function updateUsage() {
+      const state = getUsageState();
+      const remaining = Math.max(DAILY_LIMIT - state.used, 0);
+
+      usage.textContent = `${remaining} / ${DAILY_LIMIT} messages`;
+
+      const locked = remaining <= 0;
+      prompt.disabled = locked;
+      send.disabled = locked || !prompt.value.trim();
+
+      limitText.textContent = locked
+        ? "Daily limit reached. Resets tomorrow."
+        : "Daily usage resets automatically.";
+    }
+
+    function addMessage(role, text) {
+      const el = document.createElement("div");
+      el.className = `message ${role}`;
+      el.textContent = text;
+      messages.appendChild(el);
+      messages.scrollTop = messages.scrollHeight;
+      return el;
+    }
+
+    function resizeInput() {
+      prompt.style.height = "auto";
+      prompt.style.height = Math.min(prompt.scrollHeight, 140) + "px";
+    }
+
+    async function sendMessage() {
+      const text = prompt.value.trim();
+      const state = getUsageState();
+
+      if (!text || state.used >= DAILY_LIMIT) return;
+
+      addMessage("user", text);
+
+      prompt.value = "";
+      resizeInput();
+      send.disabled = true;
+
+      const thinking = addMessage("ai", "Thinking...");
+
+      try {
+        const response = await fetch(API_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: text,
+            model: "coda-1.0"
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error("Coda backend unavailable");
+        }
+
+        const data = await response.json();
+        thinking.textContent = data.response || data.text || "No response returned.";
+
+        state.used += 1;
+        saveUsageState(state);
+      } catch (error) {
+        thinking.textContent =
+          "Coda is offline right now. Connect /api/chat to the local inference backend.";
+      }
+
+      updateUsage();
+    }
+
+    prompt.addEventListener("input", () => {
+      resizeInput();
+      updateUsage();
+    });
+
+    prompt.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    send.addEventListener("click", sendMessage);
+
+    updateUsage();
+  </script>
+</body>
+</html>
