@@ -1,6 +1,39 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
+*.pyo
+
+# Secrets / local editor stuff
+.env
+.coda-model-token
+tunnel/*.json
+tunnel/opcoda-model.yml
+.vscode/
+
+# Model checkpoints
 checkpoints/*.pt
+
+# Generated training data
 data/train.bin
 data/val.bin
+data/val_iid.bin
+data/*_offsets.npy
+data/curriculum/
+
+# Imported source code
+data/imported/**
+
+# Keep imported directory structure + provenance files
+!data/imported/**/
+!data/imported/**/SOURCE.json
+
+# Always keep dataset metadata
+!data/dataset_manifest.json
+# Wrangler cache
+.wrangler/
+
+# Phase 4 generated data
+data/curriculum_v4/
+data/v4/*.bin
+data/v4/*_offsets.npy

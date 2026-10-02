@@ -1,0 +1,2379 @@
+{
+  "checkpoint": "checkpoints/coda-phase3-best.pt",
+  "step": 650,
+  "best_val": 0.6403456479310989,
+  "settings": {
+    "tokens": 256,
+    "temperature": 0.2,
+    "top_k": 10,
+    "samples": 5,
+    "seed": 2026,
+    "functional": true
+  },
+  "summary": {
+    "instruct": {
+      "syntax": 6,
+      "syntax_mean": 7.0,
+      "functional": 0,
+      "functional_mean": 0.0,
+      "tasks": 12
+    },
+    "comment": {
+      "syntax": 9,
+      "syntax_mean": 7.4,
+      "functional": 0,
+      "functional_mean": 0.0,
+      "tasks": 12
+    }
+  },
+  "details": {
+    "instruct": [
+      {
+        "task": "is_palindrome",
+        "prompt": "<task>\nReturn True when text reads the same backward.\n</task>\n<code>\ndef is_palindrome(text):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def is_palindrome(text):\n    return \"\".join(text) for token in text.startswith(terms)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def is_palindrome(text):\n    return \"\".join(text) for token in text.startswith(text)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def is_palindrome(text):\n    return \"\".join(text) for token in text.startswith(term)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def is_palindrome(text):\n    return \"\".join(text) for token in text.startswith(terms)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def is_palindrome(text):\n    return \"\".join(text) for token in text.startswith(terms)\n"
+          }
+        ]
+      },
+      {
+        "task": "average",
+        "prompt": "<task>\nReturn the arithmetic mean of values, or 0 for an empty list.\n</task>\n<code>\ndef average(values):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1, 2]"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return [value for value in values if value > 0]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return max(values, other)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ']' does not match opening parenthesis '(' (line 2)",
+            "functional": null,
+            "source": "def average(values):\n    return [max(value for value in values if value > 0])\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1, 2]"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return [value for value in values]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return max(values, other)\n"
+          }
+        ]
+      },
+      {
+        "task": "count_words",
+        "prompt": "<task>\nCount whitespace-separated words in text.\n</task>\n<code>\ndef count_words(text):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "unterminated string literal (detected at line 2) (line 2)",
+            "functional": null,
+            "source": "def count_words(text):\n    return steps * \" * len(sten)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def count_words(text):\n    return sum(sub) for symbol in text.count(symbol)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 2)",
+            "functional": null,
+            "source": "def count_words(text):\n    return \"\".join(text) for token in text.split())\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def count_words(text):\n    return steps * 60 + int(text)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def count_words(text):\n    return sum(sub, sub)\n"
+          }
+        ]
+      },
+      {
+        "task": "merge_dicts",
+        "prompt": "<task>\nReturn a new dictionary containing items from left and right; right wins.\n</task>\n<code>\ndef merge_dicts(left, right):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def merge_dicts(left, right):\n    return [widx for idx in range(left) idx != wanted]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def merge_dicts(left, right):\n    return [word for word in recontent]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def merge_dicts(left, right):\n    return [width]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def merge_dicts(left, right):\n    return [n for n in readings if n > right]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def merge_dicts(left, right):\n    return [word for word in left in line.get(word) if letter != wanted]\n"
+          }
+        ]
+      },
+      {
+        "task": "rotate_left",
+        "prompt": "<task>\nRotate a list left by one position; keep an empty list empty.\n</task>\n<code>\ndef rotate_left(values):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[0, 1, 2]"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[0]"
+                }
+              ]
+            },
+            "source": "def rotate_left(values):\n    return [label for label, value in enumerate(values) if value >= 0]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '[' (line 2)",
+            "functional": null,
+            "source": "def rotate_left(values):\n    return [label for label, value in enumerate(values) if value > lower else \"\")\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def rotate_left(values):\n    return [label for label, value in zip(values, other)]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def rotate_left(values):\n    return [label for label, value in values]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def rotate_left(values):\n    return [label for label, value in values]\n"
+          }
+        ]
+      },
+      {
+        "task": "is_prime",
+        "prompt": "<task>\nReturn True only when number is prime.\n</task>\n<code>\ndef is_prime(number):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 6,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def is_prime(number):\n    return line == 0\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def is_prime(number):\n    return line number >= 0, 1\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def is_prime(number):\n    return line number % 2 * prices\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 6,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def is_prime(number):\n    return line <= 0\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 2)",
+            "functional": null,
+            "source": "def is_prime(number):\n    return line number in number >= 0)\n"
+          }
+        ]
+      },
+      {
+        "task": "gcd",
+        "prompt": "<task>\nReturn the greatest common divisor of a and b.\n</task>\n<code>\ndef gcd(a, b):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "'in' expected after for-loop variables (line 2)",
+            "functional": null,
+            "source": "def gcd(a, b):\n    return [column for curr if curr is if c != b.cupper()]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def gcd(a, b):\n    return [column]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def gcd(a, b):\n    return [col for c in arr]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "'in' expected after for-loop variables (line 2)",
+            "functional": null,
+            "source": "def gcd(a, b):\n    return [column for curr if curr is if c != b.cupper()]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def gcd(a, b):\n    return [col for c in arr]\n"
+          }
+        ]
+      },
+      {
+        "task": "flatten_one",
+        "prompt": "<task>\nFlatten one level of nested lists.\n</task>\n<code>\ndef flatten_one(groups):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[[], [1, 2], [3]]"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[['a'], ['b', 'c']]"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sorted(groups)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "got": "0"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sum(num * num for num in groups)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sorted(groups, needle)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def flatten_one(groups):\n    return sum(num for num in groups from num if num > tol:\n        return subtotal + num\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sorted(groups, needle)\n"
+          }
+        ]
+      },
+      {
+        "task": "common_items",
+        "prompt": "<task>\nReturn values that occur in both lists without duplicates.\n</task>\n<code>\ndef common_items(left, right):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "'[' was never closed (line 2)",
+            "functional": null,
+            "source": "def common_items(left, right):\n    return [record freq[record in freq]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def common_items(left, right):\n    return [rindex for r in readings]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax. Perhaps you forgot a comma? (line 2)",
+            "functional": null,
+            "source": "def common_items(left, right):\n    return [record freq[recement if recenter in records if recordse if record.get(record) if record is None or v > record\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax. Perhaps you forgot a comma? (line 2)",
+            "functional": null,
+            "source": "def common_items(left, right):\n    return [record freq[record in freq[record in records if record.get()]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "'[' was never closed (line 2)",
+            "functional": null,
+            "source": "def common_items(left, right):\n    return [record freq[record in freq]\n"
+          }
+        ]
+      },
+      {
+        "task": "to_snake_case",
+        "prompt": "<task>\nConvert spaces and hyphens in text to lowercase underscores.\n</task>\n<code>\ndef to_snake_case(text):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "'Hll Wrld'"
+                },
+                {
+                  "ok": false,
+                  "got": "'f-br bz'"
+                },
+                {
+                  "ok": true,
+                  "got": "'x'"
+                }
+              ]
+            },
+            "source": "def to_snake_case(text):\n    collected = \"\"\n    for symbol in text:\n        if symbol.lower() not in \"aeiou\":\n            collected += symbol\n    return collected\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "'Hll Wrld'"
+                },
+                {
+                  "ok": false,
+                  "got": "'f-br bz'"
+                },
+                {
+                  "ok": true,
+                  "got": "'x'"
+                }
+              ]
+            },
+            "source": "def to_snake_case(text):\n    collected = \"\"\n    for symbol in text:\n        if symbol.lower() not in \"aeiou\":\n            collected += symbol\n    return collected\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "'Hll Wrld'"
+                },
+                {
+                  "ok": false,
+                  "got": "'f-br bz'"
+                },
+                {
+                  "ok": true,
+                  "got": "'x'"
+                }
+              ]
+            },
+            "source": "def to_snake_case(text):\n    collected = \"\"\n    for symbol in text:\n        if symbol.lower() not in \"aeiou\":\n            collected += symbol\n    return collected\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "False"
+                },
+                {
+                  "ok": false,
+                  "got": "True"
+                },
+                {
+                  "ok": false,
+                  "got": "True"
+                }
+              ]
+            },
+            "source": "def to_snake_case(text):\n    for char in text:\n        if char.isupper():\n              return False\n    return True\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unterminated string literal (detected at line 3) (line 3)",
+            "functional": null,
+            "source": "def to_snake_case(text):\n    for letter in text:\n        if letter.count(letter) == \":\n            return text\n    return text\n"
+          }
+        ]
+      },
+      {
+        "task": "second_largest",
+        "prompt": "<task>\nReturn the second-largest distinct number, or None if unavailable.\n</task>\n<code>\ndef second_largest(values):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def second_largest(values):\n    return sorted(values, other)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def second_largest(values):\n    return sorted(values, other)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def second_largest(values):\n    return sorted(values, other)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ']' does not match opening parenthesis '(' (line 2)",
+            "functional": null,
+            "source": "def second_largest(values):\n    return [sum(rows[index] for index in range(len(values))]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def second_largest(values):\n    return [label for label, value in zip(nums, other)]\n"
+          }
+        ]
+      },
+      {
+        "task": "group_by_length",
+        "prompt": "<task>\nGroup strings into a dictionary keyed by string length.\n</task>\n<code>\ndef group_by_length(words):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '{' (line 2)",
+            "functional": null,
+            "source": "def group_by_length(words):\n    return {key: value for key, value in words if key is missing.items() if key== 1)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '{' (line 2)",
+            "functional": null,
+            "source": "def group_by_length(words):\n    return {key: v for key, v in word.items() if v == other)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 2,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                }
+              ]
+            },
+            "source": "def group_by_length(words):\n    return [low for word in words]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 2,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                }
+              ]
+            },
+            "source": "def group_by_length(words):\n    return [low for part in words]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 2,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "AttributeError"
+                },
+                {
+                  "ok": false,
+                  "error": "AttributeError"
+                }
+              ]
+            },
+            "source": "def group_by_length(words):\n    return {key for key, v in words.items() if key== item}\n"
+          }
+        ]
+      }
+    ],
+    "comment": [
+      {
+        "task": "is_palindrome",
+        "prompt": "# Task: return True when text reads the same backward.\ndef is_palindrome(text):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def is_palindrome(text):\n    return \"\".join(tokens)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def is_palindrome(text):\n    return \"\".join(tokens)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def is_palindrome(text):\n    return \"\".join(tokens)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def is_palindrome(text):\n    return \"\".join(tokens)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "'racecar'"
+                },
+                {
+                  "ok": false,
+                  "got": "'hello'"
+                },
+                {
+                  "ok": false,
+                  "got": "''"
+                },
+                {
+                  "ok": false,
+                  "got": "'abba'"
+                },
+                {
+                  "ok": false,
+                  "got": "'ab'"
+                }
+              ]
+            },
+            "source": "def is_palindrome(text):\n    return \"\".join(text)\n"
+          }
+        ]
+      },
+      {
+        "task": "average",
+        "prompt": "# Task: return the arithmetic mean of values, or 0 for an empty list.\ndef average(values):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1, 2]"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return [value for value in values]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1, 2]"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return [value for value in values if value >= 0]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1, 2]"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return [value for value in values if value >= 0]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1, 2]"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return [value for value in values]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1, 2]"
+                }
+              ]
+            },
+            "source": "def average(values):\n    return [value for value in values if value >= 0]\n"
+          }
+        ]
+      },
+      {
+        "task": "count_words",
+        "prompt": "# Task: count whitespace-separated words in text.\ndef count_words(text):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "AttributeError"
+                },
+                {
+                  "ok": false,
+                  "error": "AttributeError"
+                },
+                {
+                  "ok": false,
+                  "error": "AttributeError"
+                }
+              ]
+            },
+            "source": "def count_words(text):\n    for token in text.starts():\n        if token[token] == target:\n            token[token]\n    return token[token[0]]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 2)",
+            "functional": null,
+            "source": "def count_words(text):\n    return \"\".join(text) for token in text.startswith())\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 2)",
+            "functional": null,
+            "source": "def count_words(text):\n    return \"\".join(text) for token in text.startswith())\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 2)",
+            "functional": null,
+            "source": "def count_words(text):\n    return \"\".join(words) for word in text.startswith(word))\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 2)",
+            "functional": null,
+            "source": "def count_words(text):\n    return \"\".join(text) for token in text.startswith())\n"
+          }
+        ]
+      },
+      {
+        "task": "merge_dicts",
+        "prompt": "# Task: return a new dictionary containing items from left and right; right wins.\ndef merge_dicts(left, right):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def merge_dicts(left, right):\n    return [record for record in record.get() if record is if record is None or v > record]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def merge_dicts(left, right):\n    return [widx for idx in range(len(record))]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def merge_dicts(left, right):\n    return [record for record in record.get() if record is if record is None or value > record\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def merge_dicts(left, right):\n    return [record for record in record.get() if record is if record is None or v > record]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def merge_dicts(left, right):\n    return [record for record in record.get() if record is if r cord is None or v > record]\n"
+          }
+        ]
+      },
+      {
+        "task": "rotate_left",
+        "prompt": "# Task: rotate a list left by one position; keep an empty list empty.\ndef rotate_left(values):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def rotate_left(values):\n    return [elem for elem, value in values]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "'[' was never closed (line 2)",
+            "functional": null,
+            "source": "def rotate_left(values):\n    return [key for key, value in values if key is missing.\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def rotate_left(values):\n    return [key for key, value in seeq.items() if key== 0]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def rotate_left(values):\n    return [label for label, value in values]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def rotate_left(values):\n    return [label for label, value in values]\n"
+          }
+        ]
+      },
+      {
+        "task": "is_prime",
+        "prompt": "# Task: return True only when number is prime.\ndef is_prime(number):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "'(' was never closed (line 2)",
+            "functional": null,
+            "source": "def is_prime(number):\n    return list(number * 2 for number in number, number in zip(number, number, inclusive.isdigit())\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax. Perhaps you forgot a comma? (line 2)",
+            "functional": null,
+            "source": "def is_prime(number):\n    return list(number * 2 for number in number, number in zip(number, number, inclusive.issingif number >= 0)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 6,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def is_prime(number):\n    return list(number * 2 * 2 + number % 2) * 2\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def is_prime(number):\n    return list(number * number for number in number if number > plieces number.\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 6,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def is_prime(number):\n    return list(number * number for number in number if number > 0)\n"
+          }
+        ]
+      },
+      {
+        "task": "gcd",
+        "prompt": "# Task: return the greatest common divisor of a and b.\ndef gcd(a, b):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 4,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def gcd(a, b):\n    return [col]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 2)",
+            "functional": null,
+            "source": "def gcd(a, b):\n    return [col] for cor in arr)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "unmatched ')' (line 2)",
+            "functional": null,
+            "source": "def gcd(a, b):\n    return [col] for cor in arr)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "'in' expected after for-loop variables (line 2)",
+            "functional": null,
+            "source": "def gcd(a, b):\n    return [col for cor i in range(len(a))]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "'in' expected after for-loop variables (line 2)",
+            "functional": null,
+            "source": "def gcd(a, b):\n    return [col for cor i in range(len(a))]\n"
+          }
+        ]
+      },
+      {
+        "task": "flatten_one",
+        "prompt": "# Task: flatten one level of nested lists.\ndef flatten_one(groups):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[[], [1, 2], [3]]"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[['a'], ['b', 'c']]"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sorted(groups)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[[], [1, 2], [3]]"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[['a'], ['b', 'c']]"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sorted(groups)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sorted(groups, needle)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[[], [1, 2], [3]]"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[['a'], ['b', 'c']]"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sorted(groups)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[[], [1, 2], [3]]"
+                },
+                {
+                  "ok": true,
+                  "got": "[]"
+                },
+                {
+                  "ok": false,
+                  "got": "[['a'], ['b', 'c']]"
+                }
+              ]
+            },
+            "source": "def flatten_one(groups):\n    return sorted(groups)\n"
+          }
+        ]
+      },
+      {
+        "task": "common_items",
+        "prompt": "# Task: return values that occur in both lists without duplicates.\ndef common_items(left, right):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "ValueError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def common_items(left, right):\n    return [record for record in range(min(left), right)]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '[' (line 2)",
+            "functional": null,
+            "source": "def common_items(left, right):\n    return [record for record in records if record.get() if record is None)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "ValueError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def common_items(left, right):\n    return [record for record in range(min(left), right)]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "ValueError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def common_items(left, right):\n    return [record for record in range(min(left), right)]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '[' (line 2)",
+            "functional": null,
+            "source": "def common_items(left, right):\n    return [record for record in records if record.get() if record is None)\n"
+          }
+        ]
+      },
+      {
+        "task": "to_snake_case",
+        "prompt": "# Task: convert spaces and hyphens in text to lowercase underscores.\ndef to_snake_case(text):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 1,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "'Hll Wrld'"
+                },
+                {
+                  "ok": false,
+                  "got": "'f-br bz'"
+                },
+                {
+                  "ok": true,
+                  "got": "'x'"
+                }
+              ]
+            },
+            "source": "def to_snake_case(text):\n    collected = \"\"\n    for symbol in text:\n        if symbol.lower() not in \"aeiou\":\n            collected += symbol\n    return collected\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                },
+                {
+                  "ok": false,
+                  "error": "TypeError"
+                }
+              ]
+            },
+            "source": "def to_snake_case(text):\n    return sorted(text) >= 0\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def to_snake_case(text):\n    return sum(sub, piece)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def to_snake_case(text):\n    return steps = {}\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 3,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def to_snake_case(text):\n    return sorted(text, word)\n"
+          }
+        ]
+      },
+      {
+        "task": "second_largest",
+        "prompt": "# Task: return the second-largest distinct number, or None if unavailable.\ndef second_largest(values):\n",
+        "samples": [
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[4, 5, 5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1]"
+                },
+                {
+                  "ok": false,
+                  "got": "[2, 2]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                }
+              ]
+            },
+            "source": "def second_largest(values):\n    return sorted(values)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "invalid syntax (line 2)",
+            "functional": null,
+            "source": "def second_largest(values):\n    return sorted(value * 2 for value in values if value > relse \"\"\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def second_largest(values):\n    return sorted(values, other)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 3]"
+                },
+                {
+                  "ok": false,
+                  "got": "[4, 5, 5]"
+                },
+                {
+                  "ok": false,
+                  "got": "[1]"
+                },
+                {
+                  "ok": false,
+                  "got": "[2, 2]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                }
+              ]
+            },
+            "source": "def second_largest(values):\n    return sorted(values)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 5,
+              "results": [
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                },
+                {
+                  "ok": false,
+                  "error": "NameError"
+                }
+              ]
+            },
+            "source": "def second_largest(values):\n    return list(map(values, max_len))\n"
+          }
+        ]
+      },
+      {
+        "task": "group_by_length",
+        "prompt": "# Task: group strings into a dictionary keyed by string length.\ndef group_by_length(words):\n",
+        "samples": [
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '{' (line 2)",
+            "functional": null,
+            "source": "def group_by_length(words):\n    return {key: v for key, v in word.items() if key== 0)\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '{' (line 2)",
+            "functional": null,
+            "source": "def group_by_length(words):\n    return {key: v for key, v in word.items() if v == other)\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 2,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 2, 1]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                }
+              ]
+            },
+            "source": "def group_by_length(words):\n    return [len(word) for word in words]\n"
+          },
+          {
+            "syntax": true,
+            "syntax_detail": "ok",
+            "functional": {
+              "status": "failed",
+              "passed": 0,
+              "total": 2,
+              "results": [
+                {
+                  "ok": false,
+                  "got": "[1, 2, 2, 1]"
+                },
+                {
+                  "ok": false,
+                  "got": "[]"
+                }
+              ]
+            },
+            "source": "def group_by_length(words):\n    return [len(word) for word in words]\n"
+          },
+          {
+            "syntax": false,
+            "syntax_detail": "closing parenthesis ')' does not match opening parenthesis '{' (line 2)",
+            "functional": null,
+            "source": "def group_by_length(words):\n    return {key: v for key, v in word.items() if key== 0)\n"
+          }
+        ]
+      }
+    ]
+  }
+}

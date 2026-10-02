@@ -1,0 +1,14 @@
+# Copy to tunnel/opcoda-model.yml (gitignored) and fill in the tunnel ID from
+#   cloudflared tunnel create opcoda-model
+# Kept separate from ~/.cloudflared/config.yml so your other tunnels are untouched.
+#
+# The opcoda Worker reaches 127.0.0.1:8000 privately through a Workers VPC service:
+#   npx wrangler vpc service create coda-model --type http --tunnel-id <TUNNEL_ID> --ipv4 127.0.0.1 --http-port 8000
+# Nothing is published on a public hostname. Workers VPC needs QUIC (outbound UDP 7844).
+tunnel: <TUNNEL_ID>
+credentials-file: C:\Users\<you>\.cloudflared\<TUNNEL_ID>.json
+protocol: quic
+warp-routing:
+  enabled: true
+ingress:
+  - service: http_status:404

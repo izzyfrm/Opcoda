@@ -1,0 +1,173 @@
+{
+  "version": "0.2",
+  "note": "CodaBench held-out tasks. Single source of truth for the benchmark, the curriculum generator's ban list, and prepare_data.py's contamination scan. Never copy these tasks, names, or references into training data.",
+  "banned_patterns": [
+    "palindrom",
+    "\\baverage\\b",
+    "\\bmean\\b",
+    "count(ing)?[ _]words",
+    "number of words",
+    "word[ _]count\\b",
+    "merg(e|ing)",
+    "rotat",
+    "prime",
+    "\\bgcd\\b",
+    "greatest common",
+    "\\blcm\\b",
+    "least common multiple",
+    "flatten",
+    "common[ _]items",
+    "intersect",
+    "in both",
+    "snake",
+    "kebab",
+    "camel",
+    "second[ _-]?(largest|biggest|highest|max)",
+    "\\bkth\\b",
+    "group\\w*[ _]by[ _]length",
+    "keyed by (their |string |word )?length"
+  ],
+  "tasks": [
+    {
+      "name": "is_palindrome",
+      "signature": "def is_palindrome(text):",
+      "description": "Return True when text reads the same backward.",
+      "reference": "def is_palindrome(text):\n    return text == text[::-1]\n",
+      "tests": [
+        {"args": "('racecar',)", "expected": "True"},
+        {"args": "('hello',)", "expected": "False"},
+        {"args": "('',)", "expected": "True"},
+        {"args": "('abba',)", "expected": "True"},
+        {"args": "('ab',)", "expected": "False"}
+      ]
+    },
+    {
+      "name": "average",
+      "signature": "def average(values):",
+      "description": "Return the arithmetic mean of values, or 0 for an empty list.",
+      "reference": "def average(values):\n    if not values:\n        return 0\n    return sum(values) / len(values)\n",
+      "tests": [
+        {"args": "([1, 2, 3],)", "expected": "2"},
+        {"args": "([],)", "expected": "0"},
+        {"args": "([5],)", "expected": "5"},
+        {"args": "([1, 2],)", "expected": "1.5"}
+      ]
+    },
+    {
+      "name": "count_words",
+      "signature": "def count_words(text):",
+      "description": "Count whitespace-separated words in text.",
+      "reference": "def count_words(text):\n    return len(text.split())\n",
+      "tests": [
+        {"args": "('hello world',)", "expected": "2"},
+        {"args": "('',)", "expected": "0"},
+        {"args": "('  a  b   c ',)", "expected": "3"}
+      ]
+    },
+    {
+      "name": "merge_dicts",
+      "signature": "def merge_dicts(left, right):",
+      "description": "Return a new dictionary containing items from left and right; right wins.",
+      "reference": "def merge_dicts(left, right):\n    result = dict(left)\n    result.update(right)\n    return result\n",
+      "tests": [
+        {"args": "({'a': 1}, {'b': 2})", "expected": "{'a': 1, 'b': 2}"},
+        {"args": "({'a': 1}, {'a': 3})", "expected": "{'a': 3}"},
+        {"args": "({}, {})", "expected": "{}"}
+      ]
+    },
+    {
+      "name": "rotate_left",
+      "signature": "def rotate_left(values):",
+      "description": "Rotate a list left by one position; keep an empty list empty.",
+      "reference": "def rotate_left(values):\n    return values[1:] + values[:1]\n",
+      "tests": [
+        {"args": "([1, 2, 3],)", "expected": "[2, 3, 1]"},
+        {"args": "([],)", "expected": "[]"},
+        {"args": "([7],)", "expected": "[7]"}
+      ]
+    },
+    {
+      "name": "is_prime",
+      "signature": "def is_prime(number):",
+      "description": "Return True only when number is prime.",
+      "reference": "def is_prime(number):\n    if number < 2:\n        return False\n    for divisor in range(2, int(number ** 0.5) + 1):\n        if number % divisor == 0:\n            return False\n    return True\n",
+      "tests": [
+        {"args": "(2,)", "expected": "True"},
+        {"args": "(1,)", "expected": "False"},
+        {"args": "(0,)", "expected": "False"},
+        {"args": "(9,)", "expected": "False"},
+        {"args": "(13,)", "expected": "True"},
+        {"args": "(-7,)", "expected": "False"}
+      ]
+    },
+    {
+      "name": "gcd",
+      "signature": "def gcd(a, b):",
+      "description": "Return the greatest common divisor of a and b.",
+      "reference": "def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n",
+      "tests": [
+        {"args": "(12, 18)", "expected": "6"},
+        {"args": "(7, 5)", "expected": "1"},
+        {"args": "(0, 9)", "expected": "9"},
+        {"args": "(10, 0)", "expected": "10"}
+      ]
+    },
+    {
+      "name": "flatten_one",
+      "signature": "def flatten_one(groups):",
+      "description": "Flatten one level of nested lists.",
+      "reference": "def flatten_one(groups):\n    return [item for group in groups for item in group]\n",
+      "tests": [
+        {"args": "([[1, 2], [3], []],)", "expected": "[1, 2, 3]"},
+        {"args": "([],)", "expected": "[]"},
+        {"args": "([['a'], ['b', 'c']],)", "expected": "['a', 'b', 'c']"}
+      ]
+    },
+    {
+      "name": "common_items",
+      "signature": "def common_items(left, right):",
+      "description": "Return values that occur in both lists without duplicates.",
+      "reference": "def common_items(left, right):\n    result = []\n    for value in left:\n        if value in right and value not in result:\n            result.append(value)\n    return result\n",
+      "compare": "unordered",
+      "tests": [
+        {"args": "([1, 2, 3, 2], [2, 3, 4])", "expected": "[2, 3]"},
+        {"args": "([], [1])", "expected": "[]"},
+        {"args": "([5, 6], [7])", "expected": "[]"}
+      ]
+    },
+    {
+      "name": "to_snake_case",
+      "signature": "def to_snake_case(text):",
+      "description": "Convert spaces and hyphens in text to lowercase underscores.",
+      "reference": "def to_snake_case(text):\n    return text.replace(' ', '_').replace('-', '_').lower()\n",
+      "tests": [
+        {"args": "('Hello World',)", "expected": "'hello_world'"},
+        {"args": "('foo-bar baz',)", "expected": "'foo_bar_baz'"},
+        {"args": "('x',)", "expected": "'x'"}
+      ]
+    },
+    {
+      "name": "second_largest",
+      "signature": "def second_largest(values):",
+      "description": "Return the second-largest distinct number, or None if unavailable.",
+      "reference": "def second_largest(values):\n    unique = sorted(set(values))\n    if len(unique) < 2:\n        return None\n    return unique[-2]\n",
+      "tests": [
+        {"args": "([1, 3, 2],)", "expected": "2"},
+        {"args": "([5, 5, 4],)", "expected": "4"},
+        {"args": "([1],)", "expected": "None"},
+        {"args": "([2, 2],)", "expected": "None"},
+        {"args": "([],)", "expected": "None"}
+      ]
+    },
+    {
+      "name": "group_by_length",
+      "signature": "def group_by_length(words):",
+      "description": "Group strings into a dictionary keyed by string length.",
+      "reference": "def group_by_length(words):\n    groups = {}\n    for word in words:\n        groups.setdefault(len(word), []).append(word)\n    return groups\n",
+      "tests": [
+        {"args": "(['a', 'bb', 'cc', 'd'],)", "expected": "{1: ['a', 'd'], 2: ['bb', 'cc']}"},
+        {"args": "([],)", "expected": "{}"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "opcoda",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Static site (public/) is served directly; only /api/* runs the Worker.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // Users, sessions, conversations, avatars.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "opcoda-db",
+      "database_id": "f0d4ddcd-d744-439e-8f70-2276dd4aa9b5",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Coda's model API on the owner's PC, reached privately through the Cloudflare Tunnel
+  // "opcoda-model" (Workers VPC). No public hostname exists for it.
+  // Local dev uses MODEL_URL from .dev.vars instead.
+  "vpc_services": [
+    { "binding": "CODA_MODEL", "service_id": "01a0fa7a-719c-7010-a2b7-d80b9c105df1", "remote": true }
+  ],
+
+  // Non-secret settings. Secrets (never in this file):
+  //   npx wrangler secret put MODEL_TOKEN   shared secret with server.py (.coda-model-token)
+  //   npx wrangler secret put INVITE_CODE   optional; when set, sign-up requires it
+  "vars": {
+    "DAILY_MESSAGE_LIMIT": "25"
+  },
+
+  "routes": [{ "pattern": "opcoda.cc", "custom_domain": true }],
+
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true, "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.05 }
+  }
+}

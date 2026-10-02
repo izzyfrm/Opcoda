@@ -1,0 +1,63 @@
+{
+  "format": "coda-phase3",
+  "seed": 1337,
+  "curriculum": "data\\curriculum\\curriculum.jsonl",
+  "roots": [
+    "data/raw",
+    "data/imported"
+  ],
+  "heldout_spec_sha256": "202208a084c328625324ccc535a8763e861c0521a95ab547585ac0317d8a5020",
+  "splits": {
+    "train": {
+      "examples": 31486,
+      "bytes": 6654505,
+      "sha256": "11feacf0ebec48928f856fac423730fb3ae1e38072b71bf348c61330b81153a1"
+    },
+    "val": {
+      "examples": 2882,
+      "bytes": 546915,
+      "sha256": "bedcc934291cb3e255ea618a629265ced0fc9a19c5da2584ab7a828b2b987a94"
+    },
+    "val_iid": {
+      "examples": 974,
+      "bytes": 202462,
+      "sha256": "1aad0ee1e484306167109ef8f031a21958caeed376b20229a1d88623a3fd185c"
+    }
+  },
+  "val_families": [
+    "count_char",
+    "count_in_range",
+    "ends_with",
+    "frequency",
+    "is_triangle",
+    "min_and_max",
+    "most_common_char",
+    "parse_int_list",
+    "parse_record",
+    "pluck",
+    "remove_empty",
+    "replace_char",
+    "row_sums",
+    "sum_even",
+    "to_lower",
+    "top_n",
+    "yes_no"
+  ],
+  "train_family_count": 207,
+  "files": {
+    "train": [
+      "data/raw/starter.py"
+    ],
+    "val": [],
+    "skipped_numbered_clones": [
+      "data/raw/generated_examples.py"
+    ]
+  },
+  "dropped": {
+    "duplicate": 0,
+    "contaminated": 0,
+    "numbered_clones": 1,
+    "cross_split_leak": 0
+  },
+  "contamination_examples": []
+}

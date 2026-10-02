@@ -1,0 +1,5 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
+MODEL_URL=http://127.0.0.1:8000
+MODEL_TOKEN=change-me-local-dev-token
+# Leave empty for open sign-up; set a value to require an invite code.
+INVITE_CODE=

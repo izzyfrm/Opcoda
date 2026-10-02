@@ -14,6 +14,8 @@ class CodaConfig:
 PROFILES = {
     # Start here on CPU. ~3.2M parameters.
     "smoke": CodaConfig(n_layer=4, n_head=4, n_embd=256, block_size=256),
+    # Phase 4: BPE tokens (4096 vocab), 1024-token context (~3.2 KB of code). ~6.0M parameters.
+    "coda-6m": CodaConfig(vocab_size=4096, n_layer=6, n_head=4, n_embd=256, block_size=1024),
     # Move here only after the full pipeline works reliably. ~11M parameters.
     "coda-10m": CodaConfig(n_layer=6, n_head=6, n_embd=384, block_size=256),
     # CPU training will be much slower. Intended for later hardware upgrades.

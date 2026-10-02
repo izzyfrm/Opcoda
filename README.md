@@ -13,21 +13,17 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## 2. Add training code
+## 2. Generate the Python curriculum
 
-Put code you own or permissively licensed training material inside `data/raw/`.
+Coda currently trains on Python only. The main data source is an original, locally generated curriculum
+(200+ task families, instruction-to-code and plain completions):
 
-Supported starter extensions:
+```powershell
+python tools/make_python_curriculum.py
+```
 
-- `.py`
-- `.js`, `.mjs`, `.cjs`
-- `.html`
-- `.css`
-- `.json`
-- `.md`
-- `.txt`
-
-The included files are only tiny examples and are nowhere near enough for a useful model.
+Extra `.py` files you own or that are permissively licensed can go in `data/raw/`, or can be imported with
+provenance via `tools/ingest_repo.py`.
 
 ## 3. Prepare the byte-token dataset
 
@@ -35,27 +31,28 @@ The included files are only tiny examples and are nowhere near enough for a usef
 python prepare_data.py
 ```
 
-The script intentionally refuses to train on a tiny dataset. Add enough material for at least 10,000 byte-tokens first.
+This writes `train.bin`, `val.bin` (held-out task families), and `val_iid.bin`, plus
+`data/dataset_manifest.json`. CodaBench tasks are checked for and kept out of the training data.
 
-## 4. First smoke training run
-
-```powershell
-python train.py --profile smoke --steps 500 --batch-size 8
-```
-
-The `smoke` profile is roughly 3M parameters and is meant to prove the pipeline works on CPU.
-
-After that works, try longer runs. Do **not** move to the larger profiles until training/checkpointing/generation are stable.
-
-## 5. Generate code
-
-Use the checkpoint filename printed by training:
+## 4. Train (CPU, ~15 minutes)
 
 ```powershell
-python generate.py checkpoints/coda-smoke-step-500.pt --prompt "def add(a, b):\n"
+python train.py --name phase3
 ```
 
-At 500 steps on a small dataset, output may still be terrible. That's expected. The win is proving Coda learned from weights initialized from scratch.
+Defaults: `smoke` profile (~3.3M params), 700 steps × 32 × 256 tokens, warmup + cosine LR, and early stopping
+on validation loss. The best checkpoint is `checkpoints/coda-phase3-best.pt`.
+
+Do **not** move to the larger profiles until training, checkpointing, and generation are stable.
+
+## 5. Generate code and evaluate
+
+```powershell
+python generate.py checkpoints/coda-phase3-best.pt --task "Return the number of vowels in text." --prompt "def count_vowels(text):" --temperature 0.2
+python evals/coda_bench.py checkpoints/coda-phase3-best.pt --functional
+```
+
+See `HANDOFF.md` for the current state, results, and next steps.
 
 ## Model profiles
 

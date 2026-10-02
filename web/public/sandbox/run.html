@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coda runner</title>
+</head>
+<body>
+<!--
+  Runs generated Python (Pyodide) or JavaScript for the "Run" button.
+  Isolation: this page is served with a CSP "sandbox" directive and embedded in a
+  sandbox="allow-scripts" iframe, so it has an opaque origin (no opcoda.cc cookies or
+  storage). Code runs inside a Web Worker that the page terminates on Stop/timeout.
+-->
+<script>
+"use strict";
+const PYODIDE = "https://cdn.jsdelivr.net/npm/pyodide@314.0.7/";
+
+const WORKER_SOURCE = `
+let pyodide = null;
+const post = (type, data) => postMessage({ type, ...data });
+const show = (value) => {
+  if (typeof value === "string") return value;
+  try { return JSON.stringify(value); } catch { return String(value); }
+};
+
+self.onmessage = async (event) => {
+  const { lang, code } = event.data;
+  if (lang === "javascript") {
+    const log = (stream) => (...args) => post("output", { stream, text: args.map(show).join(" ") + "\\n" });
+    const fakeConsole = { log: log("stdout"), info: log("stdout"), debug: log("stdout"), warn: log("stderr"), error: log("stderr") };
+    post("status", { text: "Running" });
+    try {
+      const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+      await new AsyncFunction("console", code)(fakeConsole);
+      post("done", { ok: true });
+    } catch (error) {
+      const message = String(error && error.message || error);
+      const hint = /document|window|localStorage/.test(message) ? " (this code needs a web page; try Preview instead)" : "";
+      post("done", { ok: false, error: message + hint });
+    }
+    return;
+  }
+  if (lang === "python") {
+    try {
+      if (!pyodide) {
+        post("status", { text: "Loading Python (first run downloads about 12 MB)" });
+        importScripts("${PYODIDE}pyodide.js");
+        pyodide = await loadPyodide({ indexURL: "${PYODIDE}" });
+      }
+      pyodide.setStdout({ batched: (text) => post("output", { stream: "stdout", text: text + "\\n" }) });
+      pyodide.setStderr({ batched: (text) => post("output", { stream: "stderr", text: text + "\\n" }) });
+      post("status", { text: "Running" });
+      await pyodide.runPythonAsync(code);
+      post("done", { ok: true });
+    } catch (error) {
+      // Keep the traceback from the user's code onward; drop Pyodide's internal frames.
+      let message = String(error && error.message || error);
+      const start = message.indexOf('  File "<exec>"');
+      if (start !== -1) message = "Traceback (most recent call last):\\n" + message.slice(start);
+      post("done", { ok: false, error: message.trimEnd() });
+    }
+  }
+};
+`;
+
+let worker = null;
+
+function startWorker() {
+  const url = URL.createObjectURL(new Blob([WORKER_SOURCE], { type: "text/javascript" }));
+  // A classic worker: module workers can't start from a blob: URL in an opaque-origin page.
+  worker = new Worker(url);
+  worker.onmessage = (event) => parent.postMessage({ source: "coda-runner", ...event.data }, "*");
+  worker.onerror = (event) => {
+    parent.postMessage({ source: "coda-runner", type: "done", ok: false, error: event.message || "The runner crashed." }, "*");
+  };
+}
+
+window.addEventListener("message", (event) => {
+  if (event.source !== parent) return;
+  const message = event.data || {};
+  if (message.type === "run" && typeof message.code === "string") {
+    if (!worker) startWorker();
+    worker.postMessage({ lang: message.lang, code: message.code });
+  } else if (message.type === "stop" && worker) {
+    worker.terminate();
+    worker = null;
+  }
+});
+
+parent.postMessage({ source: "coda-runner", type: "ready" }, "*");
+</script>
+</body>
+</html>

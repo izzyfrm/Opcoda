@@ -1,0 +1,79 @@
+{
+  "format": "coda-phase4",
+  "tokenizer": {
+    "type": "bpe",
+    "path": "tokenizer/coda-bpe-4k.json",
+    "vocab_size": 4096,
+    "sha256": "a88b4f39fbfb922a815e6703ae3ae6eec270641753ef21874675229cb6484f6f"
+  },
+  "dtype": "uint16",
+  "max_tokens": 1024,
+  "seed": 1337,
+  "curriculum": "data\\curriculum_v4\\curriculum.jsonl",
+  "roots": [],
+  "heldout_spec_sha256": "202208a084c328625324ccc535a8763e861c0521a95ab547585ac0317d8a5020",
+  "splits": {
+    "train": {
+      "examples": 38528,
+      "tokens": 13954820,
+      "sha256": "aa4bb7c6c1ba683c0b06017c61e567715a71e158ee7efdf5558cf81688df6372"
+    },
+    "val": {
+      "examples": 5023,
+      "tokens": 2140979,
+      "sha256": "2988cf103250c93dfd0b6dd01e60ea403ada49d00b9c140bd4bc966486b1505c"
+    },
+    "val_iid": {
+      "examples": 1217,
+      "tokens": 455887,
+      "sha256": "e38cc59d4bbd3c4a7cf5fb3c76f92a69a9814a73c65d6e79c344c9948a0da4cd"
+    }
+  },
+  "val_families": [
+    "all_positive",
+    "char_counter_app",
+    "count_in_range",
+    "count_keys_above",
+    "count_lines",
+    "count_substring",
+    "countdown",
+    "counter_app",
+    "css_navbar",
+    "cube",
+    "diagonal",
+    "difference",
+    "expand_range",
+    "format_currency",
+    "gradebook",
+    "group_by_first_letter",
+    "is_anagram",
+    "js_dom_keyboard_shortcuts",
+    "longest_streak",
+    "longest_string",
+    "max_subarray",
+    "min_of_three",
+    "not_found_page",
+    "pluck",
+    "sign",
+    "sorted_items",
+    "string_lengths",
+    "task_list",
+    "ticket_price",
+    "value_range",
+    "yes_no"
+  ],
+  "train_family_count": 288,
+  "files": {
+    "train": [],
+    "val": [],
+    "skipped_numbered_clones": []
+  },
+  "dropped": {
+    "duplicate": 1678,
+    "contaminated": 0,
+    "numbered_clones": 0,
+    "cross_split_leak": 0,
+    "too_long": 5643
+  },
+  "contamination_examples": []
+}

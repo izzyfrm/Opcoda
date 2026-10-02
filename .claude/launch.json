@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "coda-model",
+      "runtimeExecutable": ".venv/Scripts/python.exe",
+      "runtimeArgs": ["-m", "uvicorn", "server:app", "--host", "127.0.0.1", "--port", "8000"],
+      "port": 8000
+    },
+    {
+      "name": "opcoda-web",
+      "runtimeExecutable": "C:/Program Files/Git/bin/bash.exe",
+      "runtimeArgs": ["-c", "cd web && exec npx wrangler dev --ip 127.0.0.1 --port 8787"],
+      "port": 8787
+    },
+    {
+      "name": "coda-model-test",
+      "runtimeExecutable": "C:/Program Files/Git/bin/bash.exe",
+      "runtimeArgs": ["-c", "CODA_CHECKPOINT=checkpoints/coda-v4-snapshot.pt exec .venv/Scripts/python.exe -m uvicorn server:app --host 127.0.0.1 --port 8001"],
+      "port": 8001
+    },
+    {
+      "name": "opcoda-web-test",
+      "runtimeExecutable": "C:/Program Files/Git/bin/bash.exe",
+      "runtimeArgs": ["-c", "cd web && exec npx wrangler dev --ip 127.0.0.1 --port 8787 --var MODEL_URL:http://127.0.0.1:8001"],
+      "port": 8787
+    }
+  ]
+}
