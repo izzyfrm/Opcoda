@@ -45,10 +45,11 @@ def load_tasks() -> list[dict]:
     return json.loads(TASKS_PATH.read_text(encoding="utf-8"))["tasks"]
 
 
-def build_prompt(task: dict, fmt: str) -> str:
+def build_prompt(task: dict, fmt: str, phase4: bool = False) -> str:
     desc = task["description"]
     if fmt == "instruct":
-        return f"<task>\n{desc}\n</task>\n<code>\n{task['signature']}\n"
+        code_tag = '<code lang="python">' if phase4 else '<code>'
+        return f"<task>\n{desc}\n</task>\n{code_tag}\n{task['signature']}\n"
     return f"# Task: {desc[:1].lower() + desc[1:]}\n{task['signature']}\n"
 
 
@@ -159,11 +160,12 @@ def main() -> None:
         raise SystemExit(self_test())
 
     import torch
-    from opcoda.tokenizer import ByteTokenizer
+    from opcoda.tokenizer import tokenizer_from_checkpoint
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, payload = load_model(args.checkpoint, device)
-    tok = ByteTokenizer()
+    tok = tokenizer_from_checkpoint(payload)
+    phase4 = payload.get("format") == "coda-phase4"
     tasks = load_tasks()
 
     print(f"checkpoint: {args.checkpoint} | step {payload.get('step', '?')} | {model.parameter_count():,} params")
@@ -177,7 +179,7 @@ def main() -> None:
         syntax_by_sample = [0] * args.samples
         func_by_sample = [0] * args.samples
         for ti, task in enumerate(tasks):
-            prompt = build_prompt(task, fmt)
+            prompt = build_prompt(task, fmt, phase4)
             samples = []
             for s in range(args.samples):
                 completion = generate(model, tok, prompt, fmt, args, args.seed + 1000 * s + ti, device)

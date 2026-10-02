@@ -3,7 +3,7 @@ import torch
 
 from opcoda.config import CodaConfig
 from opcoda.model import Coda
-from opcoda.tokenizer import ByteTokenizer
+from opcoda.tokenizer import tokenizer_from_checkpoint
 
 
 def main() -> None:
@@ -31,10 +31,11 @@ def main() -> None:
     code = (args.prompt if args.prompt is not None else ("" if args.task else "def add(a, b):\n")).replace("\\n", "\n")
     if code.rstrip().endswith(":") and not code.endswith("\n"):
         code += "\n"
-    prompt = f"<task>\n{args.task}\n</task>\n<code>\n{code}" if args.task else code
+    code_tag = '<code lang="python">' if payload.get("format") == "coda-phase4" else '<code>'
+    prompt = f"<task>\n{args.task}\n</task>\n{code_tag}\n{code}" if args.task else code
     stop = ["</code>"] if args.task else None
 
-    tok = ByteTokenizer()
+    tok = tokenizer_from_checkpoint(payload)
     ids = tok.encode(prompt)
     x = torch.tensor([ids], dtype=torch.long, device=device)
     y = model.generate(
