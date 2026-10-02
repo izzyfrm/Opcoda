@@ -1,4 +1,5 @@
 // Opcoda web client. No framework, no build step.
+import { projectZip } from "./project.js";
 const $ = (id) => document.getElementById(id);
 
 const LANG_LABEL = { html: "HTML", css: "CSS", javascript: "JavaScript", python: "Python", text: "Text" };
@@ -14,6 +15,7 @@ const state = {
   activeId: null,
   messages: new Map(), // id -> assistant message shown in this chat
   artifactId: null, // message open in the workspace
+  selectedFile: null,
   sending: false,
   authMode: "login",
   statusTimer: null,
@@ -422,7 +424,8 @@ function renderContext() {
   $("context-engine").textContent = state.modelStatus?.model || meta.model || "Unavailable";
   $("context-status").textContent = state.modelStatus?.online ? "Online" : "Offline";
   $("context-mode").textContent = (settings.usageMode || "medium").replace(/^./, (c) => c.toUpperCase());
-  $("context-response").textContent = `${settings.maxTokens.toLocaleString()} tokens`;
+  const websiteTokens = { light: 2400, medium: 3200, super: 4000, intense: 4800 };
+  $("context-response").textContent = `Websites: up to ${(websiteTokens[settings.usageMode] || 3200).toLocaleString()} tokens`;
   const windowTokens = state.modelStatus?.contextTokens || meta.contextTokens;
   $("context-window").textContent = windowTokens ? `${windowTokens.toLocaleString()} tokens` : "—";
   $("context-messages").textContent = String($("messages").querySelectorAll(".msg-user, .msg-bot").length);
@@ -809,7 +812,7 @@ function workingMessage(drafts) {
   li.timer = setInterval(() => {
     const seconds = Math.round((Date.now() - started) / 1000);
     clock.textContent = `${seconds}s`;
-    if (drafts <= 1) label.textContent = seconds < 4 ? "Understanding request" : seconds < 12 ? "Writing code" : "Checking result";
+    if (drafts <= 1) label.textContent = seconds < 60 ? "Generating code" : "Still generating · larger pages take longer";
   }, 1000);
   return li;
 }
@@ -907,10 +910,11 @@ async function copyText(text) {
 
 function downloadFile(message) {
   const lang = messageLang(message);
-  const url = URL.createObjectURL(new Blob([message.content], { type: "text/plain;charset=utf-8" }));
+  const files = message.meta?.files || [];
+  const url = URL.createObjectURL(files.length ? projectZip(files) : new Blob([message.content], { type: "text/plain;charset=utf-8" }));
   const link = el("a");
   link.href = url;
-  link.download = FILE_NAME[lang] || "code.txt";
+  link.download = files.length ? "opcoda-project.zip" : FILE_NAME[lang] || "code.txt";
   document.body.append(link);
   link.click();
   link.remove();
@@ -944,11 +948,13 @@ function openWorkspace(id, tab = "code", { autoRun = false } = {}) {
   if ((tab === "preview" && !CAN_PREVIEW.has(lang)) || (tab === "run" && !CAN_RUN.has(lang))) tab = "code";
 
   if (changed) {
-    renderCodeView(message);
+    state.selectedFile = null;
+    renderProjectFiles(message);
     renderChecks(message);
     $("preview-frame").replaceChildren();
     resetRunOutput();
   }
+  renderCodeView(message);
 
   $("workspace").hidden = false;
   $("app").dataset.workspace = "open";
@@ -981,8 +987,12 @@ function selectTab(tab) {
 }
 
 function renderCodeView(message) {
-  const lang = messageLang(message);
-  const code = message.content.replace(/\n+$/, "");
+  const file = (message.meta?.files || []).find(file => file.path === state.selectedFile) || message.meta?.files?.[0];
+  const lang = file?.lang || messageLang(message);
+  const code = (file?.content ?? message.content).replace(/\n+$/, "");
+  $("ws-file").textContent = file?.path || FILE_NAME[lang] || "code.txt";
+  $("ws-lang").textContent = LANG_LABEL[lang] || lang;
+  $("ws-lang").dataset.lang = lang;
   const view = $("ws-code-view");
   const gutter = el("pre", "code-gutter");
   gutter.setAttribute("aria-hidden", "true");
@@ -992,6 +1002,26 @@ function renderCodeView(message) {
   lines.tabIndex = 0;
   lines.setAttribute("aria-label", `${FILE_NAME[lang] || "Code"}, ${lineCount(code)} lines`);
   view.replaceChildren(gutter, lines);
+}
+
+function renderProjectFiles(message) {
+  const files = message.meta?.files || [];
+  const holder = $("project-files");
+  holder.hidden = !files.length;
+  holder.replaceChildren();
+  for (const file of files) {
+    const button = el("button", "project-file", file.path);
+    button.type = "button";
+    button.setAttribute("aria-pressed", String(file.path === (state.selectedFile || files[0].path)));
+    button.addEventListener("click", () => {
+      state.selectedFile = file.path;
+      renderProjectFiles(message);
+      renderCodeView(message);
+      selectTab("code");
+    });
+    holder.append(button);
+  }
+  $("ws-download").setAttribute("aria-label", files.length ? "Download project ZIP" : "Download file");
 }
 
 function renderChecks(message) {
@@ -1450,7 +1480,8 @@ function wire() {
   }
   $("ws-copy").addEventListener("click", async () => {
     const message = state.messages.get(state.artifactId);
-    if (message) toast((await copyText(message.content)) ? "Copied to clipboard." : "Copy failed.");
+    const file = message?.meta?.files?.find(file => file.path === state.selectedFile) || message?.meta?.files?.[0];
+    if (message) toast((await copyText(file?.content ?? message.content)) ? "Copied to clipboard." : "Copy failed.");
   });
   $("ws-download").addEventListener("click", () => {
     const message = state.messages.get(state.artifactId);

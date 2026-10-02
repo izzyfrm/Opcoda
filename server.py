@@ -38,6 +38,8 @@ from pydantic import BaseModel, Field
 
 from opcoda.verify import _HTMLChecker, check_css, check_html, check_js_many, check_python, normalize_lang
 from opcoda.ui_skill import ui_guidance
+from opcoda.markdown_skills import markdown_guidance
+from opcoda.project import website_project, missing_assets
 
 CANDIDATES = ["checkpoints/coda-v4-best.pt", "checkpoints/coda-coda-v4-best.pt", "checkpoints/coda-phase3-best.pt",
               "checkpoints/coda-smoke-step-500.pt"]
@@ -49,6 +51,7 @@ MODEL_TOKEN = os.environ.get("CODA_MODEL_TOKEN") or (TOKEN_FILE.read_text().stri
 if not MODEL_TOKEN:
     print("warning: no model token set; /api/generate is open to anyone who can reach this server")
 MAX_PROMPT_CHARS = 6000
+CONTEXT_TOKENS = 8192
 LANGUAGES = ("html", "css", "javascript", "python")
 CODE_START = re.compile(r"^\s*(def |class |import |from |@)")
 LANG_TAG = re.compile(r'^<code lang="([a-z]+)">\n')
@@ -168,7 +171,7 @@ def ollama_language(text: str, requested: str) -> str:
     lang = normalize_lang(requested)
     if lang in LANGUAGES:
         return lang
-    if re.search(r"\b(html|web ?page|website|landing page)\b", text, re.I):
+    if re.search(r"\b(html|web ?page|website|landing page|portfolio|dashboard)\b", text, re.I):
         return "html"
     if re.search(r"\b(css|stylesheet)\b", text, re.I):
         return "css"
@@ -180,9 +183,41 @@ def ollama_language(text: str, requested: str) -> str:
 def generate_ollama(req: GenerateRequest) -> dict:
     lang = ollama_language(req.prompt, req.language)
     guidance = ui_guidance(req.prompt, lang)
+    local_guidance = markdown_guidance(req.prompt, lang)
     system_prompt = f"You are a careful {lang} coding assistant. Return only complete {lang} code, without Markdown fences or explanation. Use the user's exact requested names and behavior. Keep the solution concise."
+    website = lang == "html"
+    output_budget = min(max(req.max_tokens * 2, 128), 2400)
+    if website:
+        output_budget = 2400 if req.max_tokens <= 256 else 3200 if req.max_tokens <= 450 else 4000 if req.max_tokens <= 650 else 4800
+        system_prompt = (
+            "You are a website designer and frontend engineer. Return one COMPLETE standalone HTML document, "
+            "with all CSS inside <style> and any necessary JS inside <script>. No Markdown or explanation. "
+            "The application extracts these into index.html, css/styles.css and js/script.js automatically. "
+            "When JavaScript is requested, include useful working JavaScript, such as mobile navigation or reveal animations with reduced-motion support. "
+            "Design the finished website, not a bare text outline. Preserve the user's names, URLs and requirements exactly. "
+            "Use a coherent visual composition: navigation, spacious hero with clear headline and useful CTA, "
+            "well-structured content sections and a compact footer. For portfolios use the provided name, role and projects; "
+            "make each supplied project URL a real clickable link. Do not invent achievements, testimonials or contact details. "
+            "Include substantial CSS: color and spacing variables, system font stack, distinct heading sizes, "
+            "a centered max-width container, grid/flex layouts, responsive mobile breakpoint, hover and visible focus states. "
+            "Default to restrained neutral colors, strong contrast and one accent; respect requested themes. "
+            "Avoid neon, gratuitous gradients, giant rounded cards and generic marketing filler. "
+            "No external fonts, images, stylesheets or libraries: the preview has no network. "
+            "Use typography, spacing and CSS shapes for visual interest. Navigation must target real sections; "
+            "avoid nonfunctional buttons. Keep CSS compact to leave room for the complete body and closing tags. "
+            "Use this reliable layout foundation and extend it: "
+            "*{box-sizing:border-box}body{margin:0;font:400 16px/1.6 system-ui;background:#101113;color:#eee}" 
+            "a{color:inherit}.container{width:min(1100px,calc(100% - 40px));margin:auto}" 
+            ".hero{padding:80px 0}.hero h1{font-size:clamp(32px,6vw,64px);line-height:1.1}" 
+            ".projects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}" 
+            "@media(max-width:640px){.projects{grid-template-columns:1fr}.hero{padding:48px 0}}. "
+            "Never put color or bold font-weight on the universal * selector: children must inherit section colors. "
+            "Keep normal body text weight 400 and headings 600-700. Adapt foundation colors to the user's theme."
+        )
     if guidance:
         system_prompt += "\nUse these local design recommendations where relevant; explicit user requirements take priority:\n" + guidance
+    if local_guidance:
+        system_prompt += "\nApply these project coding guides where relevant. User requirements take priority; examples are patterns, not facts to copy:\n" + local_guidance
     prompt = ("Complete this code and return the whole completed file:\n" if CODE_START.match(req.prompt)
               else "Write code for this request:\n") + req.prompt
     body = {
@@ -194,27 +229,67 @@ def generate_ollama(req: GenerateRequest) -> dict:
             {"role": "user", "content": prompt},
         ],
         "options": {"temperature": min(max(req.temperature, 0.0), 1.0),
-                    "num_predict": min(max(req.max_tokens, 64), 900), "num_ctx": 4096},
+                    "num_predict": output_budget, "num_ctx": CONTEXT_TOKENS},
     }
     request = urllib.request.Request("http://127.0.0.1:11434/api/chat",
                                      data=json.dumps(body).encode("utf-8"),
                                      headers={"Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(request, timeout=135) as response:
+        with urllib.request.urlopen(request, timeout=480) as response:
             data = json.load(response)
     except (OSError, ValueError) as exc:
         raise HTTPException(status_code=503, detail=f"local Ollama unavailable: {exc}") from exc
     raw = data.get("message", {}).get("content", "").strip()
     fenced = re.search(r"```(?:[a-zA-Z0-9_+-]+)?\s*\n(.*?)\n```", raw, re.S)
     code = (fenced.group(1) if fenced else raw).strip() + "\n"
+    if website:
+        # Some small models still return separate fenced assets. Keep them.
+        for kind, asset in re.findall(r"```(css|javascript|js)\s*\n(.*?)\n```", raw, re.S | re.I):
+            if kind.lower() == "css":
+                code = re.sub(r'<link\b[^>]*rel=[\"\']stylesheet[\"\'][^>]*>', '', code, flags=re.I)
+                code = code.replace('</head>', '<style>\n' + asset + '\n</style>\n</head>')
+            elif not re.search(r'<script\b(?![^>]*src=)', code, re.I):
+                code = re.sub(r'<script\b[^>]*src=[\"\'][^\"\']+[\"\'][^>]*>\s*</script>', '', code, flags=re.I)
+                code = code.replace('</body>', '<script>\n' + asset + '\n</script>\n</body>')
+        styles = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", code, re.I | re.S))
+        if len(styles.strip()) < 250:
+            # Repair the exact failure in the screenshot: HTML with no usable CSS.
+            repair = {**body, "messages": [
+                {"role": "system", "content": "Return only complete CSS, no Markdown. Style the given HTML using its exact selectors. Respect the requested theme. Include typography, spacing, grid/flex layout, visible focus, and a mobile media query. No external assets. Keep it under 650 tokens."},
+                {"role": "user", "content": req.prompt[:1500] + "\nHTML:\n" + code[:8000]},
+            ], "options": {**body["options"], "num_predict": 700}}
+            try:
+                repair_request = urllib.request.Request("http://127.0.0.1:11434/api/chat", data=json.dumps(repair).encode(), headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(repair_request, timeout=85) as response:
+                    repaired = json.load(response)
+                css = repaired.get("message", {}).get("content", "").strip()
+                css = re.sub(r'^```css\s*|\s*```$', '', css, flags=re.I)
+                if check_css(css).ok and repaired.get("done_reason") != "length":
+                    code = re.sub(r'<link\b[^>]*rel=[\"\']stylesheet[\"\'][^>]*>', '', code, flags=re.I)
+                    code = re.sub(r'</head\s*>', lambda m: '<style>\n' + css + '\n</style>\n' + m.group(0), code, count=1, flags=re.I)
+                    data["eval_count"] = (data.get("eval_count") or 0) + (repaired.get("eval_count") or 0)
+            except (OSError, ValueError):
+                pass  # The checks below explicitly flag missing styling/assets.
     draft = {"lang": lang, "code": code}
     verify_drafts([draft])
     report = draft["report"]
+    if website:
+        styles = "\n".join(re.findall(r"<style[^>]*>(.*?)</style>", code, re.I | re.S))
+        report.add("Embedded website styling", len(styles.strip()) >= 250,
+                   "This page has little embedded styling; it may render as a plain text layout.")
+        report.add("Responsive layout", bool(re.search(r"@media|auto-fit|auto-fill", styles, re.I)),
+                   "No responsive CSS layout rule found. Check the page on a phone.")
+        report.add("Complete document", "</html>" in code.lower() and "</body>" in code.lower(),
+                   "The document is incomplete. Try a higher response effort or a smaller page.")
+        missing = missing_assets(code)
+        report.add("Referenced files exist", not missing,
+                   "Missing project assets: " + ", ".join(missing[:6]))
     return {"text": code, "lang": lang, "finished": data.get("done_reason") != "length",
             "syntax_ok": report.ok, "checks": report.to_dict(),
             "drafts": {"total": 1, "passed": int(report.ok)},
             "tokens": data.get("eval_count"), "prompt_tokens": data.get("prompt_eval_count"),
-            "context_tokens": 4096, "model": OLLAMA_MODEL}
+            "context_tokens": CONTEXT_TOKENS, "model": OLLAMA_MODEL,
+            "files": website_project(code) if website else []}
 
 
 def generate_phase4(req: GenerateRequest) -> dict:
@@ -276,7 +351,8 @@ def health():
         if OLLAMA_MODEL not in available:
             raise HTTPException(status_code=503, detail=f"model {OLLAMA_MODEL} is not installed")
         return {"ok": True, "model": OLLAMA_MODEL, "backend": "ollama", "step": None,
-                "parameters": None, "languages": list(LANGUAGES), "context_tokens": 4096}
+                "parameters": None, "languages": list(LANGUAGES), "context_tokens": CONTEXT_TOKENS,
+                "project_files": True, "generator_version": 2}
     return {"ok": True, "model": "Coda", "step": payload.get("step"), "parameters": model.parameter_count(),
             "checkpoint": Path(CHECKPOINT).name, "languages": list(LANGUAGES) if PHASE4 else ["python"],
             "context_tokens": config.block_size}

@@ -518,6 +518,10 @@ output { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var
 .ws-tabs button:hover { color: var(--text); }
 .ws-tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--text); }
 .ws-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.project-files { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--border); max-height: 140px; overflow: auto; }
+.project-file { padding: 8px 10px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--muted); font: 12px var(--mono); overflow-wrap: anywhere; }
+.project-file:hover { background: var(--hover); }
+.project-file[aria-pressed="true"] { background: var(--raised); border-color: var(--border-strong); color: var(--text); }
 #ws-code { overflow: auto; }
 
 .code-view { flex: 1; display: grid; grid-template-columns: auto minmax(0, 1fr); align-content: start; background: var(--code-bg); font: 12.5px/1.65 var(--mono); }

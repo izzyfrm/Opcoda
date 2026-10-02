@@ -30,7 +30,7 @@ def ui_guidance(prompt: str, language: str) -> str:
     guidance = [BASE]
     catalogs = (
         ("ux-guidelines.csv", ("Issue", "Description"), ("Issue", "Do", "Don't"), 2),
-        ("styles.csv", ("Style Category", "Keywords", "Best For"), ("Style Category", "CSS/Technical Keywords"), 1),
+        ("styles.csv", ("Style Category",), ("Style Category", "CSS/Technical Keywords"), 1),
         ("colors.csv", ("Product Type",), ("Product Type", "Background", "Foreground", "Primary", "On Primary"), 1),
     )
     for filename, search_fields, output_fields, limit in catalogs:

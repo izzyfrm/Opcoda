@@ -21,6 +21,7 @@ import {
   type Session,
   type UserRow,
 } from "./auth";
+import { projectFiles, projectPreview, extractWebsiteProject, type ProjectFile } from "./project";
 import {
   assertSameOrigin,
   clientIp,
@@ -445,6 +446,7 @@ interface ModelCheck {
 }
 
 interface ModelReply {
+  files?: ProjectFile[];
   text: string;
   lang?: string;
   tokens?: number;
@@ -475,8 +477,8 @@ async function askCoda(env: Env, prompt: string, language: Language, settings: S
         max_tokens: settings.maxTokens,
         drafts: settings.drafts,
       }),
-      // Several ~1,000-token drafts on a home CPU can take a while.
-      signal: AbortSignal.timeout(150_000),
+      // Styled HTML pages get a larger output budget on the local CPU.
+      signal: AbortSignal.timeout(600_000),
     });
   } catch (err) {
     console.error(JSON.stringify({ message: "model unreachable", error: String(err) }));
@@ -489,7 +491,7 @@ async function askCoda(env: Env, prompt: string, language: Language, settings: S
   }
   const data = (await res.json()) as ModelReply;
   if (typeof data.text !== "string") throw new HttpError(502, "model_error", "Coda returned an unexpected reply.");
-  return { ...data, text: data.text.slice(0, 12_000) };
+  return { ...data, text: data.text.slice(0, 100_000) };
 }
 
 function replyMeta(reply: ModelReply) {
@@ -499,6 +501,7 @@ function replyMeta(reply: ModelReply) {
     detail: String(c.detail ?? "").slice(0, 160),
   }));
   return {
+    files: projectFiles(reply.files).length ? projectFiles(reply.files) : reply.lang === "html" ? projectFiles(extractWebsiteProject(reply.text)) : [],
     model: reply.model ?? null,
     promptTokens: reply.prompt_tokens ?? null,
     contextTokens: reply.context_tokens ?? null,
@@ -631,7 +634,10 @@ const previewMessage: Handler = async (c) => {
   if (!row) throw new HttpError(404, "not_found", "Not found.");
   const lang = row.meta ? (JSON.parse(row.meta) as { lang?: string }).lang : "python";
   let html: string;
-  if (lang === "html") html = row.content;
+  if (lang === "html") {
+    const files = projectFiles(row.meta ? JSON.parse(row.meta).files : []);
+    html = projectPreview(files.find(file => file.path === "index.html")?.content ?? row.content, files);
+  }
   else if (lang === "css") html = CSS_PLAYGROUND(row.content.replace(/<\/style/gi, "<\\/style"));
   else throw new HttpError(415, "not_previewable", "Only HTML and CSS can be previewed.");
   const page = /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (tag) => tag + PREVIEW_SHIM) : PREVIEW_SHIM + html;
