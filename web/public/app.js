@@ -22,6 +22,9 @@ const state = {
   modelStatus: null,
   warnedText: null,
   attachment: null,
+  prefs: {}, // loaded in boot()
+  skills: { catalog: [], online: null, applies: true, loading: null },
+  autoFixed: new Set(), // answers that already had their one automatic fix
 };
 
 // ---------------------------------------------------------------------------
@@ -364,23 +367,57 @@ async function submitAuth(event) {
 }
 
 // ---------------------------------------------------------------------------
+// Device preferences (this browser only)
+// ---------------------------------------------------------------------------
+
+const PREF_DEFAULTS = { enterToSend: true, autoOpen: true, autoRun: false, autoFix: false, wrap: false, sidebar: "open" };
+
+function loadPrefs() {
+  try {
+    return { ...PREF_DEFAULTS, ...JSON.parse(localStorage.getItem("opcoda-prefs") || "{}") };
+  } catch {
+    return { ...PREF_DEFAULTS };
+  }
+}
+
+function setPref(key, value) {
+  state.prefs[key] = value;
+  try {
+    localStorage.setItem("opcoda-prefs", JSON.stringify(state.prefs));
+  } catch {
+    // ignore
+  }
+  applyPrefs();
+}
+
+function applyPrefs() {
+  document.documentElement.dataset.wrap = String(Boolean(state.prefs.wrap));
+  $("app").dataset.sidebar = state.prefs.sidebar === "collapsed" ? "collapsed" : "open";
+  $("prompt").enterKeyHint = state.prefs.enterToSend ? "send" : "enter";
+}
+
+// ---------------------------------------------------------------------------
 // App shell
 // ---------------------------------------------------------------------------
 
 async function enterApp(user) {
   state.me = user;
   applyTheme(user.settings.theme);
+  applyPrefs();
   renderAccount();
   renderUsage();
+  renderGreeting();
   syncUsageModeControls();
   restoreLanguage();
+  renderSkillCounts();
   $("auth").hidden = true;
   $("boot").hidden = true;
   $("app").hidden = false;
   startStatusPolling();
+  loadSkills();
   await loadConversations();
   await routeFromLocation();
-  $("prompt").focus();
+  if (matchMedia("(hover: hover)").matches) $("prompt").focus();
 }
 
 function renderAccount() {
@@ -388,17 +425,23 @@ function renderAccount() {
   $("account-name").textContent = user.displayName;
   $("account-username").textContent = `@${user.username}`;
   $("account-btn").setAttribute("aria-label", `Account menu for ${user.displayName}`);
+  $("menu-who").textContent = `@${user.username}`;
   renderAvatar($("account-avatar"), user);
+}
+
+function renderGreeting() {
+  const hour = new Date().getHours();
+  const part = hour < 5 ? "Up late" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const first = (state.me?.displayName || "").trim().split(/\s+/)[0];
+  $("greeting").textContent = first ? `${part}, ${first}` : "What should we build?";
 }
 
 function renderUsage() {
   const { used, limit, resetsAt } = state.me.usage;
   const left = Math.max(0, limit - used);
-  const usage = $("usage");
-  usage.replaceChildren();
-  const long = el("span", "usage-long", ` of ${limit}`);
-  usage.append(el("span", "", String(left)), long, " left today");
-  usage.dataset.low = String(left <= 3);
+  $("usage").textContent = `${left} left`;
+  $("open-context").dataset.low = String(left <= 3);
+  $("open-context").setAttribute("aria-label", `${left} of ${limit} messages left today. Show usage`);
 
   const note = $("composer-note");
   if (left === 0) {
@@ -406,7 +449,7 @@ function renderUsage() {
     note.textContent = `You've used today's ${limit} messages. They reset in ${formatDuration(Math.max(wait, 60))}.`;
     note.dataset.tone = "warn";
   } else {
-    note.textContent = "Each message is a new task. Coda doesn't see earlier messages.";
+    note.textContent = "Coda can make mistakes. Check code before you use it.";
     delete note.dataset.tone;
   }
   updateComposer();
@@ -421,13 +464,13 @@ function renderContext() {
   const meta = last?.meta || {};
   const conversation = state.conversations.find((item) => item.id === state.activeId);
   $("context-chat").textContent = conversation?.title || "New chat";
-  $("context-engine").textContent = state.modelStatus?.model || meta.model || "Unavailable";
   $("context-status").textContent = state.modelStatus?.online ? "Online" : "Offline";
   $("context-mode").textContent = (settings.usageMode || "medium").replace(/^./, (c) => c.toUpperCase());
   const websiteTokens = { light: 2400, medium: 3200, super: 4000, intense: 4800 };
   $("context-response").textContent = `Websites: up to ${(websiteTokens[settings.usageMode] || 3200).toLocaleString()} tokens`;
   const windowTokens = state.modelStatus?.contextTokens || meta.contextTokens;
   $("context-window").textContent = windowTokens ? `${windowTokens.toLocaleString()} tokens` : "—";
+  $("context-skills").textContent = state.skills.catalog.length ? String(activeSkills().length) : "—";
   $("context-messages").textContent = String($("messages").querySelectorAll(".msg-user, .msg-bot").length);
   $("context-input").textContent = Number.isFinite(meta.promptTokens) ? `${meta.promptTokens.toLocaleString()} tokens` : "—";
   $("context-output").textContent = Number.isFinite(meta.tokens) ? `${meta.tokens.toLocaleString()} tokens` : "—";
@@ -453,7 +496,7 @@ function updateComposer() {
 function autosize() {
   const prompt = $("prompt");
   prompt.style.height = "auto";
-  prompt.style.height = `${Math.min(prompt.scrollHeight, 220)}px`;
+  prompt.style.height = `${Math.min(prompt.scrollHeight, 240)}px`;
 }
 
 function selectedLanguage() {
@@ -494,24 +537,59 @@ async function attachFile(file) {
   $("attachment-name").textContent = safeName;
   $("attachment-chip").hidden = false;
   updateComposer();
+  $("prompt").focus();
   if (composedMessage($("prompt").value).length > state.config.maxMessageChars) toast("Shorten your prompt or attach a smaller file.");
   else if (shortened) toast("Attached the first 5,000 characters of that file.");
 }
 
 function syncUsageModeControls() {
   const mode = state.me?.settings?.usageMode || "medium";
-  for (const radio of document.querySelectorAll('input[name="header-usage-mode"]')) radio.checked = radio.value === mode;
+  for (const radio of document.querySelectorAll('input[name="header-usage-mode"], input[name="usage-mode"]')) radio.checked = radio.value === mode;
 }
+
+// ---- popovers (model menu, language, skills, account) ----
+
+const POPUPS = [
+  ["model-menu", "model-trigger", ".model-picker"],
+  ["tool-menu", "tool-trigger", ".popover-anchor"],
+  ["skills-pop", "skills-trigger", ".popover-anchor"],
+  ["account-menu", "account-btn", ".account"],
+];
 
 function setPopup(id, triggerId, open) {
   $(id).hidden = !open;
   $(triggerId).setAttribute("aria-expanded", String(open));
 }
 
+function togglePopup(id) {
+  for (const [other, trigger] of POPUPS) {
+    if (other !== id) setPopup(other, trigger, false);
+  }
+  const [, trigger] = POPUPS.find(([p]) => p === id);
+  const open = $(id).hidden;
+  setPopup(id, trigger, open);
+  if (open && id === "skills-pop") renderSkillsQuick();
+  if (open && id === "account-menu") $(id).querySelector("[role=menuitem]").focus();
+  return open;
+}
+
+function closePopups({ restoreFocus = false } = {}) {
+  let closed = false;
+  for (const [id, trigger] of POPUPS) {
+    if ($(id).hidden) continue;
+    setPopup(id, trigger, false);
+    if (restoreFocus) $(trigger).focus();
+    closed = true;
+  }
+  return closed;
+}
+
 function setLanguage(lang) {
   for (const radio of document.querySelectorAll('input[name="lang"]')) radio.checked = radio.value === lang;
   $("tool-label").textContent = lang === "auto" ? "Auto" : (LANG_LABEL[lang] || lang);
-  if ($("tool-menu")) setPopup("tool-menu", "tool-trigger", false);
+  $("tool-trigger").dataset.lang = lang;
+  $("tool-trigger").setAttribute("aria-label", `Language: ${lang === "auto" ? "auto detect" : LANG_LABEL[lang]}`);
+  setPopup("tool-menu", "tool-trigger", false);
   try {
     localStorage.setItem("opcoda-lang", lang);
   } catch {
@@ -546,8 +624,14 @@ async function checkStatus() {
 function setStatus(stateName) {
   const node = $("status");
   node.dataset.state = stateName;
-  $("status-text").textContent = { online: "Online", offline: "Offline", checking: "Checking…" }[stateName];
-  node.title = stateName === "offline" ? "Coda's PC is off or the model server isn't running." : "";
+  const text = { online: "Online", offline: "Offline", checking: "Checking…" }[stateName];
+  $("status-text").textContent = text;
+  $("model-status-line").textContent = {
+    online: "Online · ready for your next task",
+    offline: "Offline · Coda's PC is off or not serving",
+    checking: "Checking…",
+  }[stateName];
+  $("model-trigger").title = `Coda 1.0 · ${text}`;
 }
 
 function startStatusPolling() {
@@ -562,7 +646,9 @@ function stopStatusPolling() {
   clearInterval(state.statusTimer);
 }
 
-// ---- drawer (mobile) + account menu ----
+// ---- sidebar ----
+
+const isMobile = () => matchMedia("(max-width: 860px)").matches;
 
 function setDrawer(open) {
   $("app").dataset.drawer = open ? "open" : "closed";
@@ -570,10 +656,26 @@ function setDrawer(open) {
   if (open) $("new-chat").focus();
 }
 
-function setMenu(open) {
-  $("account-menu").hidden = !open;
-  $("account-btn").setAttribute("aria-expanded", String(open));
-  if (open) $("account-menu").querySelector("button").focus();
+function toggleSidebar() {
+  if (isMobile()) return setDrawer($("app").dataset.drawer !== "open");
+  setPref("sidebar", state.prefs.sidebar === "collapsed" ? "open" : "collapsed");
+  $(state.prefs.sidebar === "collapsed" ? "open-sidebar" : "collapse-sidebar").focus();
+}
+
+function openSearch() {
+  if (isMobile()) setDrawer(true);
+  else if (state.prefs.sidebar === "collapsed") setPref("sidebar", "open");
+  $("search-box").hidden = false;
+  $("search-toggle").setAttribute("aria-expanded", "true");
+  $("chat-search").focus();
+  $("chat-search").select();
+}
+
+function closeSearch() {
+  $("chat-search").value = "";
+  $("search-box").hidden = true;
+  $("search-toggle").setAttribute("aria-expanded", "false");
+  renderConversationList();
 }
 
 // ---------------------------------------------------------------------------
@@ -590,28 +692,55 @@ async function loadConversations() {
   renderConversationList();
 }
 
+function dateGroup(seconds) {
+  const day = 86_400_000;
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const t = seconds * 1000;
+  if (t >= start.getTime()) return "Today";
+  if (t >= start.getTime() - day) return "Yesterday";
+  if (t >= start.getTime() - 7 * day) return "Previous 7 days";
+  if (t >= start.getTime() - 30 * day) return "Previous 30 days";
+  return new Date(t).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+}
+
 function renderConversationList() {
-  const list = $("conversation-list");
-  list.replaceChildren();
-  for (const conv of state.conversations) {
+  const holder = $("conversation-groups");
+  const query = $("chat-search").value.trim().toLowerCase();
+  const items = query ? state.conversations.filter((c) => c.title.toLowerCase().includes(query)) : state.conversations;
+  holder.replaceChildren();
+  let list = null;
+  let current = null;
+  for (const conv of items) {
+    const group = query ? "Results" : dateGroup(conv.updatedAt);
+    if (group !== current) {
+      current = group;
+      holder.append(el("h2", "history-label", group));
+      list = el("ul");
+      holder.append(list);
+    }
     const li = el("li", "conv");
     if (conv.id === state.activeId) li.setAttribute("aria-current", "page");
     const link = el("a", "", conv.title);
     link.href = `/c/${conv.id}`;
     link.title = conv.title;
     link.addEventListener("click", (e) => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
       e.preventDefault();
       openConversation(conv.id, { push: true });
     });
     const del = el("button", "icon-btn conv-delete");
     del.type = "button";
     del.setAttribute("aria-label", `Delete chat: ${conv.title}`);
+    del.title = "Delete chat";
     del.innerHTML = icon("trash");
     del.addEventListener("click", () => deleteConversation(conv));
     li.append(link, del);
     list.append(li);
   }
-  $("history-empty").hidden = state.conversations.length > 0;
+  const empty = $("history-empty");
+  empty.hidden = items.length > 0;
+  empty.textContent = query ? "No chats match that search." : "Your chats will show up here.";
 }
 
 async function routeFromLocation() {
@@ -620,18 +749,24 @@ async function routeFromLocation() {
   else newChat({ push: false });
 }
 
+function setEmpty(empty) {
+  $("chat").dataset.empty = String(empty);
+  $("empty-state").hidden = !empty;
+}
+
 function newChat({ push = true } = {}) {
   state.activeId = null;
   state.artifactId = null;
   state.messages.clear();
   closeWorkspace();
   $("messages").replaceChildren();
-  $("empty-state").hidden = false;
+  setEmpty(true);
+  renderGreeting();
   clearAttachment();
   if (push && location.pathname !== "/") history.pushState(null, "", "/");
   document.title = "Opcoda — Coda";
   renderConversationList();
-  setDrawer(false);
+  if (isMobile()) setDrawer(false);
   if ($("context").open) renderContext();
 }
 
@@ -642,13 +777,22 @@ async function openConversation(id, { push }) {
     state.artifactId = null;
     state.messages.clear();
     closeWorkspace();
-    const list = $("messages");
-    list.replaceChildren(...messages.map((m) => (m.role === "user" ? userMessage(m.content, m.meta?.language) : botMessage(m))));
-    $("empty-state").hidden = messages.length > 0;
+    const nodes = [];
+    let lastUser = null;
+    for (const m of messages) {
+      if (m.role === "user") {
+        lastUser = m;
+        nodes.push(userMessage(m.content, m.meta?.language));
+      } else {
+        nodes.push(botMessage({ ...m, prompt: lastUser?.content, language: lastUser?.meta?.language || "auto" }));
+      }
+    }
+    $("messages").replaceChildren(...nodes);
+    setEmpty(messages.length === 0);
     if (push) history.pushState(null, "", `/c/${conversation.id}`);
     document.title = `${conversation.title} — Opcoda`;
     renderConversationList();
-    setDrawer(false);
+    if (isMobile()) setDrawer(false);
     scrollToBottom(true);
     if ($("context").open) renderContext();
   } catch (err) {
@@ -679,21 +823,55 @@ async function deleteConversation(conv) {
 // Messages
 // ---------------------------------------------------------------------------
 
+function actionButton(label, iconName, handler, { text = false } = {}) {
+  const button = el("button", text ? "msg-action has-text" : "msg-action");
+  button.type = "button";
+  button.innerHTML = icon(iconName);
+  if (text) button.append(el("span", "", label));
+  button.setAttribute("aria-label", label);
+  button.title = label;
+  button.addEventListener("click", handler);
+  return button;
+}
+
+function flashCopied(button, ok) {
+  button.innerHTML = icon(ok ? "check" : "alert");
+  button.title = ok ? "Copied" : "Copy failed";
+  setTimeout(() => {
+    button.innerHTML = icon("copy");
+    button.title = button.getAttribute("aria-label");
+  }, 1600);
+}
+
 function userMessage(text, language) {
   const li = el("li", "msg msg-user");
   const attached = splitAttachedFile(text);
-  if (language && language !== "auto") {
-    const tag = el("span", "lang-tag bubble-lang", LANG_LABEL[language] || language);
-    tag.dataset.lang = language;
-    li.append(tag);
-  }
   if (attached.fileName) {
     const file = el("div", "message-attachment");
     file.innerHTML = icon("paperclip");
     file.append(el("span", "", attached.fileName));
     li.append(file);
   }
-  if (attached.text) li.append(el("div", "bubble", attached.text));
+  if (attached.text) {
+    const bubble = el("div", "bubble", attached.text);
+    if (language && language !== "auto") {
+      const tag = el("span", "lang-tag bubble-lang", LANG_LABEL[language] || language);
+      tag.dataset.lang = language;
+      bubble.prepend(tag);
+    }
+    li.append(bubble);
+  }
+  const actions = el("div", "msg-actions");
+  const copy = actionButton("Copy message", "copy", async () => flashCopied(copy, await copyText(attached.text || text)));
+  const edit = actionButton("Edit in message box", "pencil", () => {
+    $("prompt").value = attached.text;
+    if (language) setLanguage(language);
+    autosize();
+    updateComposer();
+    $("prompt").focus();
+  });
+  actions.append(copy, edit);
+  li.append(actions);
   return li;
 }
 
@@ -725,9 +903,25 @@ function verdictNode(verdict) {
 function metaLine(message) {
   const meta = message.meta || {};
   const parts = [];
-  if (meta.drafts?.total > 1) parts.push(`${meta.drafts.passed} of ${meta.drafts.total} drafts passed`);
+  if (meta.drafts?.total > 1 && !meta.steps) parts.push(`${meta.drafts.passed} of ${meta.drafts.total} drafts passed`);
+  const repairs = (meta.steps || []).filter((s) => s === "repair").length;
+  if (meta.steps?.includes("plan")) parts.push("planned");
+  if (repairs) parts.push(`self-fixed ${repairs}×`);
+  if (meta.steps?.includes("review")) parts.push("reviewed");
   if (meta.ms) parts.push(`${(meta.ms / 1000).toFixed(1)} s`);
+  if (Number.isFinite(meta.tokens)) parts.push(`${meta.tokens.toLocaleString()} tokens`);
   return parts.join(" · ");
+}
+
+function summaryText(message) {
+  const lang = messageLang(message);
+  const files = message.meta?.files || [];
+  const lines = lineCount(message.content.replace(/\n+$/, ""));
+  const what = files.length > 1 ? `a ${files.length}-file ${LANG_LABEL[lang] || ""} project` : `${LANG_LABEL[lang] || "the"} code`;
+  const verdict = verdictFor(message);
+  const tail = !verdict ? "" : verdict.state === "ok" ? " It passed every check." : message.meta?.finished === false
+    ? " It stopped at the length limit, so it may be incomplete." : ` The checks found ${verdict.text}; open it to see details.`;
+  return `Here's ${what} (${lines} ${lines === 1 ? "line" : "lines"}).${tail}`;
 }
 
 function botMessage(message) {
@@ -735,48 +929,46 @@ function botMessage(message) {
   const lang = messageLang(message);
   const code = message.content.replace(/\n+$/, "");
   const lines = lineCount(code);
+  const files = message.meta?.files || [];
 
   const li = el("li", "msg msg-bot");
   li.dataset.id = message.id;
-  const author = el("div", "msg-author");
-  author.innerHTML = '<svg class="mark" aria-hidden="true"><use href="#i-mark"/></svg>';
-  author.append("Coda");
+  const avatar = el("div", "bot-avatar");
+  avatar.innerHTML = '<svg aria-hidden="true"><use href="#i-mark"/></svg>';
+  const main = el("div", "bot-main");
+  main.append(el("p", "bot-summary", summaryText(message)));
 
   const card = el("div", "file-card");
   card.dataset.id = message.id;
   const head = el("div", "file-head");
   const tag = el("span", "lang-tag", LANG_LABEL[lang] || lang);
   tag.dataset.lang = lang;
-  head.append(tag, el("span", "file-name", FILE_NAME[lang] || "code.txt"), el("span", "file-meta", `${lines} ${lines === 1 ? "line" : "lines"}`));
+  const fileLabel = files.length > 1 ? `${files[0].path} +${files.length - 1}` : FILE_NAME[lang] || "code.txt";
+  head.append(tag, el("span", "file-name", fileLabel), el("span", "file-meta", `${lines} ${lines === 1 ? "line" : "lines"}`));
   const verdict = verdictFor(message);
   if (verdict) head.append(verdictNode(verdict));
 
   const actions = el("div", "file-actions");
-  const addAction = (label, iconName, handler) => {
-    const button = el("button", "btn btn-ghost");
+  const addAction = (label, iconName, handler, primary = false) => {
+    const button = el("button", primary ? "btn btn-secondary" : "btn btn-ghost");
     button.type = "button";
-    if (iconName) button.innerHTML = icon(iconName);
+    button.innerHTML = icon(iconName);
     button.append(el("span", "btn-label", label));
     button.setAttribute("aria-label", `${label} ${FILE_NAME[lang] || "code"}`);
     button.addEventListener("click", handler);
     actions.append(button);
     return button;
   };
-  if (CAN_PREVIEW.has(lang)) addAction("Preview", "external", () => openWorkspace(message.id, "preview"));
-  if (CAN_RUN.has(lang)) addAction("Run", "play", () => openWorkspace(message.id, "run", { autoRun: true }));
+  if (CAN_PREVIEW.has(lang)) addAction("Preview", "external", () => openWorkspace(message.id, "preview"), true);
+  if (CAN_RUN.has(lang)) addAction("Run", "play", () => openWorkspace(message.id, "run", { autoRun: true }), true);
   addAction("Open", "panel", () => openWorkspace(message.id, "code"));
-  const copy = addAction("Copy", "copy", async () => {
-    copy.querySelector(".btn-label").textContent = (await copyText(message.content)) ? "Copied" : "Copy failed";
-    setTimeout(() => (copy.querySelector(".btn-label").textContent = "Copy"), 1600);
-  });
   head.append(actions);
 
   const body = el("div", "file-body");
   const pre = el("pre");
-  const shown = code.split("\n").slice(0, 14).join("\n");
-  pre.innerHTML = highlight(shown, lang);
+  pre.innerHTML = highlight(code.split("\n").slice(0, 12).join("\n"), lang);
   body.append(pre);
-  if (lines > 14) {
+  if (lines > 12) {
     body.classList.add("is-clipped");
     const more = el("button", "btn btn-secondary file-more", `Show all ${lines} lines`);
     more.type = "button";
@@ -788,33 +980,51 @@ function botMessage(message) {
   }
   body.addEventListener("click", () => openWorkspace(message.id, "code"));
   card.append(head, body);
-  li.append(author, card);
+  main.append(card);
+
+  const bar = el("div", "msg-actions bot-actions");
+  const copy = actionButton("Copy code", "copy", async () => flashCopied(copy, await copyText(message.content)));
+  bar.append(copy, actionButton(files.length ? "Download project" : "Download file", "download", () => downloadFile(message)));
+  if (message.prompt) {
+    bar.append(actionButton("Try again", "refresh", () => regenerate(message)));
+  }
   const meta = metaLine(message);
-  if (meta) li.append(el("div", "msg-meta", meta));
+  if (meta) bar.append(el("span", "msg-meta", meta));
+  main.append(bar);
+  li.append(avatar, main);
   return li;
 }
 
-function workingMessage(drafts) {
-  const li = el("li", "msg msg-bot");
+const WORK_STEPS = ["Reading your request", "Planning the structure", "Writing code", "Checking the result"];
+
+function workingMessage() {
+  const li = el("li", "msg msg-bot is-working");
   li.setAttribute("aria-label", "Coda is writing");
-  const author = el("div", "msg-author");
-  author.innerHTML = '<svg class="mark" aria-hidden="true"><use href="#i-mark"/></svg>';
-  author.append("Coda");
+  const avatar = el("div", "bot-avatar");
+  avatar.innerHTML = '<svg aria-hidden="true"><use href="#i-mark"/></svg>';
   const box = el("div", "working");
-  const label = el("span", "", drafts > 1 ? `Writing ${drafts} drafts` : "Understanding request");
-  const dots = el("span", "thinking-dots");
-  dots.setAttribute("aria-hidden", "true");
-  dots.append(el("i"), el("i"), el("i"));
+  const label = el("span", "working-label", WORK_STEPS[0]);
   const clock = el("time", "", "0s");
-  box.append(dots, label, clock);
-  li.append(author, box);
+  box.append(label, clock);
+  const skeleton = el("div", "skeleton");
+  skeleton.setAttribute("aria-hidden", "true");
+  skeleton.append(el("i"), el("i"), el("i"));
+  const main = el("div", "bot-main");
+  main.append(box, skeleton);
+  li.append(avatar, main);
   const started = Date.now();
   li.timer = setInterval(() => {
     const seconds = Math.round((Date.now() - started) / 1000);
-    clock.textContent = `${seconds}s`;
-    if (drafts <= 1) label.textContent = seconds < 60 ? "Generating code" : "Still generating · larger pages take longer";
+    clock.textContent = seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+    const step = seconds < 3 ? 0 : seconds < 8 ? 1 : seconds < 75 ? 2 : 3;
+    label.textContent = seconds >= 120 ? "Still writing · bigger pages take a few minutes" : WORK_STEPS[step];
   }, 1000);
   return li;
+}
+
+function nearBottom() {
+  const thread = $("thread");
+  return thread.scrollHeight - thread.scrollTop - thread.clientHeight < 160;
 }
 
 function scrollToBottom(instant = false) {
@@ -834,27 +1044,34 @@ function looksLikeTask(text) {
 
 function showTaskTip() {
   const note = $("composer-note");
-  note.textContent = "Coda is focused on code. Describe something to build, like “A landing page for a bakery”, or press Enter again to send anyway.";
+  note.textContent = "Coda is focused on code. Describe something to build, like “A landing page for a bakery”, or send again to send anyway.";
   note.dataset.tone = "warn";
 }
 
-async function sendMessage(text, language) {
+async function sendMessage(text, language, { retry = false, fix = null } = {}) {
   text = text.trim();
   if (!text || state.sending) return;
   state.sending = true;
   updateComposer();
 
-  $("empty-state").hidden = true;
+  setEmpty(false);
   const list = $("messages");
-  const userEl = userMessage(text, language);
-  const working = workingMessage(state.me.settings.drafts || 1);
-  list.append(userEl, working);
+  // A fix request shows its file like an attachment; the server attaches the stored code.
+  const shown = fix ? `${text}\n\n<attached_file name="${fix.fileName}">\n\n</attached_file>` : text;
+  const userEl = retry ? null : userMessage(shown, language);
+  const working = workingMessage();
+  if (userEl) list.append(userEl);
+  list.append(working);
   scrollToBottom();
 
   try {
-    const data = await api("/api/chat", { method: "POST", body: { conversationId: state.activeId, message: text, language } });
+    const body = { conversationId: state.activeId, message: text, language, retry, ...(fix ? { fix: { messageId: fix.messageId } } : {}) };
+    const data = await api("/api/chat", { method: "POST", body });
     clearInterval(working.timer);
-    const reply = data.messages[1];
+    const sent = retry ? null : data.messages[0];
+    const reply = { ...data.messages.at(-1), prompt: sent?.content ?? text, language: sent?.meta?.language ?? language,
+      fromAutoFix: Boolean(fix?.auto) };
+    const follow = nearBottom();
     working.replaceWith(botMessage(reply));
     state.me.usage = data.usage;
     if (!state.activeId) {
@@ -866,27 +1083,30 @@ async function sendMessage(text, language) {
     renderConversationList();
     renderUsage();
     setStatus("online");
-    if (window.matchMedia(WIDE).matches) {
-      openWorkspace(reply.id, CAN_PREVIEW.has(messageLang(reply)) && messageLang(reply) === "html" ? "preview" : "code");
-    }
+    const lang = messageLang(reply);
+    if (state.prefs.autoRun && CAN_RUN.has(lang)) openWorkspace(reply.id, "run", { autoRun: true });
+    else if (state.prefs.autoOpen && window.matchMedia(WIDE).matches) openWorkspace(reply.id, lang === "html" ? "preview" : "code");
+    if (follow) scrollToBottom();
   } catch (err) {
     clearInterval(working.timer);
     working.remove();
     if (err.status === 401) return;
-    userEl.classList.add("is-failed");
+    const host = userEl || el("li", "msg msg-user");
+    if (!userEl) list.append(host);
+    host.classList.add("is-failed");
     const row = el("div", "msg-error");
     row.setAttribute("role", "alert");
     row.append(el("span", "", err.message));
     if (["model_offline", "model_busy", "model_error", "network"].includes(err.code)) {
-      const retry = el("button", "btn btn-secondary btn-sm", "Retry");
-      retry.type = "button";
-      retry.addEventListener("click", () => {
-        userEl.remove();
-        sendMessage(text, language);
+      const again = el("button", "btn btn-secondary btn-sm", "Retry");
+      again.type = "button";
+      again.addEventListener("click", () => {
+        host.remove();
+        sendMessage(text, language, { retry });
       });
-      row.append(retry);
+      row.append(again);
     }
-    userEl.append(row);
+    host.append(row);
     if (err.code === "model_offline") setStatus("offline");
     if (err.code === "daily_limit" && err.extra.usage) {
       state.me.usage = err.extra.usage;
@@ -895,8 +1115,14 @@ async function sendMessage(text, language) {
   } finally {
     state.sending = false;
     updateComposer();
-    scrollToBottom();
   }
+}
+
+function regenerate(message) {
+  if (state.sending) return toast("Coda is still working on the last message.");
+  // The latest answer is retried in place; an older one is asked again as a new message.
+  const latest = [...state.messages.keys()].at(-1) === message.id;
+  sendMessage(message.prompt, message.language || "auto", { retry: latest && Boolean(state.activeId) });
 }
 
 async function copyText(text) {
@@ -919,6 +1145,162 @@ function downloadFile(message) {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ---------------------------------------------------------------------------
+// Skills
+// ---------------------------------------------------------------------------
+
+async function loadSkills() {
+  if (state.skills.loading) return state.skills.loading;
+  state.skills.loading = (async () => {
+    try {
+      const data = await api("/api/skills");
+      state.skills = { ...state.skills, catalog: data.skills || [], online: data.online, applies: data.applies };
+    } catch {
+      state.skills = { ...state.skills, online: false };
+    } finally {
+      state.skills.loading = null;
+    }
+    renderSkillCounts();
+    if (!$("skills-pop").hidden) renderSkillsQuick();
+    if ($("settings").open) renderSkillsPane();
+  })();
+  return state.skills.loading;
+}
+
+function skillOn(skill) {
+  const saved = state.me?.settings?.skills || {};
+  return Object.hasOwn(saved, skill.id) ? saved[skill.id] : skill.default;
+}
+
+// Counts cover the coding-style skills; design guides only apply when a request is related.
+function activeSkills() {
+  return state.skills.catalog.filter((s) => s.kind === "builtin" && skillOn(s));
+}
+
+function renderSkillCounts() {
+  const count = state.skills.catalog.length ? String(activeSkills().length) : "";
+  $("skills-count").textContent = count;
+  $("skills-trigger-count").textContent = count;
+  $("skills-trigger").setAttribute("aria-label", count ? `Skills, ${count} on` : "Skills");
+}
+
+async function setSkill(id, value) {
+  const before = state.me.settings.skills || {};
+  const skill = state.skills.catalog.find((s) => s.id === id);
+  // Store only differences from the default, so new defaults reach everyone.
+  const patch = { [id]: skill && value === skill.default ? null : value };
+  state.me.settings = { ...state.me.settings, skills: { ...before, [id]: value } };
+  renderSkillCounts();
+  try {
+    const { user } = await api("/api/me", { method: "PATCH", body: { settings: { skills: patch } } });
+    state.me = { ...state.me, settings: user.settings };
+  } catch (err) {
+    state.me.settings = { ...state.me.settings, skills: before };
+    toast(err.message);
+  }
+  renderSkillCounts();
+  if ($("settings").open) renderSkillsPane();
+  if (!$("skills-pop").hidden) renderSkillsQuick();
+}
+
+function skillSwitch(skill, idPrefix) {
+  const input = el("input");
+  input.type = "checkbox";
+  input.className = "switch";
+  input.id = `${idPrefix}-${skill.id}`;
+  input.checked = skillOn(skill);
+  input.addEventListener("change", () => setSkill(skill.id, input.checked));
+  return input;
+}
+
+const LANG_SHORT = { html: "HTML", css: "CSS", javascript: "JS", python: "Python" };
+
+function renderSkillsQuick() {
+  const holder = $("skills-quick");
+  holder.replaceChildren();
+  if (!state.skills.catalog.length) {
+    holder.append(el("p", "hint", state.skills.loading ? "Loading skills…" : "Skills load when Coda is online."));
+    if (!state.skills.loading) loadSkills();
+    return;
+  }
+  // Show the skills that apply to the chosen language (all of them on Auto).
+  const lang = selectedLanguage();
+  const skills = state.skills.catalog.filter((s) => s.kind === "builtin" && (lang === "auto" || s.langs.includes(lang)));
+  let group = null;
+  for (const skill of skills) {
+    if (skill.group && skill.group !== group) {
+      group = skill.group;
+      holder.append(el("span", "skill-quick-group", group));
+    }
+    const row = el("label", "skill-row");
+    row.htmlFor = `quick-${skill.id}`;
+    row.title = skill.description;
+    row.append(el("span", "skill-row-name", skill.name), skillSwitch(skill, "quick"));
+    holder.append(row);
+  }
+  $("skills-pop-label").textContent = lang === "auto" ? "Skills" : `Skills for ${LANG_LABEL[lang]}`;
+}
+
+function renderSkillsPane() {
+  const holder = $("skills-list");
+  const notice = $("skills-notice");
+  holder.replaceChildren();
+  const { catalog, online, applies } = state.skills;
+  notice.hidden = online !== false && applies !== false;
+  notice.textContent = online === false
+    ? "Coda is offline, so the skill list can't load right now. Your saved choices are kept."
+    : "The model that's running right now doesn't use skills. Your choices apply when it does.";
+  const GROUP_NOTES = {
+    Quality: "Make the code more reliable. Applied to every request in the languages shown.",
+    Style: "How the code reads.",
+    "Web design": "How pages look and behave.",
+    Apps: "Extra behaviour for interactive pages and scripts.",
+  };
+  const builtinGroups = [...new Set(catalog.filter((s) => s.kind === "builtin").map((s) => s.group || "Coding style"))];
+  const groups = [
+    ...builtinGroups.map((g) => [(s) => s.kind === "builtin" && (s.group || "Coding style") === g, g, GROUP_NOTES[g] || ""]),
+    [(s) => s.kind === "guide", "Design guides", "From the ai-skills folder. On means Coda may use the guide when your request is related."],
+  ];
+  for (const [match, title, desc] of groups) {
+    const skills = catalog.filter(match);
+    if (!skills.length) continue;
+    const section = el("section", "skill-group");
+    section.append(el("h4", "", title), el("p", "hint", desc));
+    for (const skill of skills) {
+      const row = el("label", "setting skill-setting");
+      row.htmlFor = `pane-${skill.id}`;
+      const text = el("span", "setting-text");
+      const name = el("span", "setting-name", skill.name);
+      for (const lang of skill.langs) {
+        const chip = el("span", "lang-tag", LANG_SHORT[lang] || lang);
+        chip.dataset.lang = lang;
+        name.append(chip);
+      }
+      text.append(name);
+      if (skill.description) text.append(el("span", "setting-desc", skill.description));
+      row.append(text, skillSwitch(skill, "pane"));
+      section.append(row);
+    }
+    holder.append(section);
+  }
+  if (!catalog.length && state.skills.loading) holder.append(el("p", "hint", "Loading skills…"));
+  $("skills-reset").disabled = !Object.keys(state.me.settings.skills || {}).length;
+}
+
+async function resetSkills() {
+  const saved = state.me.settings.skills || {};
+  const patch = Object.fromEntries(Object.keys(saved).map((id) => [id, null]));
+  try {
+    const { user } = await api("/api/me", { method: "PATCH", body: { settings: { skills: patch } } });
+    state.me = { ...state.me, settings: user.settings };
+    toast("Skills reset to defaults.");
+  } catch (err) {
+    toast(err.message);
+  }
+  renderSkillCounts();
+  renderSkillsPane();
 }
 
 // ---------------------------------------------------------------------------
@@ -952,6 +1334,7 @@ function openWorkspace(id, tab = "code", { autoRun = false } = {}) {
     renderProjectFiles(message);
     renderChecks(message);
     $("preview-frame").replaceChildren();
+    delete $("preview-frame").dataset.id;
     resetRunOutput();
   }
   renderCodeView(message);
@@ -1057,10 +1440,57 @@ function renderChecks(message) {
   details.open = failed > 0;
 }
 
+// ---- "Ask Coda to fix": real errors from the browser sandboxes go back to Coda ----
+
+function fixBar(barId, error) {
+  const bar = $(barId);
+  bar.replaceChildren();
+  bar.hidden = !error;
+  if (!error) return;
+  bar.innerHTML = icon("alert");
+  const text = el("span", "", error);
+  text.title = error;
+  const button = el("button", "btn btn-secondary btn-sm");
+  button.type = "button";
+  button.innerHTML = icon("refresh");
+  button.append("Ask Coda to fix");
+  const id = state.artifactId;
+  button.addEventListener("click", () => askFix(id, error));
+  bar.append(text, button);
+  // Optional: one automatic attempt for the newest answer, never for an answer that was itself an automatic fix.
+  const message = state.messages.get(id);
+  const newest = [...state.messages.keys()].at(-1) === id;
+  if (state.prefs.autoFix && newest && message && !message.fromAutoFix && !state.autoFixed.has(id) && !state.sending) {
+    state.autoFixed.add(id);
+    toast("Found an error. Asking Coda to fix it…");
+    askFix(id, error, { auto: true });
+  }
+}
+
+function askFix(id, error, { auto = false } = {}) {
+  const message = state.messages.get(id);
+  if (!message) return;
+  if (state.sending) return toast("Coda is still working on the last message.");
+  const lang = messageLang(message);
+  if (!window.matchMedia(WIDE).matches) closeWorkspace();
+  const what = lang === "html" ? "page" : `${LANG_LABEL[lang] || ""} code`;
+  sendMessage(`Fix this ${what}. When I ran it, it failed with this error:\n${error.slice(-600)}\nKeep everything else working.`, lang,
+    { fix: { messageId: id, fileName: FILE_NAME[lang] || "code.txt", auto } });
+}
+
+window.addEventListener("message", (event) => {
+  const frame = $("preview-frame").querySelector("iframe");
+  const msg = event.data || {};
+  if (!frame || event.source !== frame.contentWindow || msg.source !== "coda-preview" || msg.type !== "error") return;
+  if (!$("preview-fix").hidden) return; // keep the first error; later ones usually follow from it
+  fixBar("preview-fix", `${msg.message}${msg.line ? ` (line ${msg.line})` : ""}`);
+});
+
 function loadPreview() {
   const id = state.artifactId;
   const holder = $("preview-frame");
   if (!id || holder.dataset.id === id && holder.firstChild) return;
+  fixBar("preview-fix", "");
   const frame = el("iframe");
   frame.setAttribute("sandbox", "allow-scripts allow-forms allow-modals");
   frame.title = "Preview of the generated page";
@@ -1088,6 +1518,7 @@ function ensureRunner() {
 }
 
 function resetRunOutput() {
+  fixBar("run-fix", "");
   $("run-output").replaceChildren();
   $("run-status").textContent = "Runs in your browser in a sandbox, not on any server.";
   setRunButton(false);
@@ -1113,6 +1544,7 @@ async function runActive() {
   if (!CAN_RUN.has(lang)) return;
   if (runner.running) stopRun("Stopped.");
   selectTab("run");
+  fixBar("run-fix", "");
   $("run-output").replaceChildren();
   appendOutput(lang === "python" ? "$ python main.py\n" : "$ node script.js\n", "sys");
   $("run-status").textContent = "Starting…";
@@ -1132,7 +1564,12 @@ async function runActive() {
 
 function armTimeout(seconds) {
   clearTimeout(runner.timer);
-  if (seconds > 0) runner.timer = setTimeout(() => stopRun(`Stopped after ${seconds} seconds (possible infinite loop).`), seconds * 1000);
+  if (seconds > 0) {
+    runner.timer = setTimeout(() => {
+      stopRun(`Stopped after ${seconds} seconds (possible infinite loop).`);
+      fixBar("run-fix", `The program was still running after ${seconds} seconds, so it may loop forever or wait for input.`);
+    }, seconds * 1000);
+  }
 }
 
 function stopRun(reason) {
@@ -1166,6 +1603,7 @@ window.addEventListener("message", (event) => {
     } else {
       $("run-status").textContent = "Stopped with an error.";
       appendOutput(`\n${msg.error}\n`, "stderr");
+      fixBar("run-fix", String(msg.error).trim().split("\n").slice(-4).join("\n"));
     }
   }
 });
@@ -1174,9 +1612,22 @@ window.addEventListener("message", (event) => {
 // Settings
 // ---------------------------------------------------------------------------
 
-function openSettings() {
-  setMenu(false);
-  setDrawer(false);
+function selectPane(pane) {
+  for (const tab of document.querySelectorAll(".settings-nav [role=tab]")) {
+    const selected = tab.dataset.pane === pane;
+    tab.setAttribute("aria-selected", String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+  }
+  for (const section of document.querySelectorAll(".settings-pane")) section.hidden = section.id !== `pane-${pane}`;
+  if (pane === "skills") {
+    renderSkillsPane();
+    if (!state.skills.catalog.length) loadSkills();
+  }
+}
+
+function openSettings(pane = "general") {
+  closePopups();
+  if (isMobile()) setDrawer(false);
   const user = state.me;
   renderAvatar($("settings-avatar"), user);
   $("avatar-remove").hidden = !user.avatarVersion;
@@ -1187,10 +1638,17 @@ function openSettings() {
   showError($("password-error"), "");
   $("password-form").reset();
   for (const radio of document.querySelectorAll('input[name="theme"]')) radio.checked = radio.value === user.settings.theme;
-  for (const radio of document.querySelectorAll('input[name="usage-mode"]')) radio.checked = radio.value === (user.settings.usageMode || "medium");
+  syncUsageModeControls();
   $("s-temperature").value = user.settings.temperature;
   $("temperature-out").textContent = Number(user.settings.temperature).toFixed(2);
-  $("settings").showModal();
+  $("pref-enter").checked = state.prefs.enterToSend;
+  $("pref-autopen").checked = state.prefs.autoOpen;
+  $("pref-autorun").checked = state.prefs.autoRun;
+  $("pref-wrap").checked = state.prefs.wrap;
+  $("pref-autofix").checked = state.prefs.autoFix;
+  selectPane(pane);
+  if (!$("settings").open) $("settings").showModal();
+  document.querySelector(`.settings-nav [data-pane="${pane}"]`).focus();
 }
 
 async function saveSettings(patch, { quiet = false } = {}) {
@@ -1215,6 +1673,7 @@ async function saveProfile(event) {
     state.me = { ...state.me, displayName: user.displayName };
     $("s-display").value = user.displayName;
     renderAccount();
+    renderGreeting();
     renderAvatar($("settings-avatar"), state.me);
     toast("Profile saved.");
   } catch (err) {
@@ -1325,7 +1784,7 @@ async function deleteAccount() {
 }
 
 async function signOut() {
-  setMenu(false);
+  closePopups();
   try {
     await api("/api/auth/logout", { method: "POST", body: {} });
   } catch {
@@ -1378,6 +1837,35 @@ function confirmAction({ text, okLabel, password = false, run }) {
 // Wiring
 // ---------------------------------------------------------------------------
 
+function submitComposer() {
+  const prompt = $("prompt");
+  if ($("send").disabled) return;
+  const visibleText = prompt.value;
+  if (!state.attachment && !looksLikeTask(visibleText) && state.warnedText !== visibleText.trim()) {
+    state.warnedText = visibleText.trim();
+    showTaskTip();
+    return;
+  }
+  if (state.warnedText !== null) {
+    state.warnedText = null;
+    renderUsage();
+  }
+  const text = composedMessage(visibleText);
+  prompt.value = "";
+  clearAttachment();
+  autosize();
+  closePopups();
+  sendMessage(text, selectedLanguage());
+}
+
+function wireDialog(id) {
+  const dialog = $(id);
+  dialog.querySelector("[data-close]")?.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+}
+
 function wire() {
   // auth
   $("tab-login").addEventListener("click", () => setAuthMode("login"));
@@ -1404,62 +1892,100 @@ function wire() {
     updateComposer();
   });
   prompt.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+    if (e.key !== "Enter" || e.isComposing) return;
+    const mod = e.ctrlKey || e.metaKey;
+    if (state.prefs.enterToSend ? !e.shiftKey : mod) {
       e.preventDefault();
-      $("composer").requestSubmit();
+      submitComposer();
+    }
+  });
+  prompt.addEventListener("paste", (e) => {
+    const file = [...(e.clipboardData?.files || [])][0];
+    if (file && /^text\/|json|xml|javascript/.test(file.type)) {
+      e.preventDefault();
+      attachFile(file).catch(() => toast("Couldn't read that file."));
     }
   });
   $("composer").addEventListener("submit", (e) => {
     e.preventDefault();
-    if ($("send").disabled) return;
-    const visibleText = prompt.value;
-    if (!state.attachment && !looksLikeTask(visibleText) && state.warnedText !== visibleText.trim()) {
-      state.warnedText = visibleText.trim();
-      showTaskTip();
-      return;
+    submitComposer();
+  });
+  const box = $("composer");
+  box.addEventListener("dragover", (e) => {
+    if ([...(e.dataTransfer?.types || [])].includes("Files")) {
+      e.preventDefault();
+      box.classList.add("is-dropping");
     }
-    if (state.warnedText !== null) {
-      state.warnedText = null;
-      renderUsage();
-    }
-    const text = composedMessage(visibleText);
-    prompt.value = "";
-    clearAttachment();
-    autosize();
-    sendMessage(text, selectedLanguage());
+  });
+  box.addEventListener("dragleave", () => box.classList.remove("is-dropping"));
+  box.addEventListener("drop", (e) => {
+    box.classList.remove("is-dropping");
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    e.preventDefault();
+    attachFile(file).catch(() => toast("Couldn't read that file."));
   });
   for (const radio of document.querySelectorAll('input[name="lang"]')) {
-    radio.addEventListener("change", () => setLanguage(radio.value));
+    radio.addEventListener("change", () => {
+      setLanguage(radio.value);
+      $("tool-trigger").focus();
+    });
   }
   for (const example of document.querySelectorAll(".example")) {
     example.addEventListener("click", () => {
-      prompt.value = example.querySelector(":scope > span:first-child").textContent.trim();
+      prompt.value = example.dataset.prompt;
       setLanguage(example.dataset.lang || "auto");
       autosize();
       updateComposer();
       prompt.focus();
+      prompt.setSelectionRange(prompt.value.length, prompt.value.length);
     });
   }
   $("attach-file").addEventListener("click", () => $("file-input").click());
   $("file-input").addEventListener("change", (e) => attachFile(e.target.files?.[0]).catch(() => toast("Couldn't read that file.")));
   $("remove-attachment").addEventListener("click", clearAttachment);
   $("tool-trigger").addEventListener("click", () => {
-    const open = $("tool-menu").hidden;
-    setPopup("model-menu", "model-trigger", false);
-    setPopup("tool-menu", "tool-trigger", open);
+    if (togglePopup("tool-menu")) document.querySelector('#tool-menu input:checked')?.focus();
   });
+  $("skills-trigger").addEventListener("click", () => togglePopup("skills-pop"));
+
+  // thread
+  const thread = $("thread");
+  thread.addEventListener("scroll", () => {
+    $("jump-down").hidden = $("chat").dataset.empty === "true" || nearBottom();
+  }, { passive: true });
+  $("jump-down").addEventListener("click", () => scrollToBottom());
 
   // navigation
-  $("new-chat").addEventListener("click", () => {
+  const startNew = () => {
     newChat();
     prompt.focus();
+  };
+  $("new-chat").addEventListener("click", startNew);
+  $("header-new-chat").addEventListener("click", startNew);
+  $("home-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    startNew();
   });
-  $("open-sidebar").addEventListener("click", () => setDrawer(true));
+  $("open-sidebar").addEventListener("click", () => (isMobile() ? setDrawer(true) : toggleSidebar()));
+  $("collapse-sidebar").addEventListener("click", toggleSidebar);
   $("close-sidebar").addEventListener("click", () => {
     setDrawer(false);
     $("open-sidebar").focus();
   });
   $("scrim").addEventListener("click", () => setDrawer(false));
+  $("search-toggle").addEventListener("click", () => ($("search-box").hidden ? openSearch() : closeSearch()));
+  $("chat-search").addEventListener("input", renderConversationList);
+  $("chat-search").addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      closeSearch();
+      $("search-toggle").focus();
+    } else if (e.key === "Enter") {
+      $("conversation-groups").querySelector("a")?.click();
+    }
+  });
+  $("open-skills").addEventListener("click", () => openSettings("skills"));
   window.addEventListener("popstate", () => state.me && routeFromLocation());
 
   // workspace
@@ -1489,47 +2015,78 @@ function wire() {
   });
   $("run-button").addEventListener("click", () => (runner.running ? stopRun("Stopped.") : runActive()));
 
-  // account menu
-  $("account-btn").addEventListener("click", () => setMenu($("account-menu").hidden));
-  $("model-trigger").addEventListener("click", () => {
-    const open = $("model-menu").hidden;
-    setPopup("tool-menu", "tool-trigger", false);
-    setPopup("model-menu", "model-trigger", open);
+  // menus
+  $("account-btn").addEventListener("click", () => togglePopup("account-menu"));
+  $("model-trigger").addEventListener("click", () => togglePopup("model-menu"));
+  for (const button of document.querySelectorAll("[data-settings]")) {
+    button.addEventListener("click", () => openSettings(button.dataset.settings));
+  }
+  $("open-shortcuts").addEventListener("click", () => {
+    closePopups();
+    $("shortcuts").showModal();
   });
-  $("open-settings").addEventListener("click", openSettings);
-  $("open-context").addEventListener("click", () => { renderContext(); $("context").showModal(); });
+  $("open-context").addEventListener("click", () => {
+    renderContext();
+    $("context").showModal();
+  });
   $("sign-out").addEventListener("click", signOut);
   document.addEventListener("click", (e) => {
-    if (!$("account-menu").hidden && !e.target.closest(".account")) setMenu(false);
-    if (!$("model-menu").hidden && !e.target.closest(".model-picker")) setPopup("model-menu", "model-trigger", false);
-    if (!$("tool-menu").hidden && !e.target.closest(".tool-picker")) setPopup("tool-menu", "tool-trigger", false);
+    for (const [id, trigger, scope] of POPUPS) {
+      if (!$(id).hidden && !e.target.closest(scope)?.contains($(id))) setPopup(id, trigger, false);
+    }
   });
+  $("account-menu").addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    const items = [...$("account-menu").querySelectorAll("[role=menuitem]")];
+    const next = items[(items.indexOf(document.activeElement) + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length];
+    next.focus();
+  });
+
+  // keyboard shortcuts
   document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (!$("account-menu").hidden) {
-      setMenu(false);
-      $("account-btn").focus();
-    } else if (!$("model-menu").hidden) {
-      setPopup("model-menu", "model-trigger", false);
-      $("model-trigger").focus();
-    } else if (!$("tool-menu").hidden) {
-      setPopup("tool-menu", "tool-trigger", false);
-      $("tool-trigger").focus();
-    } else if ($("app").dataset.drawer === "open") {
-      setDrawer(false);
-      $("open-sidebar").focus();
-    } else if (!$("workspace").hidden && !document.querySelector("dialog[open]")) {
-      closeWorkspace();
+    if (!state.me || $("app").hidden) return;
+    const mod = e.ctrlKey || e.metaKey;
+    const key = e.key.toLowerCase();
+    const typing = e.target.closest?.("input, textarea, [contenteditable]");
+    if (mod && e.shiftKey && key === "o") {
+      e.preventDefault();
+      newChat();
+      prompt.focus();
+    } else if (mod && !e.shiftKey && key === "k") {
+      e.preventDefault();
+      openSearch();
+    } else if (mod && e.shiftKey && key === "s") {
+      e.preventDefault();
+      toggleSidebar();
+    } else if (e.key === "/" && !typing && !document.querySelector("dialog[open]")) {
+      e.preventDefault();
+      prompt.focus();
+    } else if (e.key === "Escape") {
+      if (closePopups({ restoreFocus: true })) return;
+      if ($("app").dataset.drawer === "open") {
+        setDrawer(false);
+        $("open-sidebar").focus();
+      } else if (!$("workspace").hidden && !document.querySelector("dialog[open]")) {
+        closeWorkspace();
+      }
     }
   });
 
   // settings
-  $("context").querySelector("[data-close]").addEventListener("click", () => $("context").close());
-  $("context").addEventListener("click", (e) => { if (e.target === $("context")) $("context").close(); });
-  $("settings").querySelector("[data-close]").addEventListener("click", () => $("settings").close());
-  $("settings").addEventListener("click", (e) => {
-    if (e.target === $("settings")) $("settings").close();
-  });
+  for (const id of ["context", "settings", "shortcuts"]) wireDialog(id);
+  for (const tab of document.querySelectorAll(".settings-nav [role=tab]")) {
+    tab.addEventListener("click", () => selectPane(tab.dataset.pane));
+    tab.addEventListener("keydown", (e) => {
+      const keys = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+      if (!(e.key in keys)) return;
+      e.preventDefault();
+      const tabs = [...document.querySelectorAll(".settings-nav [role=tab]")];
+      const next = tabs[(tabs.indexOf(tab) + keys[e.key] + tabs.length) % tabs.length];
+      next.focus();
+      selectPane(next.dataset.pane);
+    });
+  }
   $("profile-form").addEventListener("submit", saveProfile);
   $("avatar-input").addEventListener("change", uploadAvatar);
   $("avatar-remove").addEventListener("click", removeAvatar);
@@ -1539,13 +2096,21 @@ function wire() {
       saveSettings({ theme: radio.value }, { quiet: true });
     });
   }
-  for (const radio of document.querySelectorAll('input[name="usage-mode"]')) radio.addEventListener("change", () => saveSettings({ usageMode: radio.value }));
-  for (const radio of document.querySelectorAll('input[name="header-usage-mode"]')) radio.addEventListener("change", () => {
-    saveSettings({ usageMode: radio.value });
-    setPopup("model-menu", "model-trigger", false);
-  });
+  for (const radio of document.querySelectorAll('input[name="usage-mode"]')) {
+    radio.addEventListener("change", () => saveSettings({ usageMode: radio.value }, { quiet: true }));
+  }
+  for (const radio of document.querySelectorAll('input[name="header-usage-mode"]')) {
+    radio.addEventListener("change", () => {
+      saveSettings({ usageMode: radio.value }, { quiet: true });
+      setPopup("model-menu", "model-trigger", false);
+      toast(`Response effort: ${radio.value.replace(/^./, (c) => c.toUpperCase())}`);
+    });
+  }
   $("s-temperature").addEventListener("input", (e) => ($("temperature-out").textContent = Number(e.target.value).toFixed(2)));
-  $("s-temperature").addEventListener("change", (e) => saveSettings({ temperature: Number(e.target.value) }));
+  $("s-temperature").addEventListener("change", (e) => saveSettings({ temperature: Number(e.target.value) }, { quiet: true }));
+  const prefs = { "pref-enter": "enterToSend", "pref-autopen": "autoOpen", "pref-autorun": "autoRun", "pref-wrap": "wrap", "pref-autofix": "autoFix" };
+  for (const [id, key] of Object.entries(prefs)) $(id).addEventListener("change", (e) => setPref(key, e.target.checked));
+  $("skills-reset").addEventListener("click", resetSkills);
   $("password-form").addEventListener("submit", changePassword);
   $("revoke-sessions").addEventListener("click", revokeSessions);
   $("delete-account").addEventListener("click", deleteAccount);
@@ -1553,6 +2118,7 @@ function wire() {
 }
 
 async function boot() {
+  state.prefs = loadPrefs();
   wire();
   try {
     state.config = { ...state.config, ...(await api("/api/config")) };

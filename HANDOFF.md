@@ -4,6 +4,44 @@
 
 The owner prioritized better coding over the earlier from-scratch-only rule. The original Coda training pipeline remains in this repository, while `start-coda.ps1` now defaults to local `llama3.2:3b` through Ollama. `-Backend coda` still serves a Coda checkpoint. The 6M Phase 4 checkpoint at step 600 and a Python-focused continuation both scored 0/12 on held-out Python function tests. The local Ollama comparison scored 12/12 for `llama3.2:3b` and 10/12 for `qwen2.5-coder:3b` on the same tasks. The site is served by the 3B Ollama model through the existing private tunnel.
 
+## 2026-10-02 (later): serving backend v2
+
+The Ollama path in `server.py` now runs `opcoda/codegen.py`: language-specific system prompts,
+then **write → check → repair**, with the user's Skills added to the prompt. Default model is
+`qwen2.5-coder:3b` (`start-coda.ps1 -OllamaModel llama3.2:3b` still works).
+
+- `opcoda/quality.py` adds static checks on top of `opcoda/verify.py` (nothing generated runs on
+  this PC): placeholders/TODOs, `input()`, `while True` without exit, mutable default args, debug
+  prints, scripts that look up element ids the page doesn't have, inline handlers calling undefined
+  functions, unlabelled form fields, images without alt.
+- Failed checks are sent back to the model as a repair request; a repair is kept only if it scores
+  better, so a round can't make an answer worse.
+- Response effort: light = 1 pass; medium = + up to 1 repair; super = plan + 2 repairs;
+  intense = plan + 2 repairs + review.
+- `opcoda/skills.py`: 23 built-in skills in 4 groups (Quality, Style, Web design, Apps) plus the
+  `ai-skills/*.md` guides. `GET /skills` lists them for the website.
+- Website: "Ask Coda to fix" appears when a page throws in the preview sandbox or a script fails
+  in the Run sandbox (both run in the visitor's browser). The Worker attaches the stored code itself.
+  Optional setting: fix errors automatically (one attempt).
+
+Measured with `evals/quality_bench.py` (24 harder Python tasks with hidden tests run in the
+sandbox, plus 6 website prompts scored by the checks; temperature 0, see `evals/quality/`):
+
+| Backend | Python tests | Websites passing all checks | Avg time / Python task |
+|---|---|---|---|
+| old prompt (qwen2.5-coder:3b) | 16/24 | 5/6 | 18 s |
+| v2 medium (default) | 17/24 | 5/6 | 23 s |
+| v2 super (plan) | 17/24 | – | 56 s |
+| v2 intense (plan + review) | 18/24 | – | 110 s |
+
+Takeaway: the checks + repair catch broken code (e.g. the old to-do app's script crashed on
+missing filter buttons); they cannot catch wrong logic. Planning alone did not help this 3B model's
+logic; the review pass (intense) added one task at ~5x the time. The remaining Python failures are spec details (exact formats,
+tie-breaking), which is the model's ceiling. The realistic next step for logic is a larger
+coding model (e.g. `qwen2.5-coder:7b`, ~4.7 GB download, roughly 2× slower on this CPU).
+Server-side execution of generated code stays off: prompts come from the internet, and the eval
+sandbox is not a security boundary.
+
 Read this first if you are continuing the project (human or AI).
 
 ## Ground rules (from the project owner, do not break)

@@ -1,0 +1,32 @@
+Using local Ollama model qwen2.5-coder:3b.
+roman_to_int             PASS 5/5 passed    25.5s
+int_to_roman             PASS 5/5 passed    22.2s
+run_length_encode        PASS 5/5 passed    16.7s
+run_length_decode        fail 3/4 failed     8.7s
+balanced_brackets        PASS 6/6 passed    12.9s
+merge_intervals          fail 1/5 failed    19.5s
+top_k_words              fail 1/4 failed    15.8s
+levenshtein              PASS 5/5 passed    21.4s
+parse_duration           fail 0/5 failed    22.1s
+format_bytes             fail 3/5 failed    16.1s
+spiral_order             PASS 4/4 passed    29.5s
+group_anagrams           PASS 3/3 passed    16.3s
+caesar_cipher            PASS 4/4 passed    19.1s
+pascal_row               PASS 4/4 passed    14.6s
+dedupe_keep_order        PASS 3/3 passed    15.2s
+longest_common_prefix    PASS 5/5 passed    15.9s
+binary_search            PASS 5/5 passed    17.9s
+deep_flatten             PASS 4/4 passed    12.8s
+is_valid_ipv4            PASS 7/7 passed    18.6s
+matrix_multiply          PASS 3/3 passed    17.8s
+word_wrap                fail 1/4 failed    17.3s
+count_islands            fail 1/4 failed    24.9s
+next_greater             PASS 4/4 passed    14.2s
+slugify                  fail 2/4 failed    10.8s
+web html       OK    169 lines 134.0s []
+web html       OK    241 lines 219.0s []
+web html       OK    186 lines 136.0s []
+web css        OK    102 lines  61.0s []
+web javascript OK     48 lines  42.9s []
+web html       OK    218 lines 224.3s []
+{"model": "qwen2.5-coder:3b", "mode": "medium", "python_passed": 16, "python_total": 24, "web_ok": 6, "web_total": 6, "minutes": 20.8}

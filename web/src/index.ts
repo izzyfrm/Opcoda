@@ -43,14 +43,22 @@ interface Settings {
   maxTokens: number;
   drafts: number;
   usageMode: "light" | "medium" | "super" | "intense";
+  /** Skills -> on/off. Only the user's changes are stored; missing ids use the skill's default. */
+  skills: Record<string, boolean>;
 }
 
 const SETTINGS_VERSION = 5;
 const MODE_TOKENS = { light: 256, medium: 450, super: 650, intense: 900 } as const;
-const DEFAULT_SETTINGS: Settings = { v: SETTINGS_VERSION, theme: "dark", temperature: 0.3, maxTokens: 450, drafts: 1, usageMode: "medium" };
+const DEFAULT_SETTINGS: Settings = { v: SETTINGS_VERSION, theme: "dark", temperature: 0.3, maxTokens: 450, drafts: 1, usageMode: "medium", skills: {} };
+const SKILL_ID = /^[a-z0-9][a-z0-9-]{0,47}$/;
+/** "Ask Coda to fix" attaches the stored file server-side, so it may exceed what a user can type. */
+const FIX_FILE_CHARS = 20_000;
+const FIX_FILE_NAME: Record<string, string> = { html: "index.html", css: "styles.css", javascript: "script.js", python: "main.py" };
+const MAX_SKILLS = 40;
 const LANGUAGES = ["auto", "html", "css", "javascript", "python"] as const;
 type Language = (typeof LANGUAGES)[number];
 const MAX_MESSAGE_CHARS = 6000;
+const MAX_STORED_CHARS = MAX_MESSAGE_CHARS + FIX_FILE_CHARS + 200;
 const MAX_AVATAR_BYTES = 300 * 1024;
 
 interface Ctx {
@@ -76,9 +84,9 @@ function parseSettings(raw: string): Settings {
       const usageMode = oldLength <= 320 ? "light" : oldLength <= 550 ? "medium" : oldLength <= 750 ? "super" : "intense";
       return { ...DEFAULT_SETTINGS, theme: saved.theme ?? DEFAULT_SETTINGS.theme,
         temperature: saved.temperature ?? DEFAULT_SETTINGS.temperature,
-        usageMode, maxTokens: MODE_TOKENS[usageMode] };
+        usageMode, maxTokens: MODE_TOKENS[usageMode], skills: {} };
     }
-    return { ...DEFAULT_SETTINGS, ...saved };
+    return { ...DEFAULT_SETTINGS, ...saved, skills: { ...(saved.skills ?? {}) } };
   } catch {
     return { ...DEFAULT_SETTINGS };
   }
@@ -156,7 +164,7 @@ const getConfig: Handler = async ({ env }) =>
 
 const getStatus: Handler = async ({ env, ctx }) => {
   const cache = caches.default;
-  const key = new Request("https://opcoda.internal/model-status");
+  const key = new Request("https://opcoda.internal/model-status-v2");
   const hit = await cache.match(key);
   if (hit) return json(await hit.json());
 
@@ -166,13 +174,44 @@ const getStatus: Handler = async ({ env, ctx }) => {
     if (res.ok) {
       const data = (await res.json()) as { step?: number; parameters?: number; model?: string; backend?: string; context_tokens?: number };
       status = { online: true, step: data.step ?? null, parameters: data.parameters ?? null,
-        model: data.model ?? null, backend: data.backend ?? null, contextTokens: data.context_tokens ?? null };
+        contextTokens: data.context_tokens ?? null };
     }
   } catch {
     // offline: PC asleep, server.py stopped, or tunnel down
   }
   ctx.waitUntil(cache.put(key, json(status, { headers: { "cache-control": "max-age=20" } })));
   return json(status);
+};
+
+interface SkillInfo { id: string; name: string; description: string; default: boolean; langs: string[]; kind: string; group: string }
+
+/** The model server's Skills catalog (names and descriptions only), cached briefly. */
+const getSkills: Handler = async (c) => {
+  await session(c);
+  const cache = caches.default;
+  const key = new Request("https://opcoda.internal/skills-v2");
+  const hit = await cache.match(key);
+  if (hit) return json(await hit.json());
+  let body: { online: boolean; applies: boolean; skills: SkillInfo[] } = { online: false, applies: false, skills: [] };
+  try {
+    const res = await modelFetch(c.env, "/skills", { signal: AbortSignal.timeout(3000) });
+    if (res.ok) {
+      const data = (await res.json()) as { skills?: unknown; applies?: unknown };
+      const list = Array.isArray(data.skills) ? data.skills : [];
+      const skills = list.flatMap((raw): SkillInfo[] => {
+        const s = raw as Partial<SkillInfo>;
+        if (typeof s?.id !== "string" || !SKILL_ID.test(s.id) || typeof s.name !== "string") return [];
+        return [{ id: s.id, name: s.name.slice(0, 60), description: String(s.description ?? "").slice(0, 200),
+          default: Boolean(s.default), langs: Array.isArray(s.langs) ? s.langs.map(String).slice(0, 4) : [],
+          kind: s.kind === "guide" ? "guide" : "builtin", group: String(s.group ?? "").slice(0, 30) }];
+      }).slice(0, MAX_SKILLS);
+      body = { online: true, applies: data.applies !== false, skills };
+    }
+  } catch {
+    // offline: the client shows the user's saved choices without the catalog
+  }
+  if (body.online) c.ctx.waitUntil(cache.put(key, json(body, { headers: { "cache-control": "max-age=60" } })));
+  return json(body);
 };
 
 // ---------------------------------------------------------------------------
@@ -263,7 +302,7 @@ const updateMe: Handler = async (c) => {
   const current = parseSettings(s.user.settings);
   const next: Settings = { ...current };
   if (body.settings) {
-    const { theme, temperature, maxTokens, drafts, usageMode } = body.settings;
+    const { theme, temperature, maxTokens, drafts, usageMode, skills } = body.settings;
     if (theme !== undefined) {
       if (!["system", "light", "dark"].includes(theme)) throw new HttpError(400, "invalid_setting", "Unknown theme.");
       next.theme = theme;
@@ -288,6 +327,18 @@ const updateMe: Handler = async (c) => {
       next.usageMode = usageMode;
       next.maxTokens = MODE_TOKENS[usageMode];
       next.drafts = 1;
+    }
+    if (skills !== undefined) {
+      // A partial update: {id: true|false} sets a skill, {id: null} returns it to its default.
+      if (!skills || typeof skills !== "object" || Array.isArray(skills)) throw new HttpError(400, "invalid_setting", "Invalid skills.");
+      const merged: Record<string, boolean> = { ...current.skills };
+      for (const [id, value] of Object.entries(skills as Record<string, unknown>)) {
+        if (!SKILL_ID.test(id) || (value !== null && typeof value !== "boolean")) throw new HttpError(400, "invalid_setting", "Invalid skill.");
+        if (value === null) delete merged[id];
+        else merged[id] = value;
+      }
+      if (Object.keys(merged).length > MAX_SKILLS) throw new HttpError(400, "invalid_setting", "Too many skills.");
+      next.skills = merged;
     }
   }
   const displayName = body.displayName !== undefined
@@ -397,7 +448,9 @@ interface MessageRow {
 }
 
 function publicMessage(m: MessageRow) {
-  return { id: m.id, role: m.role, content: m.content, meta: m.meta ? JSON.parse(m.meta) : null, createdAt: m.created_at };
+  const meta = m.meta ? JSON.parse(m.meta) : null;
+  if (meta) delete meta.model;
+  return { id: m.id, role: m.role, content: m.content, meta, createdAt: m.created_at };
 }
 
 async function ownedConversation(env: Env, userId: string, id: string) {
@@ -459,6 +512,7 @@ interface ModelReply {
   syntax_ok?: boolean;
   checks?: { ok: boolean; checks: ModelCheck[]; stats?: Record<string, unknown> };
   drafts?: { total: number; passed: number };
+  steps?: string[];
 }
 
 async function askCoda(env: Env, prompt: string, language: Language, settings: Settings): Promise<ModelReply> {
@@ -476,6 +530,7 @@ async function askCoda(env: Env, prompt: string, language: Language, settings: S
         temperature: settings.temperature,
         max_tokens: settings.maxTokens,
         drafts: settings.drafts,
+        skills: settings.skills,
       }),
       // Styled HTML pages get a larger output budget on the local CPU.
       signal: AbortSignal.timeout(600_000),
@@ -502,7 +557,6 @@ function replyMeta(reply: ModelReply) {
   }));
   return {
     files: projectFiles(reply.files).length ? projectFiles(reply.files) : reply.lang === "html" ? projectFiles(extractWebsiteProject(reply.text)) : [],
-    model: reply.model ?? null,
     promptTokens: reply.prompt_tokens ?? null,
     contextTokens: reply.context_tokens ?? null,
     lang: LANGUAGES.includes(reply.lang as Language) ? reply.lang : reply.lang === "text" ? "text" : "python",
@@ -513,6 +567,7 @@ function replyMeta(reply: ModelReply) {
     checks,
     stats: reply.checks?.stats ?? null,
     drafts: reply.drafts ?? null,
+    steps: Array.isArray(reply.steps) ? reply.steps.filter((x) => /^[a-z]{1,12}$/.test(String(x))).slice(0, 8) : null,
   };
 }
 
@@ -521,13 +576,16 @@ const chat: Handler = async (c) => {
   const { env } = c;
   if (!(await rateLimit(env.DB, `chat:${s.user.id}`, 10, 60))) throw tooManyRequests("You're sending messages too quickly.");
 
-  const body = await readJson<{ conversationId?: string | null; message?: string; language?: string }>(c.request);
-  const message = String(body.message ?? "").replace(/\r\n/g, "\n").trim();
+  const body = await readJson<{
+    conversationId?: string | null; message?: string; language?: string; retry?: boolean; fix?: { messageId?: string };
+  }>(c.request);
+  let message = String(body.message ?? "").replace(/\r\n/g, "\n").trim();
   if (!message) throw new HttpError(400, "empty_message", "Write a message first.");
-  if (message.length > MAX_MESSAGE_CHARS) {
+  // A retry repeats the stored message (checked below), which may include an attached fix file.
+  if (message.length > (body.retry === true ? MAX_STORED_CHARS : MAX_MESSAGE_CHARS)) {
     throw new HttpError(400, "message_too_long", `Keep messages under ${MAX_MESSAGE_CHARS} characters.`);
   }
-  const language = (body.language ?? "auto") as Language;
+  let language = (body.language ?? "auto") as Language;
   if (!LANGUAGES.includes(language)) throw new HttpError(400, "invalid_language", "Unknown language.");
 
   const usage = await usageFor(env, s.user.id);
@@ -536,6 +594,25 @@ const chat: Handler = async (c) => {
   }
 
   const existing = body.conversationId ? await ownedConversation(env, s.user.id, body.conversationId) : null;
+  // "Try again" asks for a new answer to the chat's latest message without saving that message twice.
+  const retry = body.retry === true && existing !== null;
+  if (retry) {
+    const last = await env.DB.prepare(
+      "SELECT content FROM messages WHERE conversation_id = ? AND role = 'user' ORDER BY created_at DESC, rowid DESC LIMIT 1",
+    ).bind(existing.id).first<{ content: string }>();
+    if (last?.content !== message) throw new HttpError(400, "retry_mismatch", "Only the latest message can be tried again.");
+  }
+  if (body.fix && !retry) {
+    // "Ask Coda to fix": attach the reply's own code from the database, never from the client.
+    if (!existing) throw new HttpError(400, "invalid_fix", "Fixes belong to an existing chat.");
+    const row = await env.DB.prepare(
+      "SELECT content, meta FROM messages WHERE id = ? AND conversation_id = ? AND role = 'assistant'",
+    ).bind(String(body.fix.messageId ?? ""), existing.id).first<{ content: string; meta: string | null }>();
+    if (!row) throw new HttpError(404, "not_found", "That code isn't in this chat anymore.");
+    const lang = row.meta ? String((JSON.parse(row.meta) as { lang?: string }).lang ?? "") : "";
+    if (lang !== "auto" && LANGUAGES.includes(lang as Language)) language = lang as Language;
+    message = `${message}\n\n<attached_file name="${FIX_FILE_NAME[lang] ?? "code.txt"}">\n${row.content.slice(0, FIX_FILE_CHARS)}\n</attached_file>`;
+  }
   const reply = await askCoda(env, message, language, parseSettings(s.user.settings));
 
   const now = nowSeconds();
@@ -555,7 +632,7 @@ const chat: Handler = async (c) => {
       ? env.DB.prepare("UPDATE conversations SET updated_at = ? WHERE id = ?").bind(now, conversationId)
       : env.DB.prepare("INSERT INTO conversations (id, user_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)")
           .bind(conversationId, s.user.id, title, now, now),
-    insertMessage(userMsg),
+    ...(retry ? [] : [insertMessage(userMsg)]),
     insertMessage(botMsg),
     env.DB.prepare(
       `INSERT INTO usage (user_id, day, count) VALUES (?, ?, 1)
@@ -565,7 +642,7 @@ const chat: Handler = async (c) => {
 
   return json({
     conversation: { id: conversationId, title, updatedAt: now },
-    messages: [publicMessage(userMsg), publicMessage(botMsg)],
+    messages: retry ? [publicMessage(botMsg)] : [publicMessage(userMsg), publicMessage(botMsg)],
     usage: { ...usage, used: usage.used + 1 },
   });
 };
@@ -593,7 +670,11 @@ const PREVIEW_SHIM =
   "<script>(function(){function mem(){var d={};return{getItem:function(k){return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null}," +
   "setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){d={}},key:function(i){return Object.keys(d)[i]||null}," +
   "get length(){return Object.keys(d).length}}}['localStorage','sessionStorage'].forEach(function(n){try{window[n].getItem('x')}catch(e){" +
-  "Object.defineProperty(window,n,{value:mem(),configurable:true})}})})();</script>";
+  "Object.defineProperty(window,n,{value:mem(),configurable:true})}})})();" +
+  // Report the page's runtime errors to Opcoda so it can offer "Ask Coda to fix" (messages only, no page data).
+  "(function(){var sent=0;function send(m,l){if(sent++<5)try{parent.postMessage({source:'coda-preview',type:'error'," +
+  "message:String(m).slice(0,300),line:l||null},'*')}catch(e){}}addEventListener('error',function(e){send(e.message,e.lineno)});" +
+  "addEventListener('unhandledrejection',function(e){send('Unhandled promise rejection: '+(e.reason&&e.reason.message||e.reason))})})();</script>";
 
 const CSS_PLAYGROUND = (css: string) => `<!DOCTYPE html>
 <html lang="en">
@@ -660,6 +741,7 @@ const ID = "([0-9a-f-]{36})";
 const routes: [string, RegExp, Handler][] = [
   ["GET", /^\/api\/config$/, getConfig],
   ["GET", /^\/api\/status$/, getStatus],
+  ["GET", /^\/api\/skills$/, getSkills],
   ["POST", /^\/api\/auth\/signup$/, signup],
   ["POST", /^\/api\/auth\/login$/, login],
   ["POST", /^\/api\/auth\/logout$/, logout],

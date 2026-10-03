@@ -1,0 +1,278 @@
+{
+ "summary": {
+  "model": "qwen2.5-coder:3b",
+  "mode": "intense",
+  "python_passed": 15,
+  "python_total": 24,
+  "web_ok": 0,
+  "web_total": 0,
+  "minutes": 44.0
+ },
+ "python": [
+  {
+   "task": "roman_to_int",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 93.3,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def roman_to_int(numeral):\n    # Define the mapping of Roman numerals to integers\n    roman_map = {\n        'I': 1,\n        'V': 5,\n        'X': 10,\n        'L': 50,\n        'C': 100,\n        'D': 500,\n        'M': 1000\n    }\n    \n    # Initialize the result\n    result = 0\n    \n    # Iterate over the numeral string\n    for i in range(len(numeral)):\n        # Get the current Roman numeral and its value\n        current_value = roman_map[numeral[i]]\n        \n        # If the next numeral exists and is greater than the current, subtract it\n        if i + 1 < len(numeral) and roman_map[numeral[i + 1]] > current_value:\n            result -= current_value\n        else:\n            result += current_value\n    \n    return result\n\n# Example usage\nif __name__ == \"__main__\":\n    # Test cases\n    print(roman_to_int(\"III\"))  # Output: 3\n    print(roman_to_int(\"IV\"))   # Output: 4\n    print(roman_to_int(\"IX\"))   # Output: 9\n    print(roman_to_int(\"IVV\"))  # Output: 0\n"
+  },
+  {
+   "task": "int_to_roman",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 114.4,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def int_to_roman(number):\n    # Define the Roman numeral symbols and their corresponding values\n    val = [\n        1000, 900, 500, 400,\n        100, 90, 50, 40,\n        10, 9, 5, 4,\n        1\n    ]\n    syms = [\n        \"M\", \"CM\", \"D\", \"CD\",\n        \"C\", \"XC\", \"L\", \"XL\",\n        \"X\", \"IX\", \"V\", \"IV\",\n        \"I\"\n    ]\n    \n    roman_numeral = \"\"\n    i = 0\n    while number > 0:\n        for _ in range(number // val[i]):\n            roman_numeral += syms[i]\n            number -= val[i]\n        i += 1\n    return roman_numeral\n\n# Example usage and demonstration\nif __name__ == \"__main__\":\n    # Test cases\n    test_cases = {\n        4: \"IV\",\n        900: \"CM\",\n        3999: \"MMMCMXCIX\"\n    }\n    \n    for number, expected in test_cases.items():\n        result = int_to_roman(number)\n        print(f\"int_to_roman({number}) = {result} (Expected: {expected})\")\n"
+  },
+  {
+   "task": "run_length_encode",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 97.8,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def run_length_encode(text):\n    if not text:\n        return \"\"\n    \n    encoded = []\n    count = 1\n    \n    for i in range(1, len(text)):\n        if text[i] == text[i - 1]:\n            count += 1\n        else:\n            encoded.append(str(count) + text[i - 1])\n            count = 1\n    \n    # Append the last run\n    encoded.append(str(count) + text[-1])\n    \n    return ''.join(encoded)\n\n# Demo\nif __name__ == \"__main__\":\n    input_text = 'aaabcc'\n    result = run_length_encode(input_text)\n    print(result)  # Output: '3a1b2c'\n"
+  },
+  {
+   "task": "run_length_decode",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 83.7,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def run_length_decode(encoded):\n    decoded = []\n    i = 0\n    while i < len(encoded):\n        count = ''\n        while i < len(encoded) and encoded[i].isdigit():\n            count += encoded[i]\n            i += 1\n        if not count:\n            raise ValueError(\"Invalid input: missing count\")\n        char = encoded[i]\n        decoded.extend([char] * int(count))\n        i += 1\n    return ''.join(decoded)\n\n# Example usage\nif __name__ == \"__main__\":\n    example_input = '3a1b12c'\n    result = run_length_decode(example_input)\n    print(result)  # Output: aaabcccccccccccccc\n"
+  },
+  {
+   "task": "balanced_brackets",
+   "passed": true,
+   "status": "passed",
+   "tests": "6/6",
+   "detail": "",
+   "seconds": 80.5,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def balanced_brackets(text):\n    stack = []\n    bracket_pairs = {')': '(', '}': '{', ']': '['}\n    \n    for char in text:\n        if char in bracket_pairs.values():\n            stack.append(char)\n        elif char in bracket_pairs.keys():\n            if not stack or stack[-1] != bracket_pairs[char]:\n                return False\n            stack.pop()\n    \n    return len(stack) == 0\n\n# Demo\nif __name__ == \"__main__\":\n    print(balanced_brackets(\"()\"))  # True\n    print(balanced_brackets(\"[{()]}\"))  # True\n    print(balanced_brackets(\"([{}])\"))  # True\n    print(balanced_brackets(\"((()))\"))  # True\n    print(balanced_brackets(\"{[()]}\"))  # True\n    print(balanced_brackets(\"([{}])\"))  # True\n"
+  },
+  {
+   "task": "merge_intervals",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 99.0,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def merge_intervals(intervals):\n    if not intervals:\n        return []\n\n    # Sort intervals by start time\n    intervals.sort(key=lambda x: x[0])\n\n    merged = [intervals[0]]\n\n    for interval in intervals[1:]:\n        last_merged = merged[-1]\n        if interval[0] <= last_merged[1]:\n            # Merge intervals\n            merged[-1] = [last_merged[0], max(last_merged[1], interval[1])]\n        else:\n            # Add new interval\n            merged.append(interval)\n\n    return merged\n\n# Example usage\nif __name__ == \"__main__\":\n    input_intervals = [[1, 3], [2, 6], [8, 10]]\n    output_intervals = merge_intervals(input_intervals)\n    print(output_intervals)  # Output: [[1, 6], [8, 10]]\n"
+  },
+  {
+   "task": "top_k_words",
+   "passed": false,
+   "status": "failed",
+   "tests": "1/4",
+   "detail": "",
+   "seconds": 117.1,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "from collections import Counter\n\ndef top_k_words(text, k):\n    # Filter out non-letter characters and convert to lowercase\n    words = [word.lower() for word in text if word.isalpha()]\n    \n    # Count the frequency of each word\n    word_counts = Counter(words)\n    \n    # Sort words by frequency (descending) and alphabetically (ascending) for ties\n    sorted_words = sorted(word_counts.items(), key=lambda x: (-x[1], x[0]))\n    \n    # Return the top k words\n    return sorted_words[:k]\n\n# Example usage\nif __name__ == \"__main__\":\n    text1 = \"apple banana apple orange banana apple\"\n    k1 = 2\n    print(top_k_words(text1, k1))  # Output: [('apple', 3), ('banana', 2)]\n\n    text2 = \"hello world hello python python hello\"\n    k2 = 3\n    print(top_k_words(text2, k2))  # Output: [('hello', 4), ('world', 1), ('python', 2)]\n\n    text3 = \"one two three four five six seven eight nine ten\"\n    k3 = 10\n    print(top_k_words(text3, k3))  # Output: [('one', 1), ('two', 1), ('three', 1), ('four', 1), ('five', 1), ('six', 1), ('seven', 1), ('eight', 1), ('nine', 1), ('ten', 1)]\n\n    text4 = \"\"\n    k4 = 5\n    print(top_k_words(text4, k4))  # Output: []\n"
+  },
+  {
+   "task": "levenshtein",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 90.6,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def levenshtein(a, b):\n    if not a:\n        return len(b)\n    if not b:\n        return len(a)\n\n    # Create a matrix to store distances\n    dp = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]\n\n    # Initialize the first row and column\n    for i in range(len(a) + 1):\n        dp[i][0] = i\n    for j in range(len(b) + 1):\n        dp[0][j] = j\n\n    # Fill the matrix\n    for i in range(1, len(a) + 1):\n        for j in range(1, len(b) + 1):\n            if a[i - 1] == b[j - 1]:\n                cost = 0\n            else:\n                cost = 1\n            dp[i][j] = min(dp[i - 1][j] + 1,  # Deletion\n                           dp[i][j - 1] + 1,  # Insertion\n                           dp[i - 1][j - 1] + cost)  # Substitution\n\n    return dp[len(a)][len(b)]\n\n# Example usage\nif __name__ == \"__main__\":\n    print(levenshtein(\"kitten\", \"sitting\"))  # Expected result: 3\n    print(levenshtein(\"hello\", \"world\"))   # Expected result: 5\n    print(levenshtein(\"\", \"abc\"))         # Expected result: 3\n    print(levenshtein(\"a\", \"\"))            # Expected result: 1\n"
+  },
+  {
+   "task": "parse_duration",
+   "passed": false,
+   "status": "failed",
+   "tests": "0/5",
+   "detail": "",
+   "seconds": 143.1,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def parse_duration(text):\n    if not text:\n        return 0\n    \n    units = {'h': 3600, 'm': 60, 's': 1}\n    total_seconds = 0\n    current_unit = None\n    \n    for char in text:\n        if char.isdigit():\n            if current_unit is None:\n                total_seconds += int(char)\n            else:\n                total_seconds += int(char) * units[current_unit]\n        elif char in units:\n            current_unit = char\n        else:\n            return 0\n    \n    return total_seconds\n\n# Demo\nif __name__ == \"__main__\":\n    print(parse_duration('1h30m'))  # Output: 900\n    print(parse_duration('45s'))    # Output: 45\n    print(parse_duration('2h5s'))   # Output: 755\n    print(parse_duration('1h2m3s')) # Output: 3783\n"
+  },
+  {
+   "task": "format_bytes",
+   "passed": false,
+   "status": "failed",
+   "tests": "4/5",
+   "detail": "",
+   "seconds": 84.7,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def format_bytes(size):\n    units = ['B', 'KB', 'MB', 'GB', 'TB']\n    if size == 0:\n        return '0 B'\n    \n    for i in range(len(units)):\n        if size < 1024 or i == len(units) - 1:\n            return f\"{size:.1f} {units[i]}\"\n        size /= 1024\n\n# Example usage\nif __name__ == \"__main__\":\n    print(format_bytes(512))    # Output: '512 B'\n    print(format_bytes(1536))   # Output: '1.5 KB'\n    print(format_bytes(1048576)) # Output: '1.0 MB'\n    print(format_bytes(0))      # Output: '0 B'\n"
+  },
+  {
+   "task": "spiral_order",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 147.7,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def spiral_order(matrix):\n    if not matrix or not matrix[0]:\n        return []\n\n    result = []\n    top, bottom, left, right = 0, len(matrix) - 1, 0, len(matrix[0]) - 1\n\n    while top <= bottom and left <= right:\n        # Traverse from left to right\n        for i in range(left, right + 1):\n            result.append(matrix[top][i])\n        top += 1\n\n        # Traverse from top to bottom\n        for i in range(top, bottom + 1):\n            result.append(matrix[i][right])\n        right -= 1\n\n        if top <= bottom:\n            # Traverse from right to left\n            for i in range(right, left - 1, -1):\n                result.append(matrix[bottom][i])\n            bottom -= 1\n\n        if left <= right:\n            # Traverse from bottom to top\n            for i in range(bottom, top - 1, -1):\n                result.append(matrix[i][left])\n            left += 1\n\n    return result\n\n# Demo\nif __name__ == \"__main__\":\n    matrix1 = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\n    matrix2 = [[1, 2, 3, 4], [5, 6, 7, 8]]\n    matrix3 = [[1]]\n\n    print(spiral_order(matrix1))  # Output: [1, 2, 3, 6, 9, 8, 7, 4, 5]\n    print(spiral_order(matrix2))  # Output: [1, 2, 3, 4, 8, 7, 6, 5]\n    print(spiral_order(matrix3))  # Output: [1]\n"
+  },
+  {
+   "task": "group_anagrams",
+   "passed": false,
+   "status": "rejected",
+   "tests": "0/3",
+   "detail": "forbidden name: print",
+   "seconds": 125.0,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def group_anagrams(words):\n    # Create a dictionary to hold lists of words grouped by their sorted characters\n    anagram_groups = {}\n    \n    for word in words:\n        # Sort the characters of the word to create a key\n        sorted_word = ''.join(sorted(word))\n        \n        # If the sorted word is not already a key, add it with an empty list\n        if sorted_word not in anagram_groups:\n            anagram_groups[sorted_word] = []\n        \n        # Append the original word to the corresponding group\n        anagram_groups[sorted_word].append(word)\n    \n    # Return the values of the dictionary as a list of lists\n    return list(anagram_groups.values())\n\ndef main():\n    # Example input: a user inputs words separated by spaces\n    user_input = \"listen silent enlist google gooegl inlets\"\n    \n    # Convert the input string into a list of words\n    words = user_input.split()\n    \n    # Call the group_anagrams function with the input list\n    result = group_anagrams(words)\n    \n    # Print the result\n    print(result)\n\n# Run the main function if this script is executed directly\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  {
+   "task": "caesar_cipher",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 126.4,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def caesar_cipher(text, shift):\n    def shift_char(c, shift):\n        if 'a' <= c <= 'z':\n            return chr((ord(c) - ord('a') + shift) % 26 + ord('a'))\n        elif 'A' <= c <= 'Z':\n            return chr((ord(c) - ord('A') + shift) % 26 + ord('A'))\n        else:\n            return c\n\n    return ''.join(shift_char(c, shift) for c in text)\n\nif __name__ == \"__main__\":\n    # Example usage\n    print(caesar_cipher(\"Hello, World!\", 3))  # Output: \"Khoor, Zruog!\"\n    print(caesar_cipher(\"Python 3.8\", -2))  # Output: \"Zruog 1.6\"\n    print(caesar_cipher(\"ABC XYZ\", 10))   # Output: \"KLM NOP\"\n    print(caesar_cipher(\"Shift 123\", 0))   # Output: \"Shift 123\"\n"
+  },
+  {
+   "task": "pascal_row",
+   "passed": false,
+   "status": "rejected",
+   "tests": "0/4",
+   "detail": "forbidden name: print",
+   "seconds": 141.8,
+   "checks_ok": true,
+   "rounds": 4,
+   "source": "def pascal_row(n):\n    if n < 0:\n        return []\n    elif n == 0:\n        return [1]\n    \n    row = [1]\n    for i in range(1, n + 1):\n        next_row = [1]\n        for j in range(1, i):\n            next_row.append(row[j - 1] + row[j])\n        next_row.append(1)\n        row = next_row\n    \n    return row\n\ndef main():\n    # Example values for demonstration\n    user_input = 4\n    result = pascal_row(user_input)\n    print(result)\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  {
+   "task": "dedupe_keep_order",
+   "passed": true,
+   "status": "passed",
+   "tests": "3/3",
+   "detail": "",
+   "seconds": 97.3,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def dedupe_keep_order(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n\n# Demo\nif __name__ == \"__main__\":\n    items1 = [1, 2, 3, 2, 4, 1, 5]\n    print(dedupe_keep_order(items1))  # Output: [1, 2, 3, 4, 5]\n\n    items2 = ['apple', 'banana', 'apple', 'orange']\n    print(dedupe_keep_order(items2))  # Output: ['apple', 'banana', 'orange']\n\n    items3 = [True, False, True, True]\n    print(dedupe_keep_order(items3))  # Output: [True, False]\n\n    items4 = []\n    print(dedupe_keep_order(items4))  # Output: []\n"
+  },
+  {
+   "task": "longest_common_prefix",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 102.4,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def longest_common_prefix(words):\n    if not words:\n        return \"\"\n    \n    # Filter out non-string elements\n    words = [word for word in words if isinstance(word, str)]\n    \n    if not words:\n        return \"\"\n    \n    # Sort the list of words to find the common prefix\n    words.sort()\n    \n    # Compare the first and last words to find the common prefix\n    first_word = words[0]\n    last_word = words[-1]\n    common_prefix = \"\"\n    \n    for i in range(min(len(first_word), len(last_word))):\n        if first_word[i] == last_word[i]:\n            common_prefix += first_word[i]\n        else:\n            break\n    \n    return common_prefix\n\n# Demo\nif __name__ == \"__main__\":\n    # Example 1\n    print(longest_common_prefix([\"flower\", \"flow\", \"flight\"]))  # Output: \"fl\"\n    \n    # Example 2\n    print(longest_common_prefix([\"dog\", \"racecar\", \"car\"]))  # Output: \"\"\n    \n    # Example 3\n    print(longest_common_prefix([\"a\", \"b\", \"c\"]))  # Output: \"\"\n    \n    # Edge Case\n    print(longest_common_prefix([]))  # Output: \"\"\n"
+  },
+  {
+   "task": "binary_search",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 105.1,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def binary_search(values, target):\n    if not values:\n        return -1\n    \n    left, right = 0, len(values) - 1\n    \n    while left <= right:\n        mid = (left + right) // 2\n        \n        if values[mid] == target:\n            return mid\n        elif values[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    \n    return -1\n\n# Example usage\nif __name__ == \"__main__\":\n    # Example 1\n    result = binary_search([1, 2, 3, 4, 5], 3)\n    print(result)  # Expected output: 2\n\n    # Example 2\n    result = binary_search([10, 20, 30, 40, 50], 25)\n    print(result)  # Expected output: -1\n\n    # Example 3\n    result = binary_search([1, 1, 1, 1, 1], 1)\n    print(result)  # Expected output: 0\n\n    # Edge Case\n    result = binary_search([], 5)\n    print(result)  # Expected output: -1\n"
+  },
+  {
+   "task": "deep_flatten",
+   "passed": false,
+   "status": "failed",
+   "tests": "1/4",
+   "detail": "",
+   "seconds": 100.9,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def deep_flatten(value):\n    def flatten(item):\n        if isinstance(item, list):\n            return [flatten(i) for i in item]\n        else:\n            return [item]\n    \n    return sum(flatten(value), [])\n\n# Example usage\nif __name__ == \"__main__\":\n    print(deep_flatten([1, 2, [3, 4], [5, [6, 7]]]))  # Output: [1, 2, 3, 4, 5, 6, 7]\n    print(deep_flatten(['a', 1, [2, 'b'], ['c', [3, 'd']]]))  # Output: ['a', 1, 2, 'b', 'c', 3, 'd']\n    print(deep_flatten([[1, 2], [3, 4], [5, 6]]))  # Output: [[], [], []]\n    print(deep_flatten([]))  # Output: []\n"
+  },
+  {
+   "task": "is_valid_ipv4",
+   "passed": true,
+   "status": "passed",
+   "tests": "7/7",
+   "detail": "",
+   "seconds": 97.2,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def is_valid_ipv4(address):\n    # Check if the address is an empty string\n    if not address:\n        return False\n    \n    # Split the address by dots\n    parts = address.split('.')\n    \n    # Check if there are exactly four parts\n    if len(parts) != 4:\n        return False\n    \n    # Validate each part\n    for part in parts:\n        # Check if the part is a digit and not empty\n        if not part.isdigit() or not part:\n            return False\n        \n        # Check if the part is between 0 and 255\n        if int(part) < 0 or int(part) > 255:\n            return False\n        \n        # Check for leading zeros, except for \"0\"\n        if part != '0' and part.startswith('0'):\n            return False\n    \n    return True\n\n# Example usage\nif __name__ == \"__main__\":\n    print(is_valid_ipv4(\"192.168.1.1\"))  # Expected result: True\n    print(is_valid_ipv4(\"0.0.0.0\"))      # Expected result: True\n    print(is_valid_ipv4(\"192.168.1.255\"))# Expected result: True\n    print(is_valid_ipv4(\"\"))            # Expected result: False\n"
+  },
+  {
+   "task": "matrix_multiply",
+   "passed": true,
+   "status": "passed",
+   "tests": "3/3",
+   "detail": "",
+   "seconds": 152.6,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def matrix_multiply(a, b):\n    if len(a) == 0 or len(b) == 0 or len(a[0]) != len(b):\n        raise ValueError(\"Inner dimensions of matrices do not match\")\n    \n    result = []\n    for i in range(len(a)):\n        row = []\n        for j in range(len(b[0])):\n            element = sum(a[i][k] * b[k][j] for k in range(len(a[0])))\n            row.append(element)\n        result.append(row)\n    \n    return result\n\n# Example usage\nif __name__ == \"__main__\":\n    a = [[1, 2], [3, 4]]\n    b = [[5, 6], [7, 8]]\n    result = matrix_multiply(a, b)\n    print(result)  # Output: [[19, 22], [43, 50]]\n\n    a = [[1, 2, 3], [4, 5, 6]]\n    b = [[7, 8], [9, 10], [11, 12]]\n    result = matrix_multiply(a, b)\n    print(result)  # Output: [[58, 64], [139, 154]]\n\n    a = [[1, 2], [3, 4]]\n    b = [[5, 6], [7, 8], [9, 10]]\n    try:\n        result = matrix_multiply(a, b)\n    except ValueError as e:\n        print(e)  # Output: Inner dimensions of matrices do not match\n"
+  },
+  {
+   "task": "word_wrap",
+   "passed": false,
+   "status": "failed",
+   "tests": "1/4",
+   "detail": "",
+   "seconds": 105.4,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def word_wrap(text, width):\n    if not text or width <= 0:\n        return []\n    \n    lines = []\n    current_line = \"\"\n    \n    for word in text.split():\n        if len(current_line) + len(word) + 1 > width:\n            lines.append(current_line)\n            current_line = word\n        else:\n            current_line += \" \" + word\n    \n    lines.append(current_line)\n    \n    return lines\n\n# Demo\nif __name__ == \"__main__\":\n    print(word_wrap(\"Hello world\", 5))  # Output: ['Hello', 'world']\n    print(word_wrap(\"This is a test string that needs to be wrapped.\", 10))  # Output: ['This is a', 'test', 'string', 'that', 'needs', 'to', 'be', 'wrapped.']\n    print(word_wrap(\"Short\", 20))  # Output: ['Short']\n    print(word_wrap(\"\", 5))  # Output: []\n"
+  },
+  {
+   "task": "count_islands",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 92.8,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def count_islands(grid):\n    if not grid:\n        return 0\n\n    rows, cols = len(grid), len(grid[0])\n    visited = set()\n\n    def dfs(r, c):\n        if r < 0 or r >= rows or c < 0 or c >= cols or grid[r][c] == '0' or (r, c) in visited:\n            return\n        visited.add((r, c))\n        for dr, dc in [(0, 1), (1, 0), (-1, 0), (0, -1)]:\n            dfs(r + dr, c + dc)\n\n    island_count = 0\n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] == '1' and (r, c) not in visited:\n                dfs(r, c)\n                island_count += 1\n\n    return island_count\n\n# Example usage\nif __name__ == \"__main__\":\n    grid = [\"101\", \"010\", \"111\"]\n    print(count_islands(grid))  # Expected output: 3\n"
+  },
+  {
+   "task": "next_greater",
+   "passed": false,
+   "status": "rejected",
+   "tests": "0/4",
+   "detail": "forbidden name: print",
+   "seconds": 122.3,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "def next_greater(values):\n    if not values:\n        return []\n    \n    result = [-1] * len(values)\n    stack = []\n    \n    for i, value in enumerate(values):\n        while stack and values[stack[-1]] < value:\n            result[stack.pop()] = value\n        stack.append(i)\n    \n    return result\n\ndef main():\n    # Example input\n    input_values = [2, 1, 3]\n    print(\"Input:\", input_values)\n    \n    # Call the function\n    output_values = next_greater(input_values)\n    print(\"Output:\", output_values)\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  {
+   "task": "slugify",
+   "passed": false,
+   "status": "failed",
+   "tests": "1/4",
+   "detail": "",
+   "seconds": 119.2,
+   "checks_ok": true,
+   "rounds": 3,
+   "source": "import re\n\ndef slugify(title):\n    # Convert to lowercase\n    title = title.lower()\n    \n    # Remove all characters except lowercase letters and digits\n    title = re.sub(r'[^a-z0-9]', '', title)\n    \n    # Join words with single hyphens\n    title = '-'.join(title.split())\n    \n    # Ensure no hyphen at either end of the slug\n    title = title.strip('-')\n    \n    return title\n\n# Demo\nif __name__ == \"__main__\":\n    print(slugify(\"Hello, World! 2024\"))  # Expected: 'hello-world-2024'\n    print(slugify(\"Python3.8\"))            # Expected: 'python38'\n    print(slugify(\"123abc-456def\"))       # Expected: '123abc-456def'\n    print(slugify(\"\"))                    # Expected: ''\n    print(slugify(\"!!!@#\"))               # Expected: ''\n    print(slugify(\"NoHyphensHere\"))        # Expected: 'nohyphenshere'\n    print(slugify(\"Multiple   Spaces\"))  # Expected: 'multiple-spaces'\n"
+  }
+ ],
+ "web": []
+}

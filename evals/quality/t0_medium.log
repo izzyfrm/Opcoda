@@ -1,0 +1,32 @@
+Using local Ollama model qwen2.5-coder:3b.
+roman_to_int             PASS 5/5 passed    33.0s
+int_to_roman             PASS 5/5 passed    27.9s
+run_length_encode        PASS 5/5 passed    18.4s
+run_length_decode        fail 3/4 failed    14.6s
+balanced_brackets        PASS 6/6 passed    20.2s
+merge_intervals          fail 2/5 failed    24.8s
+top_k_words              fail 3/4 failed    24.0s
+levenshtein              PASS 5/5 passed    34.7s
+parse_duration           fail 0/5 failed    20.9s
+format_bytes             fail 3/5 failed    23.4s
+spiral_order             PASS 4/4 passed    33.0s
+group_anagrams           PASS 3/3 passed    18.9s
+caesar_cipher            PASS 4/4 passed    21.3s
+pascal_row               PASS 4/4 passed    16.8s
+dedupe_keep_order        PASS 3/3 passed    14.8s
+longest_common_prefix    PASS 5/5 passed    21.0s
+binary_search            PASS 5/5 passed    18.5s
+deep_flatten             PASS 4/4 passed    16.1s
+is_valid_ipv4            PASS 7/7 passed    27.5s
+matrix_multiply          PASS 3/3 passed    25.1s
+word_wrap                fail 0/4 failed    23.4s
+count_islands            PASS 4/4 passed    29.0s
+next_greater             PASS 4/4 passed    18.3s
+slugify                  fail 2/4 failed    17.4s
+web html       FAIL  219 lines 331.6s ['Form fields are labelled: 1 form field(s) have no <label> or aria-label.']
+web html       OK    266 lines 203.3s []
+web html       OK    139 lines 109.9s []
+web css        OK    104 lines  53.8s []
+web javascript OK     51 lines  56.3s []
+web html       OK    205 lines 171.9s []
+{"model": "qwen2.5-coder:3b", "mode": "medium", "python_passed": 17, "python_total": 24, "web_ok": 5, "web_total": 6, "minutes": 24.5}

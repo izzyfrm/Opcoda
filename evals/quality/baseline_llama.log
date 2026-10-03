@@ -1,0 +1,69 @@
+Using local Ollama model llama3.2:3b.
+roman_to_int             PASS 5/5 passed    34.9s
+int_to_roman             PASS 5/5 passed    23.2s
+run_length_encode        PASS 5/5 passed    10.2s
+run_length_decode        fail 1/4 failed    13.2s
+balanced_brackets        PASS 6/6 passed    15.3s
+merge_intervals          PASS 5/5 passed    13.0s
+top_k_words              fail 1/4 failed     9.1s
+levenshtein              PASS 5/5 passed    20.5s
+parse_duration           fail 0/5 rejected  18.1s
+format_bytes             fail 3/5 failed     6.7s
+spiral_order             PASS 4/4 passed    10.2s
+group_anagrams           PASS 3/3 passed     9.4s
+caesar_cipher            PASS 4/4 passed     8.9s
+pascal_row               PASS 4/4 passed    12.3s
+dedupe_keep_order        PASS 3/3 passed     8.4s
+longest_common_prefix    PASS 5/5 passed     8.8s
+binary_search            PASS 5/5 passed    14.1s
+deep_flatten             PASS 4/4 passed     9.5s
+is_valid_ipv4            PASS 7/7 passed    17.4s
+matrix_multiply          PASS 3/3 passed    22.6s
+word_wrap                fail 1/4 failed     7.4s
+count_islands            fail 2/4 failed    21.8s
+next_greater             PASS 4/4 passed     9.2s
+slugify                  fail 2/4 failed    10.4s
+Traceback (most recent call last):
+  File "C:\Users\izzyi\Downloads\opcoda-coda-1.0-starter\server.py", line 277, in generate_ollama
+    with urllib.request.urlopen(request, timeout=480) as response:
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\urllib\request.py", line 189, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\urllib\request.py", line 489, in open
+    response = self._open(req, data)
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\urllib\request.py", line 506, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+                              '_open', req)
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\urllib\request.py", line 466, in _call_chain
+    result = func(*args)
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\urllib\request.py", line 1348, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\urllib\request.py", line 1323, in do_open
+    r = h.getresponse()
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1430, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 331, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 292, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\izzyi\AppData\Local\Programs\Python\Python313\Lib\socket.py", line 719, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\izzyi\Downloads\opcoda-coda-1.0-starter\evals\quality_bench.py", line 100, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\izzyi\Downloads\opcoda-coda-1.0-starter\evals\quality_bench.py", line 84, in main
+    reply = server.generate_ollama(req)
+  File "C:\Users\izzyi\Downloads\opcoda-coda-1.0-starter\server.py", line 280, in generate_ollama
+    raise HTTPException(status_code=503, detail=f"local Ollama unavailable: {exc}") from exc
+fastapi.exceptions.HTTPException: 503: local Ollama unavailable: timed out

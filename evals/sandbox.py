@@ -52,6 +52,10 @@ FORBIDDEN_NODES = (
     ast.Await, ast.AsyncFor, ast.AsyncWith, ast.With, ast.Delete,
 )
 
+# Pure-computation standard library modules a program may import in "module" mode.
+SAFE_MODULES = {"math", "re", "collections", "itertools", "functools", "string", "heapq", "bisect",
+                "statistics", "operator", "typing", "dataclasses", "fractions", "decimal"}
+
 MEMORY_LIMIT_BYTES = 256 * 1024 * 1024
 CPU_SECONDS = 5
 WALL_SECONDS = 10
@@ -147,6 +151,17 @@ def same(a, b, mode):
 
 
 safe = {name: getattr(builtins, name) for name in payload["builtins"]}
+modules = set(payload.get("modules") or ())
+if modules:
+    _real_import = builtins.__import__
+
+    def _limited_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if level or name.split(".")[0] not in modules:
+            raise ImportError("import of %s is not allowed" % name)
+        return _real_import(name, globals, locals, fromlist, level)
+
+    safe["__import__"] = _limited_import
+    safe["print"] = lambda *args, **kwargs: None  # demo output is irrelevant to the tests
 namespace = {"__builtins__": safe}
 results = []
 try:
@@ -167,20 +182,41 @@ sys.stdout.write(json.dumps({"results": results}))
 '''
 
 
-def static_check(source: str, fn_name: str) -> str | None:
-    """Return a rejection reason, or None if the source may be executed in the sandbox."""
+def static_check(source: str, fn_name: str, module: bool = False) -> str | None:
+    """Return a rejection reason, or None if the source may be executed in the sandbox.
+
+    Default mode (CodaBench): exactly one top-level function, no imports.
+    Module mode (quality benchmark): top-level functions plus imports of SAFE_MODULES.
+    """
     try:
         tree = ast.parse(source)
     except SyntaxError as exc:
         return f"syntax error: {exc.msg}"
-    if len(tree.body) != 1 or not isinstance(tree.body[0], ast.FunctionDef) or tree.body[0].name != fn_name:
+    if module:
+        if fn_name not in [n.name for n in tree.body if isinstance(n, ast.FunctionDef)]:
+            return f"no top-level function named {fn_name}"
+        for node in tree.body:
+            if isinstance(node, ast.FunctionDef) or (isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant)):
+                continue
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                if isinstance(node, ast.ImportFrom) and node.level:
+                    return "relative imports are not allowed"
+                mods = [a.name for a in node.names] if isinstance(node, ast.Import) else [node.module or ""]
+                bad = [m for m in mods if m.split(".")[0] not in SAFE_MODULES]
+                if bad:
+                    return f"import of {bad[0]} is not allowed"
+                continue
+            return f"top-level {type(node).__name__} is not allowed"
+    elif len(tree.body) != 1 or not isinstance(tree.body[0], ast.FunctionDef) or tree.body[0].name != fn_name:
         return f"must be exactly one top-level function named {fn_name}"
-    if tree.body[0].decorator_list:
+    if any(isinstance(n, ast.FunctionDef) and n.decorator_list for n in tree.body):
         return "decorators are not allowed"
+    allowed = (ast.Import, ast.ImportFrom) if module else ()
     for node in ast.walk(tree):
-        if isinstance(node, FORBIDDEN_NODES):
+        if isinstance(node, FORBIDDEN_NODES) and not isinstance(node, allowed):
             return f"forbidden construct: {type(node).__name__}"
-        if isinstance(node, ast.Name) and (node.id in FORBIDDEN_NAMES or node.id.startswith("__")):
+        if isinstance(node, ast.Name) and ((node.id in FORBIDDEN_NAMES and not (module and node.id == "print"))
+                                           or node.id.startswith("__")):
             return f"forbidden name: {node.id}"
         if isinstance(node, ast.Attribute) and node.attr.startswith("_"):
             return f"forbidden attribute: {node.attr}"
@@ -193,15 +229,17 @@ def static_check(source: str, fn_name: str) -> str | None:
     return None
 
 
-def run_tests(source: str, fn_name: str, tests: list[dict], compare: str | None = None) -> dict:
+def run_tests(source: str, fn_name: str, tests: list[dict], compare: str | None = None,
+              module: bool = False) -> dict:
     """Return {"status": "passed"|"failed"|"rejected"|"timeout"|"error", "passed": n, "total": n, ...}."""
     total = len(tests)
-    reason = static_check(source, fn_name)
+    reason = static_check(source, fn_name, module=module)
     if reason:
         return {"status": "rejected", "passed": 0, "total": total, "detail": reason}
 
     payload = json.dumps({"source": source, "name": fn_name, "tests": tests,
-                          "compare": compare, "builtins": SAFE_BUILTINS})
+                          "compare": compare, "builtins": SAFE_BUILTINS,
+                          "modules": sorted(SAFE_MODULES) if module else []})
     env = {"SYSTEMROOT": os.environ.get("SYSTEMROOT", r"C:\Windows")} if sys.platform == "win32" else {}
     flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     # On Windows a venv's python.exe is a launcher that spawns the real interpreter;

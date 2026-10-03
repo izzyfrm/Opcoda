@@ -1,0 +1,626 @@
+{
+ "version": "1.0",
+ "note": "Harder serving-quality tasks; see make_quality_tasks.py.",
+ "tasks": [
+  {
+   "name": "roman_to_int",
+   "signature": "def roman_to_int(numeral):",
+   "description": "Convert a Roman numeral string (I, V, X, L, C, D, M, with subtractive forms like IV and CM) to an integer.",
+   "reference": "def roman_to_int(numeral):\n    v = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}\n    total = 0\n    for i, c in enumerate(numeral):\n        if i + 1 < len(numeral) and v[c] < v[numeral[i + 1]]:\n            total -= v[c]\n        else:\n            total += v[c]\n    return total\n",
+   "tests": [
+    {
+     "args": "('III',)",
+     "expected": "3"
+    },
+    {
+     "args": "('IV',)",
+     "expected": "4"
+    },
+    {
+     "args": "('MCMXCIV',)",
+     "expected": "1994"
+    },
+    {
+     "args": "('LVIII',)",
+     "expected": "58"
+    },
+    {
+     "args": "('MMXXIV',)",
+     "expected": "2024"
+    }
+   ]
+  },
+  {
+   "name": "int_to_roman",
+   "signature": "def int_to_roman(number):",
+   "description": "Convert an integer from 1 to 3999 to a Roman numeral string using subtractive notation (4 is IV, 900 is CM).",
+   "reference": "def int_to_roman(number):\n    pairs = [(1000, 'M'), (900, 'CM'), (500, 'D'), (400, 'CD'), (100, 'C'), (90, 'XC'), (50, 'L'), (40, 'XL'), (10, 'X'), (9, 'IX'), (5, 'V'), (4, 'IV'), (1, 'I')]\n    out = ''\n    for value, sym in pairs:\n        while number >= value:\n            out += sym\n            number -= value\n    return out\n",
+   "tests": [
+    {
+     "args": "(3,)",
+     "expected": "'III'"
+    },
+    {
+     "args": "(4,)",
+     "expected": "'IV'"
+    },
+    {
+     "args": "(1994,)",
+     "expected": "'MCMXCIV'"
+    },
+    {
+     "args": "(3999,)",
+     "expected": "'MMMCMXCIX'"
+    },
+    {
+     "args": "(40,)",
+     "expected": "'XL'"
+    }
+   ]
+  },
+  {
+   "name": "run_length_encode",
+   "signature": "def run_length_encode(text):",
+   "description": "Run-length encode a string: each run of the same character becomes the count followed by the character, e.g. 'aaabcc' -> '3a1b2c'. Empty input returns ''.",
+   "reference": "def run_length_encode(text):\n    out = []\n    i = 0\n    while i < len(text):\n        j = i\n        while j < len(text) and text[j] == text[i]:\n            j += 1\n        out.append(str(j - i) + text[i])\n        i = j\n    return ''.join(out)\n",
+   "tests": [
+    {
+     "args": "('aaabcc',)",
+     "expected": "'3a1b2c'"
+    },
+    {
+     "args": "('',)",
+     "expected": "''"
+    },
+    {
+     "args": "('x',)",
+     "expected": "'1x'"
+    },
+    {
+     "args": "('aaaaaaaaaaaa',)",
+     "expected": "'12a'"
+    },
+    {
+     "args": "('abab',)",
+     "expected": "'1a1b1a1b'"
+    }
+   ]
+  },
+  {
+   "name": "run_length_decode",
+   "signature": "def run_length_decode(encoded):",
+   "description": "Decode a run-length string where each character is preceded by its count (which may have several digits), e.g. '3a1b12c' -> 'aaab' followed by twelve 'c'.",
+   "reference": "def run_length_decode(encoded):\n    out = []\n    num = ''\n    for ch in encoded:\n        if ch.isdigit():\n            num += ch\n        else:\n            out.append(ch * int(num))\n            num = ''\n    return ''.join(out)\n",
+   "tests": [
+    {
+     "args": "('3a1b2c',)",
+     "expected": "'aaabcc'"
+    },
+    {
+     "args": "('',)",
+     "expected": "''"
+    },
+    {
+     "args": "('12x',)",
+     "expected": "'xxxxxxxxxxxx'"
+    },
+    {
+     "args": "('1a1b',)",
+     "expected": "'ab'"
+    }
+   ]
+  },
+  {
+   "name": "balanced_brackets",
+   "signature": "def balanced_brackets(text):",
+   "description": "Return True if every (, [ and { in text is closed by the matching bracket in the right order. Other characters are ignored.",
+   "reference": "def balanced_brackets(text):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in text:\n        if ch in '([{':\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n",
+   "tests": [
+    {
+     "args": "('(a[b]{c})',)",
+     "expected": "True"
+    },
+    {
+     "args": "('([)]',)",
+     "expected": "False"
+    },
+    {
+     "args": "('',)",
+     "expected": "True"
+    },
+    {
+     "args": "('((',)",
+     "expected": "False"
+    },
+    {
+     "args": "('}{',)",
+     "expected": "False"
+    },
+    {
+     "args": "('no brackets',)",
+     "expected": "True"
+    }
+   ]
+  },
+  {
+   "name": "merge_intervals",
+   "signature": "def merge_intervals(intervals):",
+   "description": "Given a list of [start, end] pairs, merge every overlapping or touching pair and return the merged list sorted by start. [[1,3],[2,6],[8,10]] -> [[1,6],[8,10]].",
+   "reference": "def merge_intervals(intervals):\n    out = []\n    for s, e in sorted(intervals):\n        if out and s <= out[-1][1]:\n            out[-1][1] = max(out[-1][1], e)\n        else:\n            out.append([s, e])\n    return out\n",
+   "tests": [
+    {
+     "args": "([[1, 3], [2, 6], [8, 10]],)",
+     "expected": "[[1, 6], [8, 10]]"
+    },
+    {
+     "args": "([],)",
+     "expected": "[]"
+    },
+    {
+     "args": "([[5, 7], [1, 2]],)",
+     "expected": "[[1, 2], [5, 7]]"
+    },
+    {
+     "args": "([[1, 4], [4, 5]],)",
+     "expected": "[[1, 5]]"
+    },
+    {
+     "args": "([[1, 10], [2, 3]],)",
+     "expected": "[[1, 10]]"
+    }
+   ]
+  },
+  {
+   "name": "top_k_words",
+   "signature": "def top_k_words(text, k):",
+   "description": "Return the k most frequent words in text (case-insensitive, words are runs of letters), most frequent first; ties are broken alphabetically.",
+   "reference": "import re\nfrom collections import Counter\n\ndef top_k_words(text, k):\n    counts = Counter(re.findall(r'[a-z]+', text.lower()))\n    return [w for w, _ in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[:k]]\n",
+   "tests": [
+    {
+     "args": "('the cat and the hat and the bat', 2)",
+     "expected": "['the', 'and']"
+    },
+    {
+     "args": "('B a b A c', 2)",
+     "expected": "['a', 'b']"
+    },
+    {
+     "args": "('', 3)",
+     "expected": "[]"
+    },
+    {
+     "args": "('Hello, hello! World.', 5)",
+     "expected": "['hello', 'world']"
+    }
+   ]
+  },
+  {
+   "name": "levenshtein",
+   "signature": "def levenshtein(a, b):",
+   "description": "Return the edit distance between strings a and b: the minimum number of single-character insertions, deletions or substitutions.",
+   "reference": "def levenshtein(a, b):\n    prev = list(range(len(b) + 1))\n    for i, ca in enumerate(a, 1):\n        cur = [i]\n        for j, cb in enumerate(b, 1):\n            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))\n        prev = cur\n    return prev[-1]\n",
+   "tests": [
+    {
+     "args": "('kitten', 'sitting')",
+     "expected": "3"
+    },
+    {
+     "args": "('', 'abc')",
+     "expected": "3"
+    },
+    {
+     "args": "('same', 'same')",
+     "expected": "0"
+    },
+    {
+     "args": "('flaw', 'lawn')",
+     "expected": "2"
+    },
+    {
+     "args": "('a', '')",
+     "expected": "1"
+    }
+   ]
+  },
+  {
+   "name": "parse_duration",
+   "signature": "def parse_duration(text):",
+   "description": "Parse a duration like '1h30m', '45s', '2h5s' or '1h2m3s' into a total number of seconds. Units are h, m and s, each optional but in that order.",
+   "reference": "import re\n\ndef parse_duration(text):\n    total = 0\n    for amount, unit in re.findall(r'(\\d+)([hms])', text):\n        total += int(amount) * {'h': 3600, 'm': 60, 's': 1}[unit]\n    return total\n",
+   "tests": [
+    {
+     "args": "('1h30m',)",
+     "expected": "5400"
+    },
+    {
+     "args": "('45s',)",
+     "expected": "45"
+    },
+    {
+     "args": "('2h5s',)",
+     "expected": "7205"
+    },
+    {
+     "args": "('1h2m3s',)",
+     "expected": "3723"
+    },
+    {
+     "args": "('10m',)",
+     "expected": "600"
+    }
+   ]
+  },
+  {
+   "name": "format_bytes",
+   "signature": "def format_bytes(size):",
+   "description": "Format a byte count for people using 1024-based units B, KB, MB, GB, TB with one decimal place, except plain bytes which have none: 512 -> '512 B', 1536 -> '1.5 KB', 1048576 -> '1.0 MB'.",
+   "reference": "def format_bytes(size):\n    if size < 1024:\n        return f'{size} B'\n    for unit in ['KB', 'MB', 'GB', 'TB']:\n        size /= 1024\n        if size < 1024 or unit == 'TB':\n            return f'{size:.1f} {unit}'\n",
+   "tests": [
+    {
+     "args": "(512,)",
+     "expected": "'512 B'"
+    },
+    {
+     "args": "(1536,)",
+     "expected": "'1.5 KB'"
+    },
+    {
+     "args": "(1048576,)",
+     "expected": "'1.0 MB'"
+    },
+    {
+     "args": "(0,)",
+     "expected": "'0 B'"
+    },
+    {
+     "args": "(1099511627776,)",
+     "expected": "'1.0 TB'"
+    }
+   ]
+  },
+  {
+   "name": "spiral_order",
+   "signature": "def spiral_order(matrix):",
+   "description": "Return the elements of a rectangular matrix (list of rows) in clockwise spiral order starting at the top-left.",
+   "reference": "def spiral_order(matrix):\n    out = []\n    rows = [list(r) for r in matrix]\n    while rows:\n        out += rows.pop(0)\n        rows = [list(r) for r in zip(*rows)][::-1]\n    return out\n",
+   "tests": [
+    {
+     "args": "([[1, 2, 3], [4, 5, 6], [7, 8, 9]],)",
+     "expected": "[1, 2, 3, 6, 9, 8, 7, 4, 5]"
+    },
+    {
+     "args": "([],)",
+     "expected": "[]"
+    },
+    {
+     "args": "([[1, 2], [3, 4], [5, 6]],)",
+     "expected": "[1, 2, 4, 6, 5, 3]"
+    },
+    {
+     "args": "([[7]],)",
+     "expected": "[7]"
+    }
+   ]
+  },
+  {
+   "name": "group_anagrams",
+   "signature": "def group_anagrams(words):",
+   "description": "Group words that are anagrams of each other. Return a list of groups; each group keeps the words in input order, and groups are ordered by the first appearance of their first word.",
+   "reference": "def group_anagrams(words):\n    groups = {}\n    for w in words:\n        groups.setdefault(''.join(sorted(w)), []).append(w)\n    return list(groups.values())\n",
+   "tests": [
+    {
+     "args": "(['eat', 'tea', 'tan', 'ate', 'nat', 'bat'],)",
+     "expected": "[['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]"
+    },
+    {
+     "args": "([],)",
+     "expected": "[]"
+    },
+    {
+     "args": "(['a'],)",
+     "expected": "[['a']]"
+    }
+   ]
+  },
+  {
+   "name": "caesar_cipher",
+   "signature": "def caesar_cipher(text, shift):",
+   "description": "Shift every letter in text by shift places in the alphabet, wrapping around and keeping case; non-letters are unchanged. Negative shifts move backwards.",
+   "reference": "def caesar_cipher(text, shift):\n    out = []\n    for ch in text:\n        if ch.isalpha() and ch.isascii():\n            base = ord('A') if ch.isupper() else ord('a')\n            out.append(chr((ord(ch) - base + shift) % 26 + base))\n        else:\n            out.append(ch)\n    return ''.join(out)\n",
+   "tests": [
+    {
+     "args": "('Hello, World!', 3)",
+     "expected": "'Khoor, Zruog!'"
+    },
+    {
+     "args": "('xyz', 3)",
+     "expected": "'abc'"
+    },
+    {
+     "args": "('abc', -1)",
+     "expected": "'zab'"
+    },
+    {
+     "args": "('Same', 26)",
+     "expected": "'Same'"
+    }
+   ]
+  },
+  {
+   "name": "pascal_row",
+   "signature": "def pascal_row(n):",
+   "description": "Return row n (0-based) of Pascal's triangle as a list of integers. Row 0 is [1], row 4 is [1, 4, 6, 4, 1].",
+   "reference": "def pascal_row(n):\n    row = [1]\n    for _ in range(n):\n        row = [1] + [a + b for a, b in zip(row, row[1:])] + [1]\n    return row\n",
+   "tests": [
+    {
+     "args": "(0,)",
+     "expected": "[1]"
+    },
+    {
+     "args": "(1,)",
+     "expected": "[1, 1]"
+    },
+    {
+     "args": "(4,)",
+     "expected": "[1, 4, 6, 4, 1]"
+    },
+    {
+     "args": "(6,)",
+     "expected": "[1, 6, 15, 20, 15, 6, 1]"
+    }
+   ]
+  },
+  {
+   "name": "dedupe_keep_order",
+   "signature": "def dedupe_keep_order(items):",
+   "description": "Remove duplicates from a list while keeping the first occurrence of each item in its original position.",
+   "reference": "def dedupe_keep_order(items):\n    seen = set()\n    out = []\n    for x in items:\n        if x not in seen:\n            seen.add(x)\n            out.append(x)\n    return out\n",
+   "tests": [
+    {
+     "args": "([3, 1, 3, 2, 1],)",
+     "expected": "[3, 1, 2]"
+    },
+    {
+     "args": "([],)",
+     "expected": "[]"
+    },
+    {
+     "args": "(['b', 'a', 'b'],)",
+     "expected": "['b', 'a']"
+    }
+   ]
+  },
+  {
+   "name": "longest_common_prefix",
+   "signature": "def longest_common_prefix(words):",
+   "description": "Return the longest string that every word in the list starts with. Return '' for an empty list or when there is no common prefix.",
+   "reference": "def longest_common_prefix(words):\n    if not words:\n        return ''\n    prefix = words[0]\n    for w in words[1:]:\n        while not w.startswith(prefix):\n            prefix = prefix[:-1]\n    return prefix\n",
+   "tests": [
+    {
+     "args": "(['flower', 'flow', 'flight'],)",
+     "expected": "'fl'"
+    },
+    {
+     "args": "(['dog', 'car'],)",
+     "expected": "''"
+    },
+    {
+     "args": "([],)",
+     "expected": "''"
+    },
+    {
+     "args": "(['same'],)",
+     "expected": "'same'"
+    },
+    {
+     "args": "(['ab', 'a'],)",
+     "expected": "'a'"
+    }
+   ]
+  },
+  {
+   "name": "binary_search",
+   "signature": "def binary_search(values, target):",
+   "description": "Return the index of target in the sorted list values using binary search, or -1 if it is not present.",
+   "reference": "def binary_search(values, target):\n    lo, hi = 0, len(values) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if values[mid] == target:\n            return mid\n        if values[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n",
+   "tests": [
+    {
+     "args": "([1, 3, 5, 7, 9], 7)",
+     "expected": "3"
+    },
+    {
+     "args": "([1, 3, 5], 4)",
+     "expected": "-1"
+    },
+    {
+     "args": "([], 1)",
+     "expected": "-1"
+    },
+    {
+     "args": "([2], 2)",
+     "expected": "0"
+    },
+    {
+     "args": "([1, 2, 3, 4, 5, 6], 1)",
+     "expected": "0"
+    }
+   ]
+  },
+  {
+   "name": "deep_flatten",
+   "signature": "def deep_flatten(value):",
+   "description": "Flatten arbitrarily nested lists into a single flat list, keeping the order of the non-list items.",
+   "reference": "def deep_flatten(value):\n    out = []\n    for item in value:\n        if isinstance(item, list):\n            out.extend(deep_flatten(item))\n        else:\n            out.append(item)\n    return out\n",
+   "tests": [
+    {
+     "args": "([1, [2, [3, [4]], 5]],)",
+     "expected": "[1, 2, 3, 4, 5]"
+    },
+    {
+     "args": "([],)",
+     "expected": "[]"
+    },
+    {
+     "args": "([[[]]],)",
+     "expected": "[]"
+    },
+    {
+     "args": "(['a', ['b']],)",
+     "expected": "['a', 'b']"
+    }
+   ]
+  },
+  {
+   "name": "is_valid_ipv4",
+   "signature": "def is_valid_ipv4(address):",
+   "description": "Return True if address is a dotted IPv4 address: exactly four decimal parts from 0 to 255, no leading zeros (except a single 0), digits only.",
+   "reference": "def is_valid_ipv4(address):\n    parts = address.split('.')\n    if len(parts) != 4:\n        return False\n    for p in parts:\n        if not p.isdigit() or not p.isascii() or (len(p) > 1 and p[0] == '0') or int(p) > 255:\n            return False\n    return True\n",
+   "tests": [
+    {
+     "args": "('192.168.1.1',)",
+     "expected": "True"
+    },
+    {
+     "args": "('255.255.255.255',)",
+     "expected": "True"
+    },
+    {
+     "args": "('256.1.1.1',)",
+     "expected": "False"
+    },
+    {
+     "args": "('1.2.3',)",
+     "expected": "False"
+    },
+    {
+     "args": "('01.2.3.4',)",
+     "expected": "False"
+    },
+    {
+     "args": "('1.2.3.a',)",
+     "expected": "False"
+    },
+    {
+     "args": "('0.0.0.0',)",
+     "expected": "True"
+    }
+   ]
+  },
+  {
+   "name": "matrix_multiply",
+   "signature": "def matrix_multiply(a, b):",
+   "description": "Multiply two matrices given as lists of rows and return the product as a list of rows. Raise ValueError if the inner dimensions don't match.",
+   "reference": "def matrix_multiply(a, b):\n    if a and b and len(a[0]) != len(b):\n        raise ValueError('incompatible')\n    return [[sum(x * y for x, y in zip(row, col)) for col in zip(*b)] for row in a]\n",
+   "tests": [
+    {
+     "args": "([[1, 2], [3, 4]], [[5, 6], [7, 8]])",
+     "expected": "[[19, 22], [43, 50]]"
+    },
+    {
+     "args": "([[1, 2, 3]], [[1], [2], [3]])",
+     "expected": "[[14]]"
+    },
+    {
+     "args": "([[2]], [[3]])",
+     "expected": "[[6]]"
+    }
+   ]
+  },
+  {
+   "name": "word_wrap",
+   "signature": "def word_wrap(text, width):",
+   "description": "Wrap text into lines of at most width characters, breaking only at spaces and never splitting words (a word longer than width gets its own line). Return the list of lines.",
+   "reference": "def word_wrap(text, width):\n    lines = []\n    line = ''\n    for word in text.split():\n        if not line:\n            line = word\n        elif len(line) + 1 + len(word) <= width:\n            line += ' ' + word\n        else:\n            lines.append(line)\n            line = word\n    if line:\n        lines.append(line)\n    return lines\n",
+   "tests": [
+    {
+     "args": "('the quick brown fox jumps', 10)",
+     "expected": "['the quick', 'brown fox', 'jumps']"
+    },
+    {
+     "args": "('', 5)",
+     "expected": "[]"
+    },
+    {
+     "args": "('extraordinary is long', 5)",
+     "expected": "['extraordinary', 'is', 'long']"
+    },
+    {
+     "args": "('a b c', 5)",
+     "expected": "['a b c']"
+    }
+   ]
+  },
+  {
+   "name": "count_islands",
+   "signature": "def count_islands(grid):",
+   "description": "Count groups of horizontally or vertically connected '1' cells in a grid given as a list of strings of '0' and '1'.",
+   "reference": "def count_islands(grid):\n    seen = set()\n    count = 0\n    for r in range(len(grid)):\n        for c in range(len(grid[r])):\n            if grid[r][c] == '1' and (r, c) not in seen:\n                count += 1\n                stack = [(r, c)]\n                while stack:\n                    y, x = stack.pop()\n                    if (y, x) in seen or not (0 <= y < len(grid) and 0 <= x < len(grid[y])) or grid[y][x] != '1':\n                        continue\n                    seen.add((y, x))\n                    stack += [(y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)]\n    return count\n",
+   "tests": [
+    {
+     "args": "(['11000', '11000', '00100', '00011'],)",
+     "expected": "3"
+    },
+    {
+     "args": "([],)",
+     "expected": "0"
+    },
+    {
+     "args": "(['111', '010', '111'],)",
+     "expected": "1"
+    },
+    {
+     "args": "(['101', '010', '101'],)",
+     "expected": "5"
+    }
+   ]
+  },
+  {
+   "name": "next_greater",
+   "signature": "def next_greater(values):",
+   "description": "For each number, return the next number to its right that is strictly larger, or -1 if there is none. [2, 1, 3] -> [3, 3, -1].",
+   "reference": "def next_greater(values):\n    out = [-1] * len(values)\n    stack = []\n    for i, v in enumerate(values):\n        while stack and values[stack[-1]] < v:\n            out[stack.pop()] = v\n        stack.append(i)\n    return out\n",
+   "tests": [
+    {
+     "args": "([2, 1, 3],)",
+     "expected": "[3, 3, -1]"
+    },
+    {
+     "args": "([],)",
+     "expected": "[]"
+    },
+    {
+     "args": "([5, 4, 3],)",
+     "expected": "[-1, -1, -1]"
+    },
+    {
+     "args": "([1, 3, 2, 4],)",
+     "expected": "[3, 4, 4, -1]"
+    }
+   ]
+  },
+  {
+   "name": "slugify",
+   "signature": "def slugify(title):",
+   "description": "Turn a title into a URL slug: lowercase, keep only a-z and 0-9, join the words with single hyphens, no hyphen at either end. 'Hello, World! 2024' -> 'hello-world-2024'.",
+   "reference": "import re\n\ndef slugify(title):\n    return '-'.join(re.findall(r'[a-z0-9]+', title.lower()))\n",
+   "tests": [
+    {
+     "args": "('Hello, World! 2024',)",
+     "expected": "'hello-world-2024'"
+    },
+    {
+     "args": "('  Spaces   everywhere  ',)",
+     "expected": "'spaces-everywhere'"
+    },
+    {
+     "args": "('---',)",
+     "expected": "''"
+    },
+    {
+     "args": "('Already-a-slug',)",
+     "expected": "'already-a-slug'"
+    }
+   ]
+  }
+ ]
+}

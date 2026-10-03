@@ -1,0 +1,347 @@
+{
+ "summary": {
+  "model": "qwen2.5-coder:3b",
+  "mode": "medium",
+  "python_passed": 17,
+  "python_total": 24,
+  "web_ok": 5,
+  "web_total": 6,
+  "minutes": 24.5
+ },
+ "python": [
+  {
+   "task": "roman_to_int",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 33.0,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def roman_to_int(numeral):\n    # Define the mapping of Roman numerals to integers\n    roman_map = {\n        'I': 1,\n        'V': 5,\n        'X': 10,\n        'L': 50,\n        'C': 100,\n        'D': 500,\n        'M': 1000\n    }\n    \n    # Initialize the result\n    result = 0\n    \n    # Iterate over the numeral string\n    for i in range(len(numeral)):\n        # Get the current Roman numeral and its value\n        current_value = roman_map[numeral[i]]\n        \n        # If the next numeral exists and is greater than the current, subtract it\n        if i + 1 < len(numeral) and roman_map[numeral[i + 1]] > current_value:\n            result -= current_value\n        else:\n            result += current_value\n    \n    return result\n\n# Example usage\nif __name__ == \"__main__\":\n    numeral = \"MCMXCIV\"\n    print(roman_to_int(numeral))  # Output: 1994\n"
+  },
+  {
+   "task": "int_to_roman",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 27.9,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def int_to_roman(number):\n    # Define the Roman numeral symbols and their corresponding values\n    val = [\n        1000, 900, 500, 400,\n        100, 90, 50, 40,\n        10, 9, 5, 4,\n        1\n    ]\n    syms = [\n        \"M\", \"CM\", \"D\", \"CD\",\n        \"C\", \"XC\", \"L\", \"XL\",\n        \"X\", \"IX\", \"V\", \"IV\",\n        \"I\"\n    ]\n    \n    roman_numeral = \"\"\n    i = 0\n    while number > 0:\n        for _ in range(number // val[i]):\n            roman_numeral += syms[i]\n            number -= val[i]\n        i += 1\n    return roman_numeral\n\n# Example usage\nif __name__ == \"__main__\":\n    example_number = 1984\n    result = int_to_roman(example_number)\n    print(f\"The Roman numeral for {example_number} is {result}\")\n"
+  },
+  {
+   "task": "run_length_encode",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 18.4,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def run_length_encode(text):\n    if not text:\n        return \"\"\n    \n    encoded = []\n    count = 1\n    \n    for i in range(1, len(text)):\n        if text[i] == text[i - 1]:\n            count += 1\n        else:\n            encoded.append(str(count) + text[i - 1])\n            count = 1\n    \n    # Append the last run\n    encoded.append(str(count) + text[-1])\n    \n    return ''.join(encoded)\n\n# Demo\nif __name__ == \"__main__\":\n    example_text = \"aaabcc\"\n    result = run_length_encode(example_text)\n    print(result)  # Output: '3a1b2c'\n"
+  },
+  {
+   "task": "run_length_decode",
+   "passed": false,
+   "status": "failed",
+   "tests": "3/4",
+   "detail": "",
+   "seconds": 14.6,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def run_length_decode(encoded):\n    decoded = []\n    i = 0\n    while i < len(encoded):\n        count = int(encoded[i])\n        char = encoded[i + 1]\n        decoded.extend([char] * count)\n        i += 2\n    return ''.join(decoded)\n\n# Demo\nencoded_string = '3a1b12c'\ndecoded_string = run_length_decode(encoded_string)\nprint(decoded_string)  # Output: aaabcccccccccccccccc\n"
+  },
+  {
+   "task": "balanced_brackets",
+   "passed": true,
+   "status": "passed",
+   "tests": "6/6",
+   "detail": "",
+   "seconds": 20.2,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def balanced_brackets(text):\n    stack = []\n    brackets = {')': '(', '}': '{', ']': '['}\n    \n    for char in text:\n        if char in brackets.values():\n            stack.append(char)\n        elif char in brackets.keys():\n            if not stack or stack.pop() != brackets[char]:\n                return False\n    \n    return len(stack) == 0\n\n# Demo\nif __name__ == \"__main__\":\n    example_text = \"{[()]}{}\"\n    result = balanced_brackets(example_text)\n    print(result)  # Output: True\n"
+  },
+  {
+   "task": "merge_intervals",
+   "passed": false,
+   "status": "failed",
+   "tests": "2/5",
+   "detail": "",
+   "seconds": 24.8,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def merge_intervals(intervals):\n    if not intervals:\n        return []\n\n    # Sort intervals by start time\n    intervals.sort(key=lambda x: x[0])\n\n    merged = [intervals[0]]\n\n    for interval in intervals[1:]:\n        last_merged = merged[-1]\n        if interval[0] <= last_merged[1]:\n            # Merge overlapping or touching intervals\n            merged[-1] = (last_merged[0], max(last_merged[1], interval[1]))\n        else:\n            # Add non-overlapping interval\n            merged.append(interval)\n\n    return merged\n\n# Demo\nif __name__ == \"__main__\":\n    example_intervals = [[1, 3], [2, 6], [8, 10]]\n    result = merge_intervals(example_intervals)\n    print(result)  # Output: [[1, 6], [8, 10]]\n"
+  },
+  {
+   "task": "top_k_words",
+   "passed": false,
+   "status": "failed",
+   "tests": "3/4",
+   "detail": "",
+   "seconds": 24.0,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def top_k_words(text, k):\n    from collections import Counter\n    \n    # Convert text to lowercase and split into words\n    words = text.lower().split()\n    \n    # Count the frequency of each word\n    word_counts = Counter(words)\n    \n    # Sort words by frequency (descending) and alphabetically (ascending for ties)\n    sorted_words = sorted(word_counts.items(), key=lambda item: (-item[1], item[0]))\n    \n    # Extract the top k words\n    top_k = [word for word, count in sorted_words[:k]]\n    \n    return top_k\n\n# Demo\nif __name__ == \"__main__\":\n    text = \"This is a test. This test is only a test.\"\n    k = 3\n    print(top_k_words(text, k))\n"
+  },
+  {
+   "task": "levenshtein",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 34.7,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def levenshtein(a, b):\n    if len(a) == 0:\n        return len(b)\n    if len(b) == 0:\n        return len(a)\n\n    # Create a matrix to store distances\n    dp = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]\n\n    # Initialize the first row and column\n    for i in range(len(a) + 1):\n        dp[i][0] = i\n    for j in range(len(b) + 1):\n        dp[0][j] = j\n\n    # Fill the matrix\n    for i in range(1, len(a) + 1):\n        for j in range(1, len(b) + 1):\n            if a[i - 1] == b[j - 1]:\n                cost = 0\n            else:\n                cost = 1\n            dp[i][j] = min(dp[i - 1][j] + 1,  # Deletion\n                           dp[i][j - 1] + 1,  # Insertion\n                           dp[i - 1][j - 1] + cost)  # Substitution\n\n    return dp[len(a)][len(b)]\n\n# Demo\nif __name__ == \"__main__\":\n    a = \"kitten\"\n    b = \"sitting\"\n    print(f\"The edit distance between '{a}' and '{b}' is: {levenshtein(a, b)}\")\n"
+  },
+  {
+   "task": "parse_duration",
+   "passed": false,
+   "status": "failed",
+   "tests": "0/5",
+   "detail": "",
+   "seconds": 20.9,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def parse_duration(text):\n    # Split the input text by spaces\n    parts = text.split()\n    \n    # Initialize total seconds to 0\n    total_seconds = 0\n    \n    # Define a mapping of units to their corresponding values in seconds\n    unit_values = {\n        'h': 3600,\n        'm': 60,\n        's': 1\n    }\n    \n    # Iterate over the parts and calculate total seconds\n    for part in parts:\n        if part.isdigit():\n            total_seconds += int(part)\n        elif part in unit_values:\n            total_seconds += unit_values[part]\n    \n    return total_seconds\n\n# Example usage\nif __name__ == \"__main__\":\n    example_input = '1h30m'\n    result = parse_duration(example_input)\n    print(f\"The duration '{example_input}' is {result} seconds.\")\n"
+  },
+  {
+   "task": "format_bytes",
+   "passed": false,
+   "status": "failed",
+   "tests": "3/5",
+   "detail": "",
+   "seconds": 23.4,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def format_bytes(size):\n    units = ['B', 'KB', 'MB', 'GB', 'TB']\n    for i in range(len(units)):\n        if size < 1024:\n            return f\"{size:.1f} {units[i]}\"\n        size /= 1024\n    return f\"{size:.1f} TB\"\n\nif __name__ == \"__main__\":\n    # Example usage\n    print(format_bytes(512))      # Output: '512 B'\n    print(format_bytes(1536))     # Output: '1.5 KB'\n    print(format_bytes(1048576))  # Output: '1.0 MB'\n    print(format_bytes(1073741824)) # Output: '1.0 GB'\n    print(format_bytes(1099511627776)) # Output: '1.0 TB'\n"
+  },
+  {
+   "task": "spiral_order",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 33.0,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def spiral_order(matrix):\n    if not matrix or not matrix[0]:\n        return []\n\n    result = []\n    top, bottom, left, right = 0, len(matrix) - 1, 0, len(matrix[0]) - 1\n\n    while top <= bottom and left <= right:\n        # Traverse from left to right\n        for i in range(left, right + 1):\n            result.append(matrix[top][i])\n        top += 1\n\n        # Traverse from top to bottom\n        for i in range(top, bottom + 1):\n            result.append(matrix[i][right])\n        right -= 1\n\n        if top <= bottom:\n            # Traverse from right to left\n            for i in range(right, left - 1, -1):\n                result.append(matrix[bottom][i])\n            bottom -= 1\n\n        if left <= right:\n            # Traverse from bottom to top\n            for i in range(bottom, top - 1, -1):\n                result.append(matrix[i][left])\n            left += 1\n\n    return result\n\n# Demo\nif __name__ == \"__main__\":\n    matrix = [\n        [1, 2, 3],\n        [4, 5, 6],\n        [7, 8, 9]\n    ]\n    print(spiral_order(matrix))  # Output: [1, 2, 3, 6, 9, 8, 7, 4, 5]\n"
+  },
+  {
+   "task": "group_anagrams",
+   "passed": true,
+   "status": "passed",
+   "tests": "3/3",
+   "detail": "",
+   "seconds": 18.9,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "from typing import List\n\ndef group_anagrams(words: List[str]) -> List[List[str]]:\n    anagram_groups = {}\n    \n    for word in words:\n        sorted_word = ''.join(sorted(word))\n        if sorted_word not in anagram_groups:\n            anagram_groups[sorted_word] = [word]\n        else:\n            anagram_groups[sorted_word].append(word)\n    \n    return list(anagram_groups.values())\n\n# Demo\nif __name__ == \"__main__\":\n    words = [\"listen\", \"silent\", \"enlist\", \"google\", \"gooegl\", \"elvis\", \"vile\"]\n    result = group_anagrams(words)\n    print(result)\n"
+  },
+  {
+   "task": "caesar_cipher",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 21.3,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def caesar_cipher(text, shift):\n    def shift_char(c):\n        if 'a' <= c <= 'z':\n            return chr((ord(c) - ord('a') + shift) % 26 + ord('a'))\n        elif 'A' <= c <= 'Z':\n            return chr((ord(c) - ord('A') + shift) % 26 + ord('A'))\n        else:\n            return c\n\n    return ''.join(shift_char(c) for c in text)\n\nif __name__ == \"__main__\":\n    # Example usage\n    text = \"Hello, World!\"\n    shift = 3\n    result = caesar_cipher(text, shift)\n    print(result)  # Output: Khoor, Zruog!\n"
+  },
+  {
+   "task": "pascal_row",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 16.8,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def pascal_row(n):\n    if n < 0:\n        return []\n    \n    row = [1]\n    for i in range(1, n + 1):\n        next_row = [1] * (i + 1)\n        for j in range(1, i):\n            next_row[j] = row[j - 1] + row[j]\n        row = next_row\n    return row\n\n# Demo\nif __name__ == \"__main__\":\n    print(pascal_row(0))  # Output: [1]\n    print(pascal_row(4))  # Output: [1, 4, 6, 4, 1]\n"
+  },
+  {
+   "task": "dedupe_keep_order",
+   "passed": true,
+   "status": "passed",
+   "tests": "3/3",
+   "detail": "",
+   "seconds": 14.8,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def dedupe_keep_order(items):\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n\n# Demo\nif __name__ == \"__main__\":\n    example_items = [1, 2, 3, 2, 4, 1, 5]\n    print(dedupe_keep_order(example_items))  # Output: [1, 2, 3, 4, 5]\n"
+  },
+  {
+   "task": "longest_common_prefix",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 21.0,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def longest_common_prefix(words):\n    if not words:\n        return ''\n    \n    # Sort the list of words to find the common prefix\n    words.sort()\n    \n    # Compare the first and last word to find the common prefix\n    first_word = words[0]\n    last_word = words[-1]\n    \n    # Find the common prefix by comparing characters\n    common_prefix = ''\n    for i in range(min(len(first_word), len(last_word))):\n        if first_word[i] == last_word[i]:\n            common_prefix += first_word[i]\n        else:\n            break\n    \n    return common_prefix\n\n# Demo\nif __name__ == \"__main__\":\n    words = [\"flower\", \"flow\", \"flight\"]\n    print(longest_common_prefix(words))  # Output: 'fl'\n"
+  },
+  {
+   "task": "binary_search",
+   "passed": true,
+   "status": "passed",
+   "tests": "5/5",
+   "detail": "",
+   "seconds": 18.5,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def binary_search(values, target):\n    left, right = 0, len(values) - 1\n    \n    while left <= right:\n        mid = (left + right) // 2\n        \n        if values[mid] == target:\n            return mid\n        elif values[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    \n    return -1\n\n# Demo\nif __name__ == \"__main__\":\n    values = [1, 3, 5, 7, 9, 11, 13, 15]\n    target = 7\n    result = binary_search(values, target)\n    print(f\"Index of {target} in {values}: {result}\")\n"
+  },
+  {
+   "task": "deep_flatten",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 16.1,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def deep_flatten(value):\n    if isinstance(value, list):\n        return [item for sublist in value for item in deep_flatten(sublist)]\n    else:\n        return [value]\n\nif __name__ == \"__main__\":\n    # Example usage\n    nested_list = [1, [2, [3, 4], 5], 6, [7, 8]]\n    flat_list = deep_flatten(nested_list)\n    print(flat_list)  # Output: [1, 2, 3, 4, 5, 6, 7, 8]\n"
+  },
+  {
+   "task": "is_valid_ipv4",
+   "passed": true,
+   "status": "passed",
+   "tests": "7/7",
+   "detail": "",
+   "seconds": 27.5,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def is_valid_ipv4(address):\n    parts = address.split('.')\n    if len(parts) != 4:\n        return False\n    \n    for part in parts:\n        if not part.isdigit() or (part.startswith('0') and len(part) > 1):\n            return False\n        if int(part) < 0 or int(part) > 255:\n            return False\n    \n    return True\n\n# Demo\nif __name__ == \"__main__\":\n    test_addresses = [\n        \"192.168.1.1\",\n        \"0.0.0.0\",\n        \"255.255.255.255\",\n        \"192.168.1.256\",\n        \"192.168.1.-1\",\n        \"192.168.1.001\",\n        \"192.168.1.a\",\n        \"192.168.1\",\n        \"192.168.1.1.1\"\n    ]\n    \n    for address in test_addresses:\n        print(f\"{address}: {is_valid_ipv4(address)}\")\n"
+  },
+  {
+   "task": "matrix_multiply",
+   "passed": true,
+   "status": "passed",
+   "tests": "3/3",
+   "detail": "",
+   "seconds": 25.1,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def matrix_multiply(a, b):\n    if not a or not b or not a[0] or not b[0]:\n        raise ValueError(\"Input matrices must be non-empty and have at least one row and one column.\")\n    \n    rows_a = len(a)\n    cols_a = len(a[0])\n    rows_b = len(b)\n    cols_b = len(b[0])\n    \n    if cols_a != rows_b:\n        raise ValueError(\"Inner dimensions of matrices do not match for multiplication.\")\n    \n    result = []\n    for i in range(rows_a):\n        row_result = []\n        for j in range(cols_b):\n            dot_product = sum(a[i][k] * b[k][j] for k in range(cols_a))\n            row_result.append(dot_product)\n        result.append(row_result)\n    \n    return result\n\n# Demo\nif __name__ == \"__main__\":\n    a = [\n        [1, 2],\n        [3, 4]\n    ]\n    b = [\n        [5, 6],\n        [7, 8]\n    ]\n    print(matrix_multiply(a, b))\n"
+  },
+  {
+   "task": "word_wrap",
+   "passed": false,
+   "status": "failed",
+   "tests": "0/4",
+   "detail": "",
+   "seconds": 23.4,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def word_wrap(text, width):\n    def wrap_line(line, width):\n        if len(line) <= width:\n            return [line]\n        for i in range(width, -1, -1):\n            if line[i] == ' ':\n                return [line[:i], *wrap_line(line[i + 1:], width)]\n        return [line]\n\n    lines = []\n    current_line = ''\n    for word in text.split():\n        if len(current_line) + len(word) + 1 <= width:\n            current_line += f\" {word}\"\n        else:\n            lines.extend(wrap_line(current_line, width))\n            current_line = word\n    lines.extend(wrap_line(current_line, width))\n    return lines\n\n# Demo\nif __name__ == \"__main__\":\n    text = \"This is a sample text that needs to be wrapped into lines of at most 10 characters.\"\n    width = 10\n    result = word_wrap(text, width)\n    print(result)\n"
+  },
+  {
+   "task": "count_islands",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 29.0,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def count_islands(grid):\n    if not grid or not grid[0]:\n        return 0\n\n    rows, cols = len(grid), len(grid[0])\n    visited = set()\n\n    def dfs(r, c):\n        if r < 0 or r >= rows or c < 0 or c >= cols or grid[r][c] == '0' or (r, c) in visited:\n            return\n        visited.add((r, c))\n        for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:\n            dfs(r + dr, c + dc)\n\n    count = 0\n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] == '1' and (r, c) not in visited:\n                dfs(r, c)\n                count += 1\n\n    return count\n\n# Demo\ngrid = [\n    \"11000\",\n    \"11000\",\n    \"00100\",\n    \"00011\"\n]\nprint(count_islands(grid))  # Output: 3\n"
+  },
+  {
+   "task": "next_greater",
+   "passed": true,
+   "status": "passed",
+   "tests": "4/4",
+   "detail": "",
+   "seconds": 18.3,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def next_greater(values):\n    stack = []\n    result = [-1] * len(values)\n    \n    for i, value in enumerate(values):\n        while stack and values[stack[-1]] < value:\n            result[stack.pop()] = value\n        stack.append(i)\n    \n    return result\n\n# Demo\nif __name__ == \"__main__\":\n    input_values = [2, 1, 3]\n    output = next_greater(input_values)\n    print(output)  # Output: [3, 3, -1]\n"
+  },
+  {
+   "task": "slugify",
+   "passed": false,
+   "status": "failed",
+   "tests": "2/4",
+   "detail": "",
+   "seconds": 17.4,
+   "checks_ok": true,
+   "rounds": 1,
+   "source": "def slugify(title):\n    # Convert to lowercase\n    title = title.lower()\n    \n    # Remove non-alphanumeric characters except hyphens\n    title = ''.join(char for char in title if char.isalnum() or char == '-')\n    \n    # Replace multiple hyphens with a single hyphen\n    title = '-'.join(title.split('-'))\n    \n    # Strip leading and trailing hyphens\n    title = title.strip('-')\n    \n    return title\n\n# Demo\nif __name__ == \"__main__\":\n    example_title = \"Hello, World! 2024\"\n    slug = slugify(example_title)\n    print(slug)  # Output: hello-world-2024\n"
+  }
+ ],
+ "web": [
+  {
+   "prompt": "Build a to-do app with add, complete, delete, a filter for all/active/done, and tasks saved in localStorage.",
+   "lang": "html",
+   "ok": false,
+   "finished": true,
+   "failed_checks": [
+    "Form fields are labelled: 1 form field(s) have no <label> or aria-label."
+   ],
+   "lines": 219,
+   "seconds": 331.6,
+   "rounds": 2,
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>To-Do App</title>\n    <style>\n        :root {\n            --background: #ECFEFF;\n            --foreground: #164E63;\n            --primary: #0891B2;\n            --on-primary: #000000;\n        }\n        body {\n            background-color: var(--background);\n            color: var(--foreground);\n            font-family: 'Arial', sans-serif;\n            line-height: 1.6;\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n        .container {\n            width: min(1100px, calc(100% - 40px));\n            margin-inline: auto;\n        }\n        .header {\n            background-color: var(--primary);\n            color: var(--on-primary);\n            padding: 20px 0;\n            text-align: center;\n        }\n        .nav {\n            display: flex;\n            justify-content: space-around;\n        }\n        .nav a {\n            color: var(--on-primary);\n            text-decoration: none;\n            transition: color 0.3s ease;\n        }\n        .nav a:hover, .nav a:focus-visible {\n            color: var(--foreground);\n        }\n        .hero {\n            padding: 40px 0;\n            text-align: center;\n        }\n        .hero h1 {\n            font-size: clamp(2rem, 3vw, 3rem);\n            margin-bottom: 20px;\n        }\n        .hero p {\n            font-size: 1.2rem;\n            color: var(--foreground);\n        }\n        .project-list {\n            display: grid;\n            gap: 20px;\n            padding: 20px 0;\n        }\n        .project {\n            background-color: #fff;\n            border-radius: 8px;\n            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n            padding: 20px;\n        }\n        .project h3 {\n            font-size: 1.5rem;\n            margin-bottom: 10px;\n        }\n        .project a {\n            display: inline-block;\n            color: var(--primary);\n            text-decoration: none;\n            transition: color 0.3s ease;\n        }\n        .project a:hover, .project a:focus-visible {\n            color: var(--on-primary);\n        }\n        .footer {\n            background-color: var(--primary);\n            color: var(--on-primary);\n            text-align: center;\n            padding: 20px 0;\n        }\n        @media (max-width: 768px) {\n            .nav {\n                flex-direction: column;\n            }\n        }\n    </style>\n</head>\n<body>\n    <header class=\"site-header\">\n        <div class=\"container\">\n            <a class=\"brand\" href=\"#top\">To-Do App</a>\n            <nav aria-label=\"Main navigation\">\n                <a href=\"#add-task\">Add Task</a>\n                <a href=\"#filter\">Filter</a>\n            </nav>\n        </div>\n    </header>\n    <main id=\"top\" class=\"container\">\n        <section class=\"hero\" aria-labelledby=\"hero-title\">\n            <h1 id=\"hero-title\">To-Do List</h1>\n            <p class=\"intro\">Add, complete, and delete tasks.</p>\n        </section>\n        <section id=\"add-task\" class=\"container\">\n            <form id=\"task-form\">\n                <label for=\"task-input\">Task:</label>\n                <input type=\"text\" id=\"task-input\" required>\n                <button type=\"submit\">Add Task</button>\n            </form>\n        </section>\n        <section id=\"filter\" class=\"container\">\n            <h2>Filter Tasks</h2>\n            <select id=\"filter-select\">\n                <option value=\"all\">All</option>\n                <option value=\"active\">Active</option>\n                <option value=\"completed\">Completed</option>\n            </select>\n        </section>\n        <section class=\"project-list\" aria-labelledby=\"project-list-title\">\n            <h2 id=\"project-list-title\">Tasks</h2>\n            <div id=\"task-list\"></div>\n        </section>\n    </main>\n    <footer class=\"footer\">\n        <p>&copy; 2023 To-Do App</p>\n    </footer>\n    <script>\n        const taskList = document.getElementById('task-list');\n        const filterSelect = document.getElementById('filter-select');\n        const taskForm = document.getElementById('task-form');\n        const taskInput = document.getElementById('task-input');\n\n        function loadTasks() {\n            try {\n                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];\n                tasks.forEach(task => renderTask(task));\n            } catch (error) {\n                console.error('Error loading tasks:', error);\n            }\n        }\n\n        function saveTasks() {\n            try {\n                localStorage.setItem('tasks', JSON.stringify(tasks));\n            } catch (error) {\n                console.error('Error saving tasks:', error);\n            }\n        }\n\n        function renderTask(task) {\n            const taskElement = document.createElement('div');\n            taskElement.classList.add('project');\n            taskElement.innerHTML = `\n                <h3>${task.text}</h3>\n                <button class=\"complete-btn\" data-id=\"${task.id}\">Complete</button>\n                <button class=\"delete-btn\" data-id=\"${task.id}\">Delete</button>\n            `;\n            taskList.appendChild(taskElement);\n        }\n\n        function addTask() {\n            const text = taskInput.value.trim();\n            if (text) {\n                const task = { id: Date.now(), text, completed: false };\n                tasks.push(task);\n                renderTask(task);\n                saveTasks();\n                taskInput.value = '';\n            }\n        }\n\n        function completeTask(event) {\n            const taskId = event.target.dataset.id;\n            tasks = tasks.map(task => task.id === taskId ? { ...task, completed: true } : task);\n            saveTasks();\n            event.target.parentElement.remove();\n        }\n\n        function deleteTask(event) {\n            const taskId = event.target.dataset.id;\n            tasks = tasks.filter(task => task.id !== taskId);\n            saveTasks();\n            event.target.parentElement.remove();\n        }\n\n        function filterTasks() {\n            const filterValue = filterSelect.value;\n            tasks.forEach(task => {\n                const taskElement = taskList.querySelector(`[data-id=\"${task.id}\"]`);\n                if (filterValue === 'all' || (filterValue === 'active' && !task.completed) || (filterValue === 'completed' && task.completed)) {\n                    taskElement.style.display = 'block';\n                } else {\n                    taskElement.style.display = 'none';\n                }\n            });\n        }\n\n        function init() {\n            loadTasks();\n            taskForm.addEventListener('submit', addTask);\n            taskList.addEventListener('click', (event) => {\n                if (event.target.classList.contains('complete-btn')) {\n                    completeTask(event);\n                } else if (event.target.classList.contains('delete-btn')) {\n                    deleteTask(event);\n                }\n            });\n            filterSelect.addEventListener('change', filterTasks);\n        }\n\n        init();\n    </script>\n</body>\n</html>\n"
+  },
+  {
+   "prompt": "Make a landing page for a bike repair shop with a hero, services, prices table, opening hours and a contact form.",
+   "lang": "html",
+   "ok": true,
+   "finished": true,
+   "failed_checks": [],
+   "lines": 266,
+   "seconds": 203.3,
+   "rounds": 1,
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Bike Repair Shop</title>\n    <style>\n        :root {\n            --page-bg: #F8FAFC;\n            --text: #0F172A;\n            --primary: #1E3A5F;\n            --on-primary: #FFFFFF;\n        }\n        body {\n            min-height: 100vh;\n            background: var(--page-bg);\n            color: var(--text);\n            font-family: 'Arial', sans-serif;\n            line-height: 1.6;\n            box-sizing: border-box;\n        }\n        .container {\n            width: min(1100px, calc(100% - 40px));\n            margin-inline: auto;\n        }\n        header {\n            background: var(--primary);\n            color: var(--on-primary);\n            padding: 20px 0;\n            text-align: center;\n        }\n        nav {\n            display: flex;\n            justify-content: space-around;\n        }\n        nav a {\n            color: var(--on-primary);\n            text-decoration: none;\n            transition: color 0.3s ease;\n        }\n        nav a:hover, nav a:focus-visible {\n            color: #1E3A5F;\n        }\n        .hero {\n            background-image: linear-gradient(to bottom, #1E3A5F, #1E3A5F 50%, #F8FAFC);\n            color: var(--on-primary);\n            padding: 100px 0;\n            text-align: center;\n        }\n        .hero h1 {\n            font-size: clamp(2rem, 4vw, 3rem);\n            margin-bottom: 20px;\n        }\n        .hero p {\n            font-size: 1.2rem;\n            max-width: 600px;\n            margin-inline: auto;\n        }\n        .services {\n            padding: 50px 0;\n        }\n        .services h2 {\n            font-size: 2rem;\n            margin-bottom: 30px;\n        }\n        .services ul {\n            list-style-type: none;\n            padding: 0;\n        }\n        .services li {\n            display: flex;\n            align-items: center;\n            margin-bottom: 15px;\n        }\n        .services i {\n            font-size: 2rem;\n            margin-right: 15px;\n        }\n        .prices {\n            padding: 50px 0;\n        }\n        .prices h2 {\n            font-size: 2rem;\n            margin-bottom: 30px;\n        }\n        .prices table {\n            width: 100%;\n            border-collapse: collapse;\n        }\n        .prices th, .prices td {\n            padding: 15px;\n            text-align: center;\n            border: 1px solid #ccc;\n        }\n        .prices th {\n            background-color: #1E3A5F;\n            color: var(--on-primary);\n        }\n        .opening-hours {\n            padding: 50px 0;\n        }\n        .opening-hours h2 {\n            font-size: 2rem;\n            margin-bottom: 30px;\n        }\n        .opening-hours table {\n            width: 100%;\n            border-collapse: collapse;\n        }\n        .opening-hours th, .opening-hours td {\n            padding: 15px;\n            text-align: center;\n            border: 1px solid #ccc;\n        }\n        .opening-hours th {\n            background-color: #1E3A5F;\n            color: var(--on-primary);\n        }\n        .contact-form {\n            padding: 50px 0;\n        }\n        .contact-form h2 {\n            font-size: 2rem;\n            margin-bottom: 30px;\n        }\n        .contact-form label {\n            display: block;\n            margin-bottom: 10px;\n        }\n        .contact-form input, .contact-form textarea {\n            width: 100%;\n            padding: 10px;\n            margin-bottom: 20px;\n            border: 1px solid #ccc;\n            border-radius: 5px;\n        }\n        .contact-form button {\n            background-color: var(--primary);\n            color: var(--on-primary);\n            padding: 10px 20px;\n            border: none;\n            border-radius: 5px;\n            cursor: pointer;\n            transition: background-color 0.3s ease;\n        }\n        .contact-form button:hover, .contact-form button:focus-visible {\n            background-color: #1E3A5F;\n        }\n        @media (max-width: 768px) {\n            nav {\n                flex-direction: column;\n            }\n            nav a {\n                margin-bottom: 10px;\n            }\n        }\n        @media (prefers-reduced-motion: reduce) {\n            * {\n                transition: none !important;\n            }\n        }\n    </style>\n</head>\n<body>\n    <header class=\"site-header\">\n        <div class=\"container\">\n            <a class=\"brand\" href=\"#top\">Bike Repair Shop</a>\n            <nav aria-label=\"Main navigation\">\n                <a href=\"#services\">Services</a>\n                <a href=\"#prices\">Prices</a>\n                <a href=\"#opening-hours\">Opening Hours</a>\n                <a href=\"#contact\">Contact</a>\n            </nav>\n        </div>\n    </header>\n    <main id=\"top\" class=\"container\">\n        <section class=\"hero\" aria-labelledby=\"hero-title\">\n            <p class=\"eyebrow\">Bike Repair Services</p>\n            <h1 id=\"hero-title\">Welcome to Bike Repair Shop</h1>\n            <p class=\"intro\">We offer professional bike repairs and maintenance services.</p>\n            <a class=\"text-link\" href=\"#services\">Explore our services</a>\n        </section>\n        <section id=\"services\" class=\"container\" aria-labelledby=\"services-title\">\n            <h2 id=\"services-title\">Our Services</h2>\n            <ul>\n                <li><i class=\"fas fa-tools\"></i> Bicycle Mechanics</li>\n                <li><i class=\"fas fa-wrench\"></i> Tire Repair</li>\n                <li><i class=\"fas fa-bolt\"></i> Electrical Repairs</li>\n                <li><i class=\"fas fa-cog\"></i> Frame Repair</li>\n            </ul>\n        </section>\n        <section id=\"prices\" class=\"container\" aria-labelledby=\"prices-title\">\n            <h2 id=\"prices-title\">Prices</h2>\n            <table>\n                <thead>\n                    <tr>\n                        <th>Service</th>\n                        <th>Price</th>\n                    </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                        <td>Bicycle Mechanics</td>\n                        <td>$50 - $100</td>\n                    </tr>\n                    <tr>\n                        <td>Tire Repair</td>\n                        <td>$20 - $40</td>\n                    </tr>\n                    <tr>\n                        <td>Electrical Repairs</td>\n                        <td>$30 - $60</td>\n                    </tr>\n                    <tr>\n                        <td>Frame Repair</td>\n                        <td>$70 - $150</td>\n                    </tr>\n                </tbody>\n            </table>\n        </section>\n        <section id=\"opening-hours\" class=\"container\" aria-labelledby=\"opening-hours-title\">\n            <h2 id=\"opening-hours-title\">Opening Hours</h2>\n            <table>\n                <thead>\n                    <tr>\n                        <th>Day</th>\n                        <th>Hours</th>\n                    </tr>\n                </thead>\n                <tbody>\n                    <tr>\n                        <td>Monday - Friday</td>\n                        <td>9:00 AM - 5:00 PM</td>\n                    </tr>\n                    <tr>\n                        <td>Saturday</td>\n                        <td>10:00 AM - 4:00 PM</td>\n                    </tr>\n                    <tr>\n                        <td>Sunday</td>\n                        <td>Closed</td>\n                    </tr>\n                </tbody>\n            </table>\n        </section>\n        <section id=\"contact\" class=\"container\" aria-labelledby=\"contact-title\">\n            <h2 id=\"contact-title\">Contact Us</h2>\n            <form class=\"contact-form\" action=\"#\" method=\"post\">\n                <label for=\"name\">Name:</label>\n                <input type=\"text\" id=\"name\" name=\"name\" required>\n                <label for=\"email\">Email:</label>\n                <input type=\"email\" id=\"email\" name=\"email\" required>\n                <label for=\"message\">Message:</label>\n                <textarea id=\"message\" name=\"message\" rows=\"4\" required></textarea>\n                <button type=\"submit\">Send</button>\n            </form>\n        </section>\n    </main>\n    <footer class=\"container\">\n        <p>&copy; 2023 Bike Repair Shop. All rights reserved.</p>\n    </footer>\n    <script>\n        // Placeholder for JavaScript behavior\n    </script>\n</body>\n</html>\n"
+  },
+  {
+   "prompt": "Create a tip calculator page: bill amount, tip percentage buttons, number of people, and per-person totals that update live.",
+   "lang": "html",
+   "ok": true,
+   "finished": true,
+   "failed_checks": [],
+   "lines": 139,
+   "seconds": 109.9,
+   "rounds": 1,
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Tip Calculator</title>\n    <style>\n        :root {\n            --primary: #059669;\n            --on-primary: #000000;\n            --background: #F8FAFC;\n            --foreground: #0F172A;\n            --accent: #FFD700;\n        }\n        body {\n            font-family: 'Arial', sans-serif;\n            background-color: var(--background);\n            color: var(--foreground);\n            line-height: 1.6;\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n        .container {\n            width: min(1100px, calc(100% - 40px));\n            margin-inline: auto;\n        }\n        .hero {\n            text-align: center;\n            padding: 50px 0;\n        }\n        .hero h1 {\n            font-size: clamp(2rem, 3vw, 3rem);\n            color: var(--primary);\n        }\n        .hero p {\n            font-size: 1.2rem;\n            margin-bottom: 20px;\n        }\n        .form {\n            max-width: 400px;\n            margin: 50px auto;\n        }\n        .form label {\n            display: block;\n            margin-bottom: 5px;\n            font-weight: 600;\n        }\n        .form input, .form select {\n            width: 100%;\n            padding: 10px;\n            margin-bottom: 15px;\n            border: 1px solid #ccc;\n            border-radius: 4px;\n        }\n        .form button {\n            background-color: var(--primary);\n            color: var(--on-primary);\n            border: none;\n            padding: 10px 20px;\n            border-radius: 4px;\n            cursor: pointer;\n            transition: background-color 0.3s ease;\n        }\n        .form button:hover {\n            background-color: var(--accent);\n        }\n        .form button:focus-visible {\n            outline: 2px solid var(--primary);\n        }\n        .results {\n            margin-top: 50px;\n            text-align: center;\n        }\n        .result {\n            font-size: 1.2rem;\n            margin-bottom: 10px;\n        }\n        @media (max-width: 768px) {\n            .container {\n                width: 90%;\n            }\n        }\n    </style>\n</head>\n<body>\n    <header class=\"site-header\">\n        <div class=\"container\">\n            <a class=\"brand\" href=\"#top\">Tip Calculator</a>\n            <nav aria-label=\"Main navigation\">\n                <a href=\"#bill\">Bill</a>\n                <a href=\"#tip\">Tip</a>\n                <a href=\"#people\">People</a>\n            </nav>\n        </div>\n    </header>\n    <main id=\"top\" class=\"container\">\n        <section class=\"hero\" aria-labelledby=\"hero-title\">\n            <h1 id=\"hero-title\">Tip Calculator</h1>\n            <p>Calculate your tip and per-person total.</p>\n        </section>\n        <section id=\"bill\" class=\"form\">\n            <label for=\"bill-amount\">Bill Amount:</label>\n            <input type=\"number\" id=\"bill-amount\" placeholder=\"Enter bill amount\" required>\n            <label for=\"tip-percentage\">Tip Percentage:</label>\n            <select id=\"tip-percentage\">\n                <option value=\"0\">0%</option>\n                <option value=\"5\">5%</option>\n                <option value=\"10\">10%</option>\n                <option value=\"15\">15%</option>\n                <option value=\"20\">20%</option>\n            </select>\n            <label for=\"number-of-people\">Number of People:</label>\n            <input type=\"number\" id=\"number-of-people\" placeholder=\"Enter number of people\" required>\n            <button onclick=\"calculateTip()\">Calculate</button>\n        </section>\n        <section id=\"results\" class=\"form\">\n            <div class=\"result\" id=\"per-person-total\"></div>\n        </section>\n    </main>\n    <script>\n        function calculateTip() {\n            const billAmount = parseFloat(document.getElementById('bill-amount').value);\n            const tipPercentage = parseFloat(document.getElementById('tip-percentage').value) / 100;\n            const numberOfPeople = parseInt(document.getElementById('number-of-people').value);\n\n            if (isNaN(billAmount) || isNaN(tipPercentage) || isNaN(numberOfPeople) || numberOfPeople <= 0) {\n                alert('Please enter valid numbers.');\n                return;\n            }\n\n            const tipAmount = billAmount * tipPercentage;\n            const perPersonTotal = (billAmount + tipAmount) / numberOfPeople;\n\n            document.getElementById('per-person-total').textContent = `Per Person Total: $${perPersonTotal.toFixed(2)}`;\n        }\n    </script>\n</body>\n</html>\n"
+  },
+  {
+   "prompt": "Style a responsive pricing section with three plan cards, the middle one highlighted.",
+   "lang": "css",
+   "ok": true,
+   "finished": true,
+   "failed_checks": [],
+   "lines": 104,
+   "seconds": 53.8,
+   "rounds": 1,
+   "source": ":root {\n  --background-color: #f4f4f9;\n  --surface-color: #fff;\n  --text-color: #000;\n  --muted-text-color: #666;\n  --border-color: #e0e0e0;\n  --accent-color: #3498db;\n  --spacing: 2rem;\n}\n\nhtml {\n  scroll-behavior: smooth;\n}\n\nbody {\n  font-family: sans-serif;\n  background-color: var(--background-color);\n  color: var(--text-color);\n  margin: 0;\n  padding: 0;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  min-height: 100vh;\n}\n\n.container {\n  max-width: 1200px;\n  width: 90%;\n  padding: var(--spacing);\n  box-sizing: border-box;\n}\n\n.header {\n  text-align: center;\n  margin-bottom: var(--spacing);\n}\n\n.hero {\n  text-align: center;\n  margin-bottom: var(--spacing);\n}\n\n.section {\n  margin-bottom: var(--spacing);\n}\n\n.footer {\n  text-align: center;\n  margin-top: var(--spacing);\n}\n\n.plan-card {\n  display: grid;\n  gap: var(--spacing);\n  border: 1px solid var(--border-color);\n  border-radius: 8px;\n  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n  transition: background-color 0.3s ease;\n}\n\n.plan-card:hover {\n  background-color: #e0e0e0;\n}\n\n.plan-card.active {\n  background-color: var(--accent-color);\n  border-color: var(--accent-color);\n}\n\n.plan-card h2 {\n  font-size: 1.5rem;\n  margin-bottom: var(--spacing);\n}\n\n.plan-card p {\n  font-size: 1rem;\n  line-height: 1.6;\n}\n\n.plan-card button {\n  background-color: var(--accent-color);\n  color: #fff;\n  border: none;\n  padding: 0.75rem 1.5rem;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: background-color 0.3s ease;\n}\n\n.plan-card button:hover {\n  background-color: #2980b9;\n}\n\n.plan-card button:focus-visible {\n  outline: 2px solid var(--accent-color);\n  outline-offset: 2px;\n}\n\n@media (max-width: 768px) {\n  .plan-card {\n    grid-template-columns: 1fr;\n  }\n}\n"
+  },
+  {
+   "prompt": "Write a debounce function and a throttle function with JSDoc, plus a short demo that logs when they fire.",
+   "lang": "javascript",
+   "ok": true,
+   "finished": true,
+   "failed_checks": [],
+   "lines": 51,
+   "seconds": 56.3,
+   "rounds": 1,
+   "source": "/**\n * Debounce function to limit the number of times a function is called.\n * @param {Function} func - The function to debounce.\n * @param {number} wait - The time in milliseconds to wait before calling the function.\n * @returns {Function} A debounced version of the function.\n */\nfunction debounce(func, wait) {\n  let timeout;\n  return function(...args) {\n    clearTimeout(timeout);\n    timeout = setTimeout(() => func.apply(this, args), wait);\n  };\n}\n\n/**\n * Throttle function to limit the rate at which a function is called.\n * @param {Function} func - The function to throttle.\n * @param {number} limit - The maximum number of times the function can be called in a given time frame.\n * @param {boolean} leading - Whether to call the function on the leading edge of the interval.\n * @returns {Function} A throttled version of the function.\n */\nfunction throttle(func, limit, leading) {\n  let lastCall = 0;\n  let lastInvoke = 0;\n  const trailingDebounce = debounce(func, limit);\n\n  return function(...args) {\n    const now = Date.now();\n    const remaining = limit - (now - lastInvoke);\n    if (!leading && !lastCall) {\n      lastCall = now;\n      func.apply(this, args);\n      return;\n    }\n    if (remaining <= 0 || remaining > limit) {\n      trailingDebounce(...args);\n      lastInvoke = now;\n    } else if (!leading) {\n      timeout = setTimeout(() => trailingDebounce(...args), remaining);\n    }\n  };\n}\n\n// Demo\nconst logDebounce = debounce(() => console.log('Debounce fired'), 1000);\nconst logThrottle = throttle(() => console.log('Throttle fired'), 500, true);\n\ndocument.addEventListener('keydown', () => {\n  logDebounce();\n  logThrottle();\n});\n"
+  },
+  {
+   "prompt": "Build a quiz page with five multiple-choice questions, a score at the end and a restart button.",
+   "lang": "html",
+   "ok": true,
+   "finished": true,
+   "failed_checks": [],
+   "lines": 205,
+   "seconds": 171.9,
+   "rounds": 1,
+   "source": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Quiz Page</title>\n    <style>\n        :root {\n            --primary: #2563EB;\n            --on-primary: #FFFFFF;\n            --background: #EFF6FF;\n            --foreground: #0F172A;\n            --accent: #FF5733;\n        }\n        body {\n            background-color: var(--background);\n            color: var(--foreground);\n            font-family: 'Arial', sans-serif;\n            line-height: 1.6;\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n        .container {\n            width: min(1100px, calc(100% - 40px));\n            margin-inline: auto;\n            padding: 20px;\n        }\n        .quiz-container {\n            max-width: 600px;\n            margin: 0 auto;\n        }\n        h1, h2, p {\n            margin: 0;\n        }\n        .question {\n            margin-bottom: 20px;\n        }\n        .answer {\n            display: block;\n            margin-bottom: 5px;\n            cursor: pointer;\n        }\n        .answer:hover {\n            text-decoration: underline;\n        }\n        .score {\n            margin-top: 40px;\n        }\n        .restart-button {\n            margin-top: 20px;\n            padding: 10px 20px;\n            background-color: var(--primary);\n            color: var(--on-primary);\n            border: none;\n            border-radius: 5px;\n            cursor: pointer;\n        }\n        .restart-button:hover {\n            background-color: var(--accent);\n        }\n        @media (max-width: 600px) {\n            .container, .quiz-container {\n                max-width: 100%;\n            }\n        }\n    </style>\n</head>\n<body>\n    <header class=\"site-header\">\n        <div class=\"container\">\n            <a class=\"brand\" href=\"#top\">Quiz Game</a>\n            <nav aria-label=\"Main navigation\">\n                <a href=\"#questions\">Questions</a>\n                <a href=\"#score\">Score</a>\n                <a href=\"#restart\">Restart</a>\n            </nav>\n        </div>\n    </header>\n    <main id=\"top\" class=\"container\">\n        <section id=\"questions\" class=\"quiz-container\" aria-labelledby=\"questions-title\">\n            <h2 id=\"questions-title\">Questions</h2>\n            <form id=\"quiz-form\">\n                <div class=\"question\">\n                    <p>What is the capital of France?</p>\n                    <label>\n                        <input type=\"radio\" name=\"q1\" value=\"Paris\" id=\"q1-1\">\n                        <span>Paris</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q1\" value=\"London\" id=\"q1-2\">\n                        <span>London</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q1\" value=\"Berlin\" id=\"q1-3\">\n                        <span>Berlin</span>\n                    </label>\n                </div>\n                <div class=\"question\">\n                    <p>What is the largest planet in our solar system?</p>\n                    <label>\n                        <input type=\"radio\" name=\"q2\" value=\"Jupiter\" id=\"q2-1\">\n                        <span>Jupiter</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q2\" value=\"Saturn\" id=\"q2-2\">\n                        <span>Saturn</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q2\" value=\"Mars\" id=\"q2-3\">\n                        <span>Mars</span>\n                    </label>\n                </div>\n                <div class=\"question\">\n                    <p>What is the chemical symbol for gold?</p>\n                    <label>\n                        <input type=\"radio\" name=\"q3\" value=\"Au\" id=\"q3-1\">\n                        <span>Au</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q3\" value=\"Ag\" id=\"q3-2\">\n                        <span>Ag</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q3\" value=\"Au\" id=\"q3-3\">\n                        <span>Au</span>\n                    </label>\n                </div>\n                <div class=\"question\">\n                    <p>What is the largest mammal?</p>\n                    <label>\n                        <input type=\"radio\" name=\"q4\" value=\"Blue Whale\" id=\"q4-1\">\n                        <span>Blue Whale</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q4\" value=\"Elephant\" id=\"q4-2\">\n                        <span>Elephant</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q4\" value=\"Giraffe\" id=\"q4-3\">\n                        <span>Giraffe</span>\n                    </label>\n                </div>\n                <div class=\"question\">\n                    <p>What is the smallest country in the world?</p>\n                    <label>\n                        <input type=\"radio\" name=\"q5\" value=\"Vatican City\" id=\"q5-1\">\n                        <span>Vatican City</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q5\" value=\"Monaco\" id=\"q5-2\">\n                        <span>Monaco</span>\n                    </label>\n                    <label>\n                        <input type=\"radio\" name=\"q5\" value=\"San Marino\" id=\"q5-3\">\n                        <span>San Marino</span>\n                    </label>\n                </div>\n                <button type=\"submit\">Submit</button>\n            </form>\n        </section>\n        <section id=\"score\" class=\"quiz-container\" aria-labelledby=\"score-title\">\n            <h2 id=\"score-title\">Score</h2>\n            <p id=\"score-text\">Your score is 0/5</p>\n        </section>\n        <section id=\"restart\" class=\"quiz-container\" aria-labelledby=\"restart-title\">\n            <h2 id=\"restart-title\">Restart</h2>\n            <button type=\"button\" id=\"restart-button\">Restart</button>\n        </section>\n    </main>\n    <script>\n        const questions = [\n            { question: 'What is the capital of France?', answers: ['Paris', 'London', 'Berlin'], correct: 'Paris' },\n            { question: 'What is the largest planet in our solar system?', answers: ['Jupiter', 'Saturn', 'Mars'], correct: 'Jupiter' },\n            { question: 'What is the chemical symbol for gold?', answers: ['Au', 'Ag', 'Au'], correct: 'Au' },\n            { question: 'What is the largest mammal?', answers: ['Blue Whale', 'Elephant', 'Giraffe'], correct: 'Blue Whale' },\n            { question: 'What is the smallest country in the world?', answers: ['Vatican City', 'Monaco', 'San Marino'], correct: 'Vatican City' }\n        ];\n\n        const quizForm = document.getElementById('quiz-form');\n        const scoreText = document.getElementById('score-text');\n        const restartButton = document.getElementById('restart-button');\n\n        let score = 0;\n\n        quizForm.addEventListener('submit', (event) => {\n            event.preventDefault();\n            const formData = new FormData(quizForm);\n            for (let i = 1; i <= 5; i++) {\n                const answer = formData.get(`q${i}`);\n                if (answer === questions[i - 1].correct) {\n                    score++;\n                }\n            }\n            scoreText.textContent = `Your score is ${score}/5`;\n        });\n\n        restartButton.addEventListener('click', () => {\n            score = 0;\n            scoreText.textContent = 'Your score is 0/5';\n            quizForm.reset();\n        });\n    </script>\n</body>\n</html>\n"
+  }
+ ]
+}

@@ -6,8 +6,8 @@
   <title>Opcoda — Coda</title>
   <meta name="description" content="Coda 1.0 helps you build HTML, CSS, JavaScript and Python projects." />
   <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0d0d0e" media="(prefers-color-scheme: dark)" />
   <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
   <link rel="apple-touch-icon" href="/favicon.png" />
   <script src="/theme.js"></script>
@@ -22,6 +22,10 @@
       <symbol id="i-menu" viewBox="0 0 20 20"><path d="M3 6h14M3 10h14M3 14h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
       <symbol id="i-close" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
       <symbol id="i-plus" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="i-compose" viewBox="0 0 20 20"><path d="M9 4H5.5A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16h9a1.5 1.5 0 001.5-1.5V11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M14.3 3.3a1.4 1.4 0 012 2L10 11.6 7.5 12.5l.9-2.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="i-search" viewBox="0 0 20 20"><circle cx="9" cy="9" r="5.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+      <symbol id="i-sparkle" viewBox="0 0 20 20"><path d="M10 3c.5 3.3 1.7 4.5 5 5-3.3.5-4.5 1.7-5 5-.5-3.3-1.7-4.5-5-5 3.3-.5 4.5-1.7 5-5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M15.5 13.5c.2 1.2.6 1.6 1.8 1.8-1.2.2-1.6.6-1.8 1.8-.2-1.2-.6-1.6-1.8-1.8 1.2-.2 1.6-.6 1.8-1.8z" fill="currentColor"/></symbol>
+      <symbol id="i-sidebar" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 4v12" stroke="currentColor" stroke-width="1.6"/></symbol>
       <symbol id="i-trash" viewBox="0 0 20 20"><path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
       <symbol id="i-check" viewBox="0 0 20 20"><path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
       <symbol id="i-alert" viewBox="0 0 20 20"><path d="M10 6v5M10 14h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
@@ -33,7 +37,17 @@
       <symbol id="i-panel" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 4v12" stroke="currentColor" stroke-width="1.6"/></symbol>
       <symbol id="i-chevron" viewBox="0 0 20 20"><path d="M6.5 8l3.5 3.5L13.5 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
       <symbol id="i-paperclip" viewBox="0 0 20 20"><path d="M7 10.5l4.8-4.8a2.5 2.5 0 013.5 3.5l-6.6 6.6a4 4 0 01-5.7-5.7l6.3-6.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-      <symbol id="i-sliders" viewBox="0 0 20 20"><path d="M4 6h4m4 0h4M4 14h7m4 0h1M8 4v4m3 4v4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="13" cy="14" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+      <symbol id="i-code" viewBox="0 0 20 20"><path d="M7 6l-4 4 4 4M13 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 20 20"><path d="M15.5 8A6 6 0 004.6 7M4.5 12a6 6 0 0010.9 1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 3.5V7h3.5M16 16.5V13h-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-pencil" viewBox="0 0 20 20"><path d="M13.5 3.5a1.8 1.8 0 012.5 2.5L7 15l-3.5 1 1-3.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="i-arrow-down" viewBox="0 0 20 20"><path d="M10 4v12M5 11l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+      <symbol id="i-keyboard" viewBox="0 0 20 20"><rect x="2.5" y="5" width="15" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 8.5h.01M9 8.5h.01M12 8.5h.01M15 8.5h.01M7 12h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="i-info" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9v5M10 6.2h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 20 20"><path d="M8 16H5a1 1 0 01-1-1V5a1 1 0 011-1h3M12 6l4 4-4 4M16 10H8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-user" viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 16.5c.8-3 3.2-4.5 6-4.5s5.2 1.5 6 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 20 20"><path d="M10 2.8l6 2.2v4.5c0 3.7-2.5 6.4-6 7.7-3.5-1.3-6-4-6-7.7V5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+      <symbol id="i-gauge" viewBox="0 0 20 20"><path d="M3.5 14a7 7 0 1113 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M10 13l3-4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
     </defs>
   </svg>
 
@@ -84,15 +98,28 @@
   <div id="app" class="app" hidden>
     <aside id="sidebar" class="sidebar" aria-label="Chats and account">
       <div class="sidebar-top">
-        <span class="wordmark"><img src="/favicon.png" alt="" width="24" height="24" />opcoda</span>
+        <a class="wordmark" href="/" id="home-link"><img src="/favicon.png" alt="" width="24" height="24" />opcoda</a>
+        <button type="button" class="icon-btn only-desktop" id="collapse-sidebar" aria-label="Close sidebar" title="Close sidebar (Ctrl+Shift+S)"><svg aria-hidden="true"><use href="#i-sidebar"/></svg></button>
         <button type="button" class="icon-btn only-mobile" id="close-sidebar" aria-label="Close menu"><svg aria-hidden="true"><use href="#i-close"/></svg></button>
       </div>
-      <button type="button" class="btn btn-secondary new-chat" id="new-chat"><svg aria-hidden="true"><use href="#i-plus"/></svg>New chat</button>
-      <nav class="history" aria-labelledby="history-label">
-        <h2 class="history-label" id="history-label">Chats</h2>
-        <ul id="conversation-list"></ul>
-        <p class="history-empty" id="history-empty">No chats yet.</p>
+
+      <nav class="side-nav" aria-label="Actions">
+        <button type="button" class="side-item" id="new-chat"><svg aria-hidden="true"><use href="#i-compose"/></svg><span>New chat</span><kbd>Ctrl Shift O</kbd></button>
+        <button type="button" class="side-item" id="search-toggle" aria-expanded="false" aria-controls="search-box"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Search chats</span><kbd>Ctrl K</kbd></button>
+        <button type="button" class="side-item" id="open-skills"><svg aria-hidden="true"><use href="#i-sparkle"/></svg><span>Skills</span><span class="side-count" id="skills-count"></span></button>
       </nav>
+
+      <div class="search-box" id="search-box" hidden>
+        <svg aria-hidden="true"><use href="#i-search"/></svg>
+        <label for="chat-search" class="sr-only">Search chats</label>
+        <input id="chat-search" type="search" placeholder="Search chats" autocomplete="off" spellcheck="false" />
+      </div>
+
+      <nav class="history" aria-label="Chats">
+        <div id="conversation-groups"></div>
+        <p class="history-empty" id="history-empty">Your chats will show up here.</p>
+      </nav>
+
       <div class="account">
         <button type="button" class="account-btn" id="account-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="account-menu">
           <span class="avatar" id="account-avatar" aria-hidden="true"></span>
@@ -100,71 +127,110 @@
             <span class="account-name" id="account-name"></span>
             <span class="account-username" id="account-username"></span>
           </span>
+          <svg class="account-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
         </button>
         <div class="menu" id="account-menu" role="menu" hidden>
-          <button type="button" role="menuitem" id="open-settings">Settings</button>
-          <a role="menuitem" href="/info">About Opcoda</a>
-          <button type="button" role="menuitem" id="sign-out">Sign out</button>
+          <div class="menu-who" id="menu-who"></div>
+          <button type="button" role="menuitem" data-settings="general"><svg aria-hidden="true"><use href="#i-settings"/></svg>Settings</button>
+          <button type="button" role="menuitem" data-settings="skills"><svg aria-hidden="true"><use href="#i-sparkle"/></svg>Skills</button>
+          <button type="button" role="menuitem" id="open-shortcuts"><svg aria-hidden="true"><use href="#i-keyboard"/></svg>Keyboard shortcuts</button>
+          <a role="menuitem" href="/info"><svg aria-hidden="true"><use href="#i-info"/></svg>About Opcoda</a>
+          <hr />
+          <button type="button" role="menuitem" id="sign-out"><svg aria-hidden="true"><use href="#i-logout"/></svg>Sign out</button>
         </div>
       </div>
     </aside>
     <div class="scrim" id="scrim"></div>
 
-    <main class="chat">
+    <main class="chat" id="chat" data-empty="true">
       <header class="chat-header">
-        <button type="button" class="icon-btn only-mobile" id="open-sidebar" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false"><svg aria-hidden="true"><use href="#i-menu"/></svg></button>
+        <button type="button" class="icon-btn sidebar-opener" id="open-sidebar" aria-label="Open sidebar" aria-controls="sidebar" aria-expanded="false"><svg aria-hidden="true"><use href="#i-sidebar"/></svg></button>
+        <button type="button" class="icon-btn sidebar-opener" id="header-new-chat" aria-label="New chat"><svg aria-hidden="true"><use href="#i-compose"/></svg></button>
         <div class="model-picker">
-          <button type="button" class="model-trigger" id="model-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="model-menu"><span>Coda 1.0</span><svg aria-hidden="true"><use href="#i-chevron"/></svg></button>
+          <button type="button" class="model-trigger" id="model-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="model-menu">
+            <span>Coda 1.0</span>
+            <span class="status" id="status" data-state="checking"><span class="dot" aria-hidden="true"></span><span class="sr-only" id="status-text">Checking…</span></span>
+            <svg aria-hidden="true"><use href="#i-chevron"/></svg>
+          </button>
           <div class="model-menu" id="model-menu" role="menu" hidden>
-            <div class="model-option" aria-current="true"><span class="model-check"><svg aria-hidden="true"><use href="#i-check"/></svg></span><span><strong>Coda 1.0</strong><small>Local coding model</small></span></div>
-            <div class="model-menu-section"><span class="model-menu-label">Response effort</span><div class="compact-modes" role="radiogroup" aria-label="Response effort"><label><input type="radio" name="header-usage-mode" value="light" />Light</label><label><input type="radio" name="header-usage-mode" value="medium" />Medium</label><label><input type="radio" name="header-usage-mode" value="super" />Super</label><label><input type="radio" name="header-usage-mode" value="intense" />Intense</label></div></div>
-          </div>
-        </div>
-        <div class="model-id">
-          <span class="status" id="status" data-state="checking"><span class="dot" aria-hidden="true"></span><span id="status-text">Checking…</span></span>
-        </div>
-        <button type="button" class="btn btn-ghost btn-sm context-trigger" id="open-context" aria-haspopup="dialog">Usage</button>
-        <span class="usage" id="usage"></span>
-        <button type="button" class="icon-btn" id="toggle-workspace" aria-label="Show code panel" aria-controls="workspace" aria-expanded="false" hidden><svg aria-hidden="true"><use href="#i-panel"/></svg></button>
-      </header>
-
-      <section class="thread" id="thread" aria-label="Conversation">
-        <div class="empty" id="empty-state">
-          <div class="empty-mark" aria-hidden="true"><svg><use href="#i-mark"/></svg></div>
-          <h1>Build something useful.</h1>
-          <p>Describe the result you want. Coda will write the code, check it, and open the result in your workspace.</p>
-          <div class="examples" id="examples">
-            <button type="button" class="example" data-lang="html"><span>Build a polished product landing page</span><span class="lang-tag" data-lang="html">HTML</span></button>
-            <button type="button" class="example" data-lang="html"><span>Create a to-do app with saved tasks</span><span class="lang-tag" data-lang="html">HTML</span></button>
-            <button type="button" class="example" data-lang="python"><span>Write a transaction history class</span><span class="lang-tag" data-lang="python">Python</span></button>
-            <button type="button" class="example" data-lang="javascript"><span>Split an array into fixed-size chunks</span><span class="lang-tag" data-lang="javascript">JS</span></button>
-          </div>
-        </div>
-        <ol class="messages" id="messages" aria-live="polite"></ol>
-      </section>
-
-      <form class="composer" id="composer">
-        <div class="composer-box">
-          <div class="attachment-chip" id="attachment-chip" hidden><svg aria-hidden="true"><use href="#i-paperclip"/></svg><span id="attachment-name"></span><button type="button" id="remove-attachment" aria-label="Remove attachment"><svg aria-hidden="true"><use href="#i-close"/></svg></button></div>
-          <div class="composer-row">
-            <label for="prompt" class="sr-only">Describe what Coda should build</label>
-            <textarea id="prompt" rows="1" placeholder="Describe a page, component, function or program…" autocomplete="off" spellcheck="true"></textarea>
-          </div>
-          <div class="composer-toolbar">
-            <div class="composer-actions">
-              <button type="button" class="composer-tool" id="attach-file" aria-label="Attach a code or text file" title="Attach file"><svg aria-hidden="true"><use href="#i-paperclip"/></svg></button>
-              <input type="file" id="file-input" class="sr-only" accept=".txt,.md,.html,.css,.js,.jsx,.ts,.tsx,.py,.json,.xml,.yaml,.yml" />
-              <div class="tool-picker">
-                <button type="button" class="composer-tool tool-trigger" id="tool-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="tool-menu"><svg aria-hidden="true"><use href="#i-sliders"/></svg><span id="tool-label">Auto</span><svg class="chevron" aria-hidden="true"><use href="#i-chevron"/></svg></button>
-                <div class="tool-menu" id="tool-menu" role="menu" hidden><span class="tool-menu-label">Output language</span><div class="lang-picker" role="radiogroup" aria-label="Language" id="lang-picker"><label><input type="radio" name="lang" value="auto" checked />Auto detect</label><label><input type="radio" name="lang" value="html" />HTML</label><label><input type="radio" name="lang" value="css" />CSS</label><label><input type="radio" name="lang" value="javascript" />JavaScript</label><label><input type="radio" name="lang" value="python" />Python</label></div></div>
+            <div class="model-option" aria-current="true">
+              <span class="model-check"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
+              <span><strong>Coda 1.0</strong><small id="model-status-line">Checking…</small></span>
+            </div>
+            <div class="model-menu-section">
+              <span class="model-menu-label">Response effort</span>
+              <div class="effort-list" role="radiogroup" aria-label="Response effort">
+                <label><input type="radio" name="header-usage-mode" value="light" /><span><strong>Light</strong><small>Fastest, shorter code</small></span></label>
+                <label><input type="radio" name="header-usage-mode" value="medium" /><span><strong>Medium</strong><small>Balanced for most tasks</small></span></label>
+                <label><input type="radio" name="header-usage-mode" value="super" /><span><strong>Super</strong><small>Longer pages and programs</small></span></label>
+                <label><input type="radio" name="header-usage-mode" value="intense" /><span><strong>Intense</strong><small>Most room, slowest</small></span></label>
               </div>
             </div>
-            <span class="composer-count" id="composer-count" aria-live="polite"></span>
-            <button type="submit" class="send" id="send" aria-label="Send message" disabled><svg aria-hidden="true"><use href="#i-send"/></svg></button>
           </div>
         </div>
-        <p class="composer-note" id="composer-note">Each message is a new task. Coda doesn't see earlier messages.</p>
-      </form>
+        <div class="header-end">
+          <button type="button" class="usage-pill" id="open-context" aria-haspopup="dialog"><svg aria-hidden="true"><use href="#i-gauge"/></svg><span id="usage"></span></button>
+          <button type="button" class="icon-btn" id="toggle-workspace" aria-label="Show code panel" aria-controls="workspace" aria-expanded="false" hidden><svg aria-hidden="true"><use href="#i-panel"/></svg></button>
+        </div>
+      </header>
+
+      <div class="chat-body">
+        <section class="thread" id="thread" aria-label="Conversation">
+          <div class="hero" id="empty-state">
+            <h1 id="greeting">What should we build?</h1>
+            <p>Pages, components, scripts and programs, checked before you see them.</p>
+          </div>
+          <ol class="messages" id="messages" aria-live="polite"></ol>
+        </section>
+
+        <div class="composer-dock">
+          <button type="button" class="jump-down" id="jump-down" aria-label="Scroll to latest" hidden><svg aria-hidden="true"><use href="#i-arrow-down"/></svg></button>
+          <form class="composer" id="composer">
+            <div class="composer-box">
+              <div class="attachment-chip" id="attachment-chip" hidden><svg aria-hidden="true"><use href="#i-paperclip"/></svg><span id="attachment-name"></span><button type="button" id="remove-attachment" aria-label="Remove attachment"><svg aria-hidden="true"><use href="#i-close"/></svg></button></div>
+              <label for="prompt" class="sr-only">Message Coda</label>
+              <textarea id="prompt" rows="1" placeholder="Ask Coda to build something…" autocomplete="off" spellcheck="true"></textarea>
+              <div class="composer-toolbar">
+                <button type="button" class="tool-btn round" id="attach-file" aria-label="Attach a code or text file" title="Attach a file"><svg aria-hidden="true"><use href="#i-plus"/></svg></button>
+                <input type="file" id="file-input" class="sr-only" tabindex="-1" accept=".txt,.md,.html,.css,.js,.jsx,.ts,.tsx,.py,.json,.xml,.yaml,.yml" />
+
+                <div class="popover-anchor">
+                  <button type="button" class="tool-btn" id="tool-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="tool-menu"><svg aria-hidden="true"><use href="#i-code"/></svg><span id="tool-label">Auto</span></button>
+                  <div class="popover" id="tool-menu" role="menu" hidden>
+                    <span class="popover-label">Write code in</span>
+                    <div class="lang-picker" role="radiogroup" aria-label="Language" id="lang-picker">
+                      <label><input type="radio" name="lang" value="auto" checked /><span class="lang-dot" data-lang="auto"></span>Auto detect</label>
+                      <label><input type="radio" name="lang" value="html" /><span class="lang-dot" data-lang="html"></span>HTML</label>
+                      <label><input type="radio" name="lang" value="css" /><span class="lang-dot" data-lang="css"></span>CSS</label>
+                      <label><input type="radio" name="lang" value="javascript" /><span class="lang-dot" data-lang="javascript"></span>JavaScript</label>
+                      <label><input type="radio" name="lang" value="python" /><span class="lang-dot" data-lang="python"></span>Python</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="popover-anchor">
+                  <button type="button" class="tool-btn" id="skills-trigger" aria-haspopup="dialog" aria-expanded="false" aria-controls="skills-pop"><svg aria-hidden="true"><use href="#i-sparkle"/></svg><span>Skills</span><span class="tool-count" id="skills-trigger-count"></span></button>
+                  <div class="popover popover-wide" id="skills-pop" role="dialog" aria-label="Skills" hidden>
+                    <div class="popover-head"><span class="popover-label" id="skills-pop-label">Skills</span><button type="button" class="link-btn" data-settings="skills">Manage</button></div>
+                    <div class="skill-quick" id="skills-quick"></div>
+                  </div>
+                </div>
+
+                <span class="composer-count" id="composer-count" aria-live="polite"></span>
+                <button type="submit" class="send" id="send" aria-label="Send message" disabled><svg aria-hidden="true"><use href="#i-send"/></svg></button>
+              </div>
+            </div>
+          </form>
+          <div class="suggestions" id="examples">
+            <button type="button" class="example" data-lang="html" data-prompt="Build a landing page for a coffee roaster with a menu section and contact form"><span class="lang-dot" data-lang="html"></span>Landing page</button>
+            <button type="button" class="example" data-lang="html" data-prompt="Create a to-do app with saved tasks, filters and a clear-completed button"><span class="lang-dot" data-lang="html"></span>To-do app</button>
+            <button type="button" class="example" data-lang="css" data-prompt="Style a pricing card component with three tiers and a highlighted plan"><span class="lang-dot" data-lang="css"></span>Pricing cards</button>
+            <button type="button" class="example" data-lang="python" data-prompt="Write a bank account class with deposits, withdrawals and a transaction history"><span class="lang-dot" data-lang="python"></span>Python class</button>
+            <button type="button" class="example" data-lang="javascript" data-prompt="Write a function that splits an array into fixed-size chunks, with examples"><span class="lang-dot" data-lang="javascript"></span>JS utility</button>
+          </div>
+          <p class="composer-note" id="composer-note">Coda can make mistakes. Check code before you use it.</p>
+        </div>
+      </div>
     </main>
 
     <!-- Code workspace -->
@@ -176,8 +242,8 @@
           <span class="ws-status" id="ws-status"></span>
         </div>
         <div class="ws-actions">
-          <button type="button" class="btn btn-ghost btn-sm" id="ws-copy">Copy</button>
-          <button type="button" class="icon-btn" id="ws-download" aria-label="Download file"><svg aria-hidden="true"><use href="#i-download"/></svg></button>
+          <button type="button" class="btn btn-ghost btn-sm" id="ws-copy"><svg aria-hidden="true"><use href="#i-copy"/></svg>Copy</button>
+          <button type="button" class="icon-btn" id="ws-download" aria-label="Download file" title="Download"><svg aria-hidden="true"><use href="#i-download"/></svg></button>
           <button type="button" class="icon-btn" id="ws-close" aria-label="Close code panel"><svg aria-hidden="true"><use href="#i-close"/></svg></button>
         </div>
       </header>
@@ -199,6 +265,7 @@
           <span class="hint" id="preview-note">Runs in an isolated sandbox with no network access.</span>
           <a class="btn btn-ghost btn-sm" id="preview-open" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-external"/></svg>Open</a>
         </div>
+        <div class="fix-bar" id="preview-fix" role="alert" hidden></div>
         <div class="preview-frame" id="preview-frame"></div>
       </section>
       <section class="ws-panel ws-run" id="ws-run" role="tabpanel" aria-labelledby="ws-tab-run" hidden>
@@ -206,115 +273,177 @@
           <button type="button" class="btn btn-primary btn-sm" id="run-button"><svg aria-hidden="true"><use href="#i-play"/></svg>Run</button>
           <span class="run-status" id="run-status">Runs in your browser in a sandbox, not on any server.</span>
         </div>
+        <div class="fix-bar" id="run-fix" role="alert" hidden></div>
         <pre class="run-output" id="run-output" aria-live="polite"></pre>
       </section>
     </aside>
   </div>
 
   <dialog id="context" class="dialog context-dialog" aria-labelledby="context-title">
-    <header class="dialog-header"><h2 id="context-title">Context</h2><button type="button" class="icon-btn" data-close aria-label="Close context"><svg aria-hidden="true"><use href="#i-close"/></svg></button></header>
+    <header class="dialog-header"><h2 id="context-title">Usage</h2><button type="button" class="icon-btn" data-close aria-label="Close usage"><svg aria-hidden="true"><use href="#i-close"/></svg></button></header>
     <div class="dialog-body">
+      <div class="context-usage"><div><span>Messages today</span><strong id="context-daily">—</strong></div><progress id="context-progress" max="25" value="0"></progress><p class="hint" id="context-reset"></p></div>
       <div class="context-grid">
         <div><span>Chat</span><strong id="context-chat">New chat</strong></div>
         <div><span>Model</span><strong>Coda 1.0</strong></div>
-        <div><span>Engine</span><strong id="context-engine">Checking…</strong></div>
         <div><span>Model status</span><strong id="context-status">Checking…</strong></div>
-        <div><span>Usage mode</span><strong id="context-mode">Medium</strong></div>
-        <div><span>Response limit</span><strong id="context-response">450 tokens</strong></div>
+        <div><span>Response effort</span><strong id="context-mode">Medium</strong></div>
+        <div><span>Response limit</span><strong id="context-response">—</strong></div>
         <div><span>Context window</span><strong id="context-window">—</strong></div>
+        <div><span>Skills on</span><strong id="context-skills">—</strong></div>
         <div><span>Messages in chat</span><strong id="context-messages">0</strong></div>
         <div><span>Last input</span><strong id="context-input">—</strong></div>
         <div><span>Last output</span><strong id="context-output">—</strong></div>
       </div>
-      <div class="context-usage"><div><span>Daily messages</span><strong id="context-daily">—</strong></div><progress id="context-progress" max="25" value="0"></progress><p class="hint" id="context-reset"></p></div>
-      <p class="hint">Each request is a new coding task. Earlier chat messages are saved here but are not sent to the model.</p>
+      <p class="hint context-foot">Each request is a new coding task. Earlier messages are saved in your chat but aren't sent to the model.</p>
+    </div>
+  </dialog>
+
+  <dialog id="shortcuts" class="dialog dialog-small" aria-labelledby="shortcuts-title">
+    <header class="dialog-header"><h2 id="shortcuts-title">Keyboard shortcuts</h2><button type="button" class="icon-btn" data-close aria-label="Close shortcuts"><svg aria-hidden="true"><use href="#i-close"/></svg></button></header>
+    <div class="dialog-body">
+      <dl class="shortcut-list">
+        <div><dt>New chat</dt><dd><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>O</kbd></dd></div>
+        <div><dt>Search chats</dt><dd><kbd>Ctrl</kbd><kbd>K</kbd></dd></div>
+        <div><dt>Toggle sidebar</dt><dd><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>S</kbd></dd></div>
+        <div><dt>Focus the message box</dt><dd><kbd>/</kbd></dd></div>
+        <div><dt>Send message</dt><dd><kbd>Enter</kbd></dd></div>
+        <div><dt>New line</dt><dd><kbd>Shift</kbd><kbd>Enter</kbd></dd></div>
+        <div><dt>Close panel or menu</dt><dd><kbd>Esc</kbd></dd></div>
+      </dl>
+      <p class="hint">On a Mac, use <kbd>⌘</kbd> instead of Ctrl.</p>
     </div>
   </dialog>
 
   <!-- Settings -->
-  <dialog id="settings" class="dialog" aria-labelledby="settings-title">
+  <dialog id="settings" class="dialog settings-dialog" aria-labelledby="settings-title">
     <header class="dialog-header">
       <h2 id="settings-title">Settings</h2>
       <button type="button" class="icon-btn" data-close aria-label="Close settings"><svg aria-hidden="true"><use href="#i-close"/></svg></button>
     </header>
-    <div class="dialog-body">
-      <section class="settings-section" aria-labelledby="s-profile">
-        <h3 id="s-profile">Profile</h3>
-        <div class="avatar-row">
-          <span class="avatar avatar-lg" id="settings-avatar" aria-hidden="true"></span>
-          <div>
-            <div class="avatar-actions">
-              <label class="btn btn-secondary btn-sm" for="avatar-input" id="avatar-upload-label">Upload photo</label>
-              <input type="file" id="avatar-input" class="sr-only" accept="image/png,image/jpeg,image/webp,image/gif" />
-              <button type="button" class="btn btn-ghost btn-sm" id="avatar-remove">Remove</button>
+    <div class="settings-layout">
+      <nav class="settings-nav" role="tablist" aria-label="Settings sections" aria-orientation="vertical">
+        <button type="button" role="tab" data-pane="general" aria-controls="pane-general"><svg aria-hidden="true"><use href="#i-settings"/></svg>General</button>
+        <button type="button" role="tab" data-pane="coda" aria-controls="pane-coda"><svg aria-hidden="true"><use href="#i-gauge"/></svg>Coda</button>
+        <button type="button" role="tab" data-pane="skills" aria-controls="pane-skills"><svg aria-hidden="true"><use href="#i-sparkle"/></svg>Skills</button>
+        <button type="button" role="tab" data-pane="profile" aria-controls="pane-profile"><svg aria-hidden="true"><use href="#i-user"/></svg>Profile</button>
+        <button type="button" role="tab" data-pane="account" aria-controls="pane-account"><svg aria-hidden="true"><use href="#i-shield"/></svg>Account</button>
+      </nav>
+
+      <div class="settings-panes">
+        <section class="settings-pane" id="pane-general" role="tabpanel" aria-labelledby="pane-general-title">
+          <h3 id="pane-general-title">General</h3>
+          <div class="setting">
+            <div class="setting-text"><span class="setting-name" id="theme-label">Appearance</span></div>
+            <div class="segmented" role="radiogroup" aria-labelledby="theme-label" id="theme-group">
+              <label><input type="radio" name="theme" value="system" />System</label>
+              <label><input type="radio" name="theme" value="light" />Light</label>
+              <label><input type="radio" name="theme" value="dark" />Dark</label>
             </div>
-            <p class="hint">PNG, JPEG or WebP. Cropped to a square.</p>
           </div>
-        </div>
-        <form id="profile-form" novalidate>
-          <div class="row">
+          <label class="setting" for="pref-enter">
+            <span class="setting-text"><span class="setting-name">Send with Enter</span><span class="setting-desc">When off, Enter adds a new line and Ctrl+Enter sends.</span></span>
+            <input type="checkbox" class="switch" id="pref-enter" />
+          </label>
+          <label class="setting" for="pref-autopen">
+            <span class="setting-text"><span class="setting-name">Open results automatically</span><span class="setting-desc">Show the code or preview beside the chat when Coda finishes.</span></span>
+            <input type="checkbox" class="switch" id="pref-autopen" />
+          </label>
+          <label class="setting" for="pref-autorun">
+            <span class="setting-text"><span class="setting-name">Run scripts after they're written</span><span class="setting-desc">Python and JavaScript run in your browser's sandbox, never on a server.</span></span>
+            <input type="checkbox" class="switch" id="pref-autorun" />
+          </label>
+          <label class="setting" for="pref-autofix">
+            <span class="setting-text"><span class="setting-name">Fix errors automatically</span><span class="setting-desc">When a script or page Coda just wrote hits an error in the sandbox, Coda gets one automatic try to fix it. Uses a daily message.</span></span>
+            <input type="checkbox" class="switch" id="pref-autofix" />
+          </label>
+          <label class="setting" for="pref-wrap">
+            <span class="setting-text"><span class="setting-name">Wrap long lines in code</span><span class="setting-desc">Easier to read on small screens.</span></span>
+            <input type="checkbox" class="switch" id="pref-wrap" />
+          </label>
+          <p class="hint pane-foot">These preferences are saved on this device.</p>
+        </section>
+
+        <section class="settings-pane" id="pane-coda" role="tabpanel" aria-labelledby="pane-coda-title" hidden>
+          <h3 id="pane-coda-title">Coda</h3>
+          <div class="setting setting-stack">
+            <div class="setting-text"><span class="setting-name" id="mode-label">Response effort</span><span class="setting-desc">How much time and output Coda spends on a request. Higher effort fits longer pages but takes longer.</span></div>
+            <div class="segmented modes" role="radiogroup" aria-labelledby="mode-label">
+              <label><input type="radio" name="usage-mode" value="light" />Light</label>
+              <label><input type="radio" name="usage-mode" value="medium" />Medium</label>
+              <label><input type="radio" name="usage-mode" value="super" />Super</label>
+              <label><input type="radio" name="usage-mode" value="intense" />Intense</label>
+            </div>
+          </div>
+          <div class="setting setting-stack">
+            <div class="setting-text"><label class="setting-name" for="s-temperature">Creativity <output id="temperature-out" for="s-temperature"></output></label><span class="setting-desc">Lower is more consistent. Higher tries more varied ideas.</span></div>
+            <input type="range" id="s-temperature" min="0.1" max="1" step="0.05" />
+            <div class="range-ends" aria-hidden="true"><span>Precise</span><span>Creative</span></div>
+          </div>
+        </section>
+
+        <section class="settings-pane" id="pane-skills" role="tabpanel" aria-labelledby="pane-skills-title" hidden>
+          <div class="pane-head">
+            <h3 id="pane-skills-title">Skills</h3>
+            <button type="button" class="btn btn-ghost btn-sm" id="skills-reset">Reset to defaults</button>
+          </div>
+          <p class="pane-lede">Skills shape how Coda writes code. Turn on the ones you want for every request; your message still wins when it asks for something different.</p>
+          <p class="notice" id="skills-notice" hidden></p>
+          <div id="skills-list" class="skills-list"></div>
+        </section>
+
+        <section class="settings-pane" id="pane-profile" role="tabpanel" aria-labelledby="pane-profile-title" hidden>
+          <h3 id="pane-profile-title">Profile</h3>
+          <div class="avatar-row">
+            <span class="avatar avatar-lg" id="settings-avatar" aria-hidden="true"></span>
+            <div>
+              <div class="avatar-actions">
+                <label class="btn btn-secondary btn-sm" for="avatar-input" id="avatar-upload-label">Upload photo</label>
+                <input type="file" id="avatar-input" class="sr-only" accept="image/png,image/jpeg,image/webp,image/gif" />
+                <button type="button" class="btn btn-ghost btn-sm" id="avatar-remove">Remove</button>
+              </div>
+              <p class="hint">PNG, JPEG or WebP. Cropped to a square.</p>
+            </div>
+          </div>
+          <form id="profile-form" novalidate>
+            <div class="row">
+              <div class="field">
+                <label for="s-display">Display name</label>
+                <input id="s-display" maxlength="40" autocomplete="name" />
+              </div>
+              <button type="submit" class="btn btn-secondary">Save</button>
+            </div>
+            <p class="field-error" id="profile-error" role="alert" hidden></p>
+            <p class="hint" id="s-username"></p>
+          </form>
+        </section>
+
+        <section class="settings-pane" id="pane-account" role="tabpanel" aria-labelledby="pane-account-title" hidden>
+          <h3 id="pane-account-title">Account</h3>
+          <form id="password-form" novalidate>
+            <h4>Change password</h4>
             <div class="field">
-              <label for="s-display">Display name</label>
-              <input id="s-display" maxlength="40" autocomplete="name" />
+              <label for="s-current">Current password</label>
+              <input id="s-current" type="password" autocomplete="current-password" maxlength="128" />
             </div>
-            <button type="submit" class="btn btn-secondary">Save</button>
+            <div class="field">
+              <label for="s-new">New password</label>
+              <input id="s-new" type="password" autocomplete="new-password" maxlength="128" aria-describedby="s-new-hint" />
+              <p class="hint" id="s-new-hint">At least 8 characters. Other devices will be signed out.</p>
+            </div>
+            <p class="field-error" id="password-error" role="alert" hidden></p>
+            <div class="form-actions"><button type="submit" class="btn btn-secondary">Change password</button></div>
+          </form>
+          <div class="setting">
+            <span class="setting-text"><span class="setting-name">Other devices</span><span class="setting-desc">Sign out everywhere except this browser.</span></span>
+            <button type="button" class="btn btn-secondary btn-sm" id="revoke-sessions">Sign out others</button>
           </div>
-          <p class="field-error" id="profile-error" role="alert" hidden></p>
-          <p class="hint" id="s-username"></p>
-        </form>
-      </section>
-
-      <section class="settings-section" aria-labelledby="s-appearance">
-        <h3 id="s-appearance">Appearance</h3>
-        <div class="segmented" role="radiogroup" aria-labelledby="s-appearance" id="theme-group">
-          <label><input type="radio" name="theme" value="system" />System</label>
-          <label><input type="radio" name="theme" value="light" />Light</label>
-          <label><input type="radio" name="theme" value="dark" />Dark</label>
-        </div>
-      </section>
-
-      <section class="settings-section" aria-labelledby="s-coda">
-        <h3 id="s-coda">Coda</h3>
-        <p>Choose how much time and output Coda spends on a request.</p>
-        <div class="segmented modes" role="radiogroup" aria-label="Usage mode">
-          <label><input type="radio" name="usage-mode" value="light" />Light</label>
-          <label><input type="radio" name="usage-mode" value="medium" />Medium</label>
-          <label><input type="radio" name="usage-mode" value="super" />Super</label>
-          <label><input type="radio" name="usage-mode" value="intense" />Intense</label>
-        </div>
-        <p class="hint">Light is faster and shorter. Intense allows longer responses; it may take more time.</p>
-        <div class="field">
-          <label for="s-temperature">Creativity <output id="temperature-out" for="s-temperature"></output></label>
-          <input type="range" id="s-temperature" min="0.1" max="1" step="0.05" />
-          <p class="hint">Lower is more consistent. Higher allows more variation.</p>
-        </div>
-      </section>
-
-      <section class="settings-section" aria-labelledby="s-security">
-        <h3 id="s-security">Security</h3>
-        <form id="password-form" novalidate>
-          <div class="field">
-            <label for="s-current">Current password</label>
-            <input id="s-current" type="password" autocomplete="current-password" maxlength="128" />
+          <div class="setting setting-danger">
+            <span class="setting-text"><span class="setting-name">Delete account</span><span class="setting-desc">Permanently deletes your account, chats and profile picture.</span></span>
+            <button type="button" class="btn btn-danger-outline btn-sm" id="delete-account">Delete…</button>
           </div>
-          <div class="field">
-            <label for="s-new">New password</label>
-            <input id="s-new" type="password" autocomplete="new-password" maxlength="128" aria-describedby="s-new-hint" />
-            <p class="hint" id="s-new-hint">At least 8 characters. Other devices will be signed out.</p>
-          </div>
-          <p class="field-error" id="password-error" role="alert" hidden></p>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-secondary">Change password</button>
-            <button type="button" class="btn btn-ghost" id="revoke-sessions">Sign out other devices</button>
-          </div>
-        </form>
-      </section>
-
-      <section class="settings-section" aria-labelledby="s-danger">
-        <h3 id="s-danger">Delete account</h3>
-        <p>Permanently deletes your account, chats and profile picture.</p>
-        <button type="button" class="btn btn-danger-outline" id="delete-account">Delete account…</button>
-      </section>
+        </section>
+      </div>
     </div>
   </dialog>
 

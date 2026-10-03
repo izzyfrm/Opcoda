@@ -5,7 +5,7 @@
 param(
     [string]$Checkpoint = "",
     [ValidateSet("ollama", "coda")][string]$Backend = "ollama",
-    [string]$OllamaModel = "llama3.2:3b"
+    [string]$OllamaModel = "qwen2.5-coder:3b"
 )
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
