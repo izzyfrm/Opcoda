@@ -12,6 +12,7 @@
   <link rel="apple-touch-icon" href="/favicon.png" />
   <script src="/theme.js"></script>
   <link rel="stylesheet" href="/app.css" />
+  <link rel="stylesheet" href="/workspace.css" />
   <script type="module" src="/app.js"></script>
 </head>
 <body>
@@ -104,10 +105,13 @@
       </div>
 
       <nav class="side-nav" aria-label="Actions">
-        <button type="button" class="side-item" id="new-chat"><svg aria-hidden="true"><use href="#i-compose"/></svg><span>New chat</span><kbd>Ctrl Shift O</kbd></button>
-        <button type="button" class="side-item" id="search-toggle" aria-expanded="false" aria-controls="search-box"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Search chats</span><kbd>Ctrl K</kbd></button>
+        <button type="button" class="side-item" id="new-chat"><svg aria-hidden="true"><use href="#i-compose"/></svg><span>New session</span><kbd>Ctrl Shift O</kbd></button>
+        <button type="button" class="side-item" id="search-toggle" aria-expanded="false" aria-controls="search-box"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Search</span><kbd>Ctrl K</kbd></button>
         <button type="button" class="side-item" id="open-skills"><svg aria-hidden="true"><use href="#i-sparkle"/></svg><span>Skills</span><span class="side-count" id="skills-count"></span></button>
+        <button type="button" class="side-item" data-settings="general"><svg aria-hidden="true"><use href="#i-settings"/></svg><span>Customize</span></button>
+        <a class="side-item" href="/info"><svg aria-hidden="true"><use href="#i-info"/></svg><span>About Opcoda</span></a>
       </nav>
+      <div class="local-section"><span class="section-caption">Workspace</span><button type="button" class="side-item local-workspace" data-settings="coda"><svg aria-hidden="true"><use href="#i-code"/></svg><span>Local AI</span><span class="local-label">CODA</span></button></div>
 
       <div class="search-box" id="search-box" hidden>
         <svg aria-hidden="true"><use href="#i-search"/></svg>
@@ -146,6 +150,7 @@
       <header class="chat-header">
         <button type="button" class="icon-btn sidebar-opener" id="open-sidebar" aria-label="Open sidebar" aria-controls="sidebar" aria-expanded="false"><svg aria-hidden="true"><use href="#i-sidebar"/></svg></button>
         <button type="button" class="icon-btn sidebar-opener" id="header-new-chat" aria-label="New chat"><svg aria-hidden="true"><use href="#i-compose"/></svg></button>
+        <span class="session-caption">New session</span>
         <div class="model-picker">
           <button type="button" class="model-trigger" id="model-trigger" aria-haspopup="menu" aria-expanded="false" aria-controls="model-menu">
             <span>Coda 1.0</span>
@@ -177,19 +182,23 @@
       <div class="chat-body">
         <section class="thread" id="thread" aria-label="Conversation">
           <div class="hero" id="empty-state">
-            <h1 id="greeting">What should we build?</h1>
-            <p>Pages, components, scripts and programs, checked before you see them.</p>
+            <h1 id="greeting" class="sr-only">What should we build?</h1>
+            <div class="environment-card">
+              <div class="environment-name"><svg aria-hidden="true"><use href="#i-code"/></svg><span>Opcoda workspace</span><span class="environment-tag">LOCAL</span></div>
+              <button type="button" data-settings="coda"><span>Configure environment</span><svg aria-hidden="true"><use href="#i-chevron"/></svg></button>
+            </div>
           </div>
           <ol class="messages" id="messages" aria-live="polite"></ol>
         </section>
 
         <div class="composer-dock">
+          <span class="coda-pixel" aria-hidden="true">&gt;_</span>
           <button type="button" class="jump-down" id="jump-down" aria-label="Scroll to latest" hidden><svg aria-hidden="true"><use href="#i-arrow-down"/></svg></button>
           <form class="composer" id="composer">
             <div class="composer-box">
               <div class="attachment-chip" id="attachment-chip" hidden><svg aria-hidden="true"><use href="#i-paperclip"/></svg><span id="attachment-name"></span><button type="button" id="remove-attachment" aria-label="Remove attachment"><svg aria-hidden="true"><use href="#i-close"/></svg></button></div>
               <label for="prompt" class="sr-only">Message Coda</label>
-              <textarea id="prompt" rows="1" placeholder="Ask Coda to build something…" autocomplete="off" spellcheck="true"></textarea>
+              <textarea id="prompt" rows="1" placeholder="Describe a task or ask a question" autocomplete="off" spellcheck="true"></textarea>
               <div class="composer-toolbar">
                 <button type="button" class="tool-btn round" id="attach-file" aria-label="Attach a code or text file" title="Attach a file"><svg aria-hidden="true"><use href="#i-plus"/></svg></button>
                 <input type="file" id="file-input" class="sr-only" tabindex="-1" accept=".txt,.md,.html,.css,.js,.jsx,.ts,.tsx,.py,.json,.xml,.yaml,.yml" />
@@ -228,6 +237,7 @@
             <button type="button" class="example" data-lang="python" data-prompt="Write a bank account class with deposits, withdrawals and a transaction history"><span class="lang-dot" data-lang="python"></span>Python class</button>
             <button type="button" class="example" data-lang="javascript" data-prompt="Write a function that splits an array into fixed-size chunks, with examples"><span class="lang-dot" data-lang="javascript"></span>JS utility</button>
           </div>
+          <div class="workspace-footer"><span><svg aria-hidden="true"><use href="#i-code"/></svg> Local inference</span><span>Opcoda · Coda 1.0</span></div>
           <p class="composer-note" id="composer-note">Coda can make mistakes. Check code before you use it.</p>
         </div>
       </div>
