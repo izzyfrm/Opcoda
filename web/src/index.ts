@@ -776,7 +776,7 @@ export default {
       if (url.pathname === "/info" || url.pathname === "/info/") {
         return env.ASSETS.fetch(request);
       }
-      if (url.pathname === "/" || /^\/c\/[0-9a-f-]{36}$/.test(url.pathname) || /^\/(?:app\.css|app\.js|theme\.js|project\.js|favicon\.png|info\.html|404\.html|sandbox\/run\.html)$/.test(url.pathname)) {
+      if (url.pathname === "/" || /^\/c\/[0-9a-f-]{36}$/.test(url.pathname) || /^\/(?:app\.css|workspace\.css|workspace-ascii\.svg|app\.js|theme\.js|project\.js|favicon\.png|info\.html|404\.html|sandbox\/run\.html)$/.test(url.pathname)) {
         return env.ASSETS.fetch(request);
       }
       const asset = await env.ASSETS.fetch(new Request(new URL("/404", url), request));

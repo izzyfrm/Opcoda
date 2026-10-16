@@ -93,3 +93,35 @@
   .model-trigger { font-size: 11px; padding-inline: 4px; }
   .workspace-footer { font-size: 10px; }
 }
+
+/* Keep the input as a single bar, with controls on the baseline below it. */
+.composer { position: relative; }
+.composer-box { min-height: 44px; padding: 4px 8px; }
+.composer-toolbar { position: absolute; top: calc(100% + 5px); left: 120px; right: 160px; min-height: 24px; }
+.composer-toolbar > .tool-btn.round { position: absolute; top: auto; bottom: calc(100% + 10px); left: -113px; }
+.composer-toolbar .send { position: absolute; left: calc(100% + 124px); right: auto; top: auto; bottom: calc(100% + 10px); }
+.composer-toolbar .composer-count { font-size: 10px; }
+.tool-btn { height: 24px; }
+.workspace-footer { min-height: 28px; align-items: center; margin-top: 4px; }
+.coda-pixel { width: 36px; height: 28px; padding: 0; background: none; color: #db8c6c; clip-path: none; }
+.chat::before { inset: 54px 0 0; opacity: .22; background-size: cover; mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent); }
+.chat[data-empty="true"] .thread { padding-top: 52px; }
+.environment-name svg, .environment-card button svg { flex: none; }
+:root[data-theme="light"] .chat::before { opacity: .13; }
+@media (max-width: 640px) {
+  .composer-box { min-height: 48px; }
+  .composer-toolbar { left: 100px; right: 85px; }
+  .composer-toolbar > .tool-btn.round { left: -96px; bottom: calc(100% + 8px); }
+  .composer-toolbar .send { left: calc(100% + 42px); bottom: calc(100% + 8px); }
+  .workspace-footer { min-height: 40px; }
+  .workspace-footer > span:last-child { font-size: 0; }
+  .workspace-footer > span:last-child::after { content: 'Coda 1.0'; font-size: 10px; }
+  .tool-btn { min-height: 36px; padding-inline: 5px; }
+  .composer-count { display: none; }
+}
+.composer-toolbar #attach-file { top: auto; bottom: calc(100% + 10px); left: -113px; }
+.workspace-footer { width: 100%; }
+.chat::before { opacity: .34; }
+@media (max-width: 640px) {
+  .composer-toolbar #attach-file { top: auto; left: -96px; bottom: calc(100% + 8px); }
+}

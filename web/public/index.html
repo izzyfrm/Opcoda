@@ -192,13 +192,14 @@
         </section>
 
         <div class="composer-dock">
-          <span class="coda-pixel" aria-hidden="true">&gt;_</span>
+          <svg class="coda-pixel" width="36" height="28" viewBox="0 0 36 28" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M6 2h24v4h6v12h-6v8h-4v-6h-4v6h-4v-6h-4v6h-4v-8H6v-4H0V6h6z"/><path fill="#201916" d="M10 6h4v5h-4zm12 0h4v5h-4z"/></svg>
           <button type="button" class="jump-down" id="jump-down" aria-label="Scroll to latest" hidden><svg aria-hidden="true"><use href="#i-arrow-down"/></svg></button>
           <form class="composer" id="composer">
             <div class="composer-box">
               <div class="attachment-chip" id="attachment-chip" hidden><svg aria-hidden="true"><use href="#i-paperclip"/></svg><span id="attachment-name"></span><button type="button" id="remove-attachment" aria-label="Remove attachment"><svg aria-hidden="true"><use href="#i-close"/></svg></button></div>
               <label for="prompt" class="sr-only">Message Coda</label>
               <textarea id="prompt" rows="1" placeholder="Describe a task or ask a question" autocomplete="off" spellcheck="true"></textarea>
+            </div>
               <div class="composer-toolbar">
                 <button type="button" class="tool-btn round" id="attach-file" aria-label="Attach a code or text file" title="Attach a file"><svg aria-hidden="true"><use href="#i-plus"/></svg></button>
                 <input type="file" id="file-input" class="sr-only" tabindex="-1" accept=".txt,.md,.html,.css,.js,.jsx,.ts,.tsx,.py,.json,.xml,.yaml,.yml" />
@@ -228,7 +229,6 @@
                 <span class="composer-count" id="composer-count" aria-live="polite"></span>
                 <button type="submit" class="send" id="send" aria-label="Send message" disabled><svg aria-hidden="true"><use href="#i-send"/></svg></button>
               </div>
-            </div>
           </form>
           <div class="suggestions" id="examples">
             <button type="button" class="example" data-lang="html" data-prompt="Build a landing page for a coffee roaster with a menu section and contact form"><span class="lang-dot" data-lang="html"></span>Landing page</button>
